@@ -60,6 +60,7 @@ LOCAL_APPS = [
     "apps.payments",
     "apps.audit",
     "apps.notifications",
+    "apps.reviews",
     "apps.reports",
 ]
 
@@ -229,6 +230,8 @@ SPECTACULAR_SETTINGS = {
         "NotificationKindEnum": "apps.notifications.models.NotificationKind.choices",
         "ChannelEnum": "apps.notifications.models.Channel.choices",
         "DeliveryStatusEnum": "apps.notifications.models.DeliveryStatus.choices",
+        "ReviewStatusEnum": "apps.reviews.models.ReviewStatus.choices",
+        "ExportStatusEnum": "apps.reports.models.ExportStatus.choices",
     },
 }
 
@@ -248,7 +251,7 @@ S3_DOWNLOAD_URL_TTL = env.int("S3_DOWNLOAD_URL_TTL", default=60)
 # ---------------------------------------------------------------------------
 CELERY_BROKER_URL = env("CELERY_BROKER_URL")
 CELERY_RESULT_BACKEND = env("CELERY_RESULT_BACKEND")
-CELERY_TASK_ACKS_LATE = True          # a worker that dies re-queues its job
+CELERY_TASK_ACKS_LATE = True  # a worker that dies re-queues its job
 CELERY_TASK_REJECT_ON_WORKER_LOST = True
 CELERY_WORKER_PREFETCH_MULTIPLIER = 1
 CELERY_TASK_TIME_LIMIT = 60 * 10

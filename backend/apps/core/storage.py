@@ -131,6 +131,23 @@ def head_object(key: str) -> ObjectInfo | None:
     )
 
 
+def put_bytes(key: str, data: bytes, content_type: str) -> int:
+    """
+    Write an object the server generated itself - a report export, not an
+    upload. Uploads never come through here; they go browser to bucket with a
+    signed policy, and routing them through Django is the thing this module
+    exists to avoid.
+    """
+    try:
+        _client().put_object(
+            Bucket=settings.S3_BUCKET_NAME, Key=key, Body=data, ContentType=content_type
+        )
+    except ClientError as exc:
+        logger.exception("Could not write %s", key)
+        raise StorageError("Could not write the file to storage.") from exc
+    return len(data)
+
+
 def delete_object(key: str) -> None:
     """Only for cleaning up an upload that never became a proof row."""
     try:

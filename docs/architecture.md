@@ -16,7 +16,7 @@ them can still change; the note says what it would cost.
 | Ref | Decision | Built as | Cost to change now |
 | --- | --- | --- | --- |
 | D-1 | One role per user, or several? | Several, via `UserRole` (Phase 5). `User.primary_role` is a denormalised routing hint only. | Low until Phase 5 lands. |
-| D-2 | Review attached to student+course, or to enrolment? | Enrolment. Makes "only enrolled students may review" a foreign key. | Low until Phase 12. |
+| D-2 | Review attached to student+course, or to enrolment? | Enrolment. Makes "only enrolled students may review" a foreign key. | **Settled** — built that way in Phase 12. |
 | D-3 | Recurring weekly schedule, or dated sessions? | Recurring weekly. Per-session cancellation is not modelled. | Medium — a second table, decided before Phase 9. |
 | D-4 | Can an APPROVED payment be reversed? | No. Approved is terminal; a correction is a new record. | Medium — a reversal model and permission, before Phase 10. |
 | D-5 | Block double-booked rooms and professors? | Warn, allow override. | Low — a validator change, or a range-overlap exclusion constraint. |
@@ -62,20 +62,77 @@ Run against the real stack on 24 August 2026, not asserted from reading the code
 
 ## Phase log
 
+All dates 2026. Every row marked **Done** was merged to `develop` with
+`--no-ff` after the verification gate below passed on the running stack.
+
 | Phase | State | Notes |
 | --- | --- | --- |
-| 1–3 Skeleton | **Done** — merged to `develop` 24 Aug 2026 | Repo, Docker Compose, settings split, `core`, custom user model, health endpoint, CI. |
-| 4–5 Auth + RBAC | **Done** — merged to `develop` 24 Aug 2026 | `rbac` app, permission catalogue + seed, cached resolution, the two gates, session login, password change and staff reset. 128 tests. |
-| 6 User management | Not started | |
-| 7–9 Courses, enrolments, schedules | Not started | |
-| 9b Grades | Not started | `Assessment`, `AssessmentScore`, averages, professor roster and next-session view. Added by D-6. |
-| 10–11 Payments and proofs | Not started | |
-| 16 Audit log | Not started | Brought forward, immediately after payments. |
-| 13–14 Notifications, dashboards | Not started | |
-| 12 Reviews | Not started | |
-| 15 Reports | Not started | |
-| 17–18 Hardening, tests | Not started | |
-| 19–20 Deployment | Not started | |
+| 1-3 Skeleton | **Done** 24 Aug | Repo, Docker Compose, settings split, `core`, custom user model, health endpoint, CI. |
+| 4-5 Auth + RBAC | **Done** 24 Aug | `rbac` app, permission catalogue + seed, cached resolution, the two gates, session login, password change and staff reset. |
+| 6 User management | **Done** 24 Aug | All five roles, scoped listing, role assignment, deactivation. |
+| 7-9 Courses, enrolments, schedules | **Done** 24 Aug | Catalogue, professor assignment, enrolment with frozen price, recurring weekly schedule. |
+| 9b Grades | **Done** 24 Aug | `Assessment`, `AssessmentScore`, averages computed on read, gradebook, professor roster and next-session view. Added by D-6. |
+| 10-11 Payments and proofs | **Done** 24 Aug | Terminal states, separation of duty, presigned upload/download, balances computed on read. |
+| 16 Audit log | **Done** 24 Aug | Append-only, enforced by a PostgreSQL trigger. No foreign keys. Brought forward, immediately after payments. |
+| 13-14 Notifications, dashboards | **Done** 24 Aug | Channel abstraction (in-app registered, SMS stubbed per D-8), two idempotent beat jobs, one permission-driven dashboard endpoint. |
+| 12 Reviews | **Done** 24 Aug | Attached to enrolment per D-2. Moderation workflow, author withheld from professors (D-9). |
+| 15 Reports | **Done** 24 Aug | Three reports, operational split from financial, CSV export as a Celery job writing to the private bucket. |
+| 17-18 Hardening, tests | Not started | |
+| 19-20 Deployment | Not started | Production compose, Nginx, backups. |
+| Frontend | Not started | Next.js + TypeScript. Comparable in size to everything above. |
+
+### Verification gate
+
+Run against the real stack on every merge, not asserted from reading the code.
+
+| Check | Command | After reviews + reports |
+| --- | --- | --- |
+| Tests | `pytest` | 381 passed |
+| Lint | `ruff check .` | clean |
+| Migration drift | `makemigrations --check` | no changes |
+| Production posture | `check --deploy` (prod settings) | 0 issues |
+| OpenAPI | `manage.py spectacular` | 56 paths, no warnings |
+| Background jobs | `celery inspect registered` | 3 tasks, worker and beat both live |
+
+## Decisions settled while building reviews and reports (24 Aug 2026)
+
+| Ref | Question | Answer |
+| --- | --- | --- |
+| D-9 | May a professor see who wrote a review of their course? | **No.** A professor enters the marks of the student who wrote it. Knowing that STU-000042 gave two stars hands them a motive, the student knows it, and the channel then only ever returns fives. Professors read approved reviews of their own courses with the author omitted from the payload - not blanked, absent. |
+| D-10 | When may a course be reviewed, and may a review be edited? | **On completion, and until a moderator rules.** A review written in week two is a review of the enrolment process. After moderation the text is frozen, mirroring the payment rule: editable until somebody has acted on it, immutable afterwards. |
+
+### Review rules
+
+- A review hangs off `Enrollment` (D-2), so "only someone who took this course
+  may review it" is a foreign key and "one review per attempt" is a unique
+  constraint.
+- Created `PENDING` always. `status` is not a writable field, so no client can
+  publish past moderation.
+- **Never deleted.** `HIDDEN` and `REJECTED` keep the row, the moderator and
+  the timestamp; `DELETE` answers 405 for everyone, including the owner. A
+  moderation decision nobody can inspect afterwards is not moderation.
+- Averages are computed on read over approved reviews only. A stored average
+  cannot be re-derived once a review is hidden.
+- The owner deliberately does not hold `review.create`. Only a student who took
+  the course may review it, and the owner is not exempt from that.
+
+### Report rules
+
+- `report.view_operational` and `report.view_financial` are separate grants,
+  and this is the whole reason the split exists: reception and professors hold
+  the operational one. The enrolment report therefore carries no money at all -
+  not even a course price.
+- Every report is a function of `(user, filters)` and narrows through the same
+  scoping helpers the API uses. The export runs in a worker with no request; if
+  it built its own queryset it would eventually build an unscoped one.
+- The worker **re-checks permissions and re-runs the query as the requester**.
+  The gap between queueing a job and running it is exactly when a role gets
+  revoked, and a queue message is not a place to put an authorization decision.
+- Exports are private to whoever asked for them, including from the owner.
+  Someone else's export is 404, never 403.
+- CSV cells are guarded against spreadsheet formula injection, and money is
+  written as minor units with a separate currency column - never a localised
+  decimal that changes meaning depending on who opens the file.
 
 ## Domain rules settled by D-6 (24 Aug 2026)
 

@@ -18,6 +18,7 @@ from apps.courses.models import AssignmentStatus, Course, CourseProfessor, Cours
 from apps.enrollments.models import Enrollment, EnrollmentStatus
 from apps.payments.models import Payment, PaymentStatus
 from apps.rbac.services import has_permission
+from apps.reviews.models import Review, ReviewStatus
 from apps.schedules.models import Schedule, ScheduleStatus
 
 LIVE_ENROLMENTS = ~Q(status__in=[EnrollmentStatus.CANCELLED, EnrollmentStatus.DROPPED])
@@ -179,6 +180,17 @@ def _reception_tiles() -> dict:
     }
 
 
+def _moderation_tiles() -> dict:
+    """
+    For holders of review.moderate: the size of the queue, not what is in it.
+
+    A count is safe on a shared screen in a way a pending complaint is not.
+    """
+    return {
+        "reviews_awaiting_moderation": Review.objects.filter(status=ReviewStatus.PENDING).count()
+    }
+
+
 def build_dashboard(user) -> dict:
     """
     Assemble only what this caller may see.
@@ -201,6 +213,9 @@ def build_dashboard(user) -> dict:
     if has_permission(user, "payment.create") and not has_permission(user, "report.view_financial"):
         # Reception: the queue in front of them, not the money behind it.
         tiles.update(_reception_tiles())
+
+    if has_permission(user, "review.moderate"):
+        tiles.update(_moderation_tiles())
 
     if has_permission(user, "score.enter"):
         tiles.update(_professor_tiles(user))
