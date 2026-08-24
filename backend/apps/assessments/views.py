@@ -14,6 +14,8 @@ from apps.core.viewsets import ScopedModelViewSet
 from apps.courses.models import Course
 from apps.courses.scoping import scope_courses, scope_enrollments
 from apps.enrollments.models import Enrollment, EnrollmentStatus
+from apps.notifications.models import NotificationKind
+from apps.notifications.services import notify_many
 from apps.rbac.permissions import RequirePermission
 from apps.rbac.services import has_permission
 
@@ -151,6 +153,20 @@ class AssessmentViewSet(ScopedModelViewSet):
             update_fields=["is_published", "published_at", "published_by", "updated_at"]
         )
 
+        # Only students who actually have a mark. Telling someone their result
+        # is ready when no mark was entered for them is worse than silence.
+        marked_students = [
+            score.enrollment.student
+            for score in assessment.scores.select_related("enrollment__student")
+        ]
+        notify_many(
+            marked_students,
+            NotificationKind.MARKS_PUBLISHED,
+            f"Marks published for {assessment.title}",
+            f"Your mark for {assessment.title} in {assessment.course.title} is available.",
+            target=assessment,
+            link_path="/marks",
+        )
         logger.info("Assessment %s published by %s", assessment.pk, request.user.public_id)
         return Response(
             AssessmentSerializer(assessment, context=self.get_serializer_context()).data

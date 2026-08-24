@@ -20,12 +20,14 @@ from apps.audit.views import AuditLogViewSet
 from apps.core.health import health_view
 from apps.courses.views import CourseViewSet
 from apps.enrollments.views import EnrollmentViewSet
+from apps.notifications.views import NotificationViewSet
 from apps.payments.views import (
     EnrollmentBalanceView,
     PaymentViewSet,
     ProofDownloadView,
     ProofScanCallbackView,
 )
+from apps.reports.views import DashboardView
 from apps.schedules.views import ScheduleViewSet
 
 router = DefaultRouter()
@@ -36,6 +38,7 @@ router.register("schedules", ScheduleViewSet, basename="schedule")
 router.register("assessments", AssessmentViewSet, basename="assessment")
 router.register("payments", PaymentViewSet, basename="payment")
 router.register("audit", AuditLogViewSet, basename="audit")
+router.register("notifications", NotificationViewSet, basename="notification")
 
 v1_patterns = [
     path("health/", health_view, name="health"),
@@ -43,6 +46,7 @@ v1_patterns = [
     # Reports, not collections - a plain path each rather than a router entry.
     path("enrollments/<int:pk>/average/", EnrollmentAverageView.as_view(), name="average"),
     path("gradebook/", CourseGradebookView.as_view(), name="gradebook"),
+    path("reports/dashboard/", DashboardView.as_view(), name="dashboard"),
     path("enrollments/<int:pk>/balance/", EnrollmentBalanceView.as_view(), name="balance"),
     path("proofs/<int:pk>/download/", ProofDownloadView.as_view(), name="proof-download"),
     path("proofs/<int:pk>/scanned/", ProofScanCallbackView.as_view(), name="proof-scanned"),
