@@ -40,9 +40,7 @@ class Role(TimeStampedModel):
     # from any authorization at all.
     is_system = models.BooleanField(default=True)
 
-    permissions = models.ManyToManyField(
-        Permission, through="RolePermission", related_name="roles"
-    )
+    permissions = models.ManyToManyField(Permission, through="RolePermission", related_name="roles")
 
     class Meta:
         db_table = "rbac_role"

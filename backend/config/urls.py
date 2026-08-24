@@ -12,9 +12,15 @@ from rest_framework.routers import DefaultRouter
 
 from apps.accounts.user_views import UserViewSet
 from apps.core.health import health_view
+from apps.courses.views import CourseViewSet
+from apps.enrollments.views import EnrollmentViewSet
+from apps.schedules.views import ScheduleViewSet
 
 router = DefaultRouter()
 router.register("users", UserViewSet, basename="user")
+router.register("courses", CourseViewSet, basename="course")
+router.register("enrollments", EnrollmentViewSet, basename="enrollment")
+router.register("schedules", ScheduleViewSet, basename="schedule")
 
 v1_patterns = [
     path("health/", health_view, name="health"),

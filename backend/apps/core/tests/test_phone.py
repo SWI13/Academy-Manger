@@ -14,12 +14,12 @@ from apps.core.phone import normalize_phone, validate_e164
 @pytest.mark.parametrize(
     ("typed", "stored"),
     [
-        ("0555123456", "+213555123456"),          # what reception actually types
-        ("05 55 12 34 56", "+213555123456"),      # with the spaces they use
+        ("0555123456", "+213555123456"),  # what reception actually types
+        ("05 55 12 34 56", "+213555123456"),  # with the spaces they use
         ("05-55-12-34-56", "+213555123456"),
-        ("+213555123456", "+213555123456"),       # already international
-        ("00213555123456", "+213555123456"),      # international prefix instead of +
-        ("0770123456", "+213770123456"),          # a different Algerian carrier
+        ("+213555123456", "+213555123456"),  # already international
+        ("00213555123456", "+213555123456"),  # international prefix instead of +
+        ("0770123456", "+213770123456"),  # a different Algerian carrier
     ],
 )
 def test_local_input_is_stored_as_e164(typed, stored):
