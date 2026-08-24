@@ -103,3 +103,34 @@ Professor scope, enforced in `get_queryset()` and tested per role:
   row the caller may not see must be indistinguishable from a missing one.
 - Professors hold no `payment.*` permission at all. They see who is in the
   room, not who has paid.
+
+## The professor surface is deliberately two screens
+
+Confirmed 24 Aug 2026. A professor opens this platform for exactly two
+reasons. This is a **constraint on future work**, not a summary: anything
+proposed for the professor role that does not serve one of these two jobs is
+out of scope until the constraint is revisited.
+
+| Job | Endpoint |
+| --- | --- |
+| Enter marks | `GET /courses/{id}/assessments`, `PUT /assessments/{id}/scores` |
+| Know what is next | `GET /professors/me/next-session`, `GET /courses/{id}/roster` |
+
+`PUT /assessments/{id}/scores` takes the whole mark sheet in one atomic
+write — forty marks either all save or none do. A half-entered mark sheet on
+a dropped connection is the failure mode this prevents.
+
+### "Updates" is a push, not a page
+
+A professor teaching twice a week will not open the app to check whether
+anything changed. Four events notify a professor, and no others:
+
+1. Assigned to a course — a new `CourseProfessor` row.
+2. Next session reminder — Celery beat, evening before, with time, room and
+   current head-count.
+3. Roster changed — enrolment or drop, **batched to one message a day** so a
+   busy enrolment week is not forty notifications.
+4. Schedule changed — an admin moved the time or the room.
+
+In-app in MVP, behind a channel interface so SMS is an added class rather
+than a refactor. See D-8.
