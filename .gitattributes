@@ -1,0 +1,29 @@
+# The repository is developed on Windows and runs in Linux containers.
+# Anything the container executes or parses must be checked out with LF:
+# a shell script with CRLF fails inside the image with a misleading
+# "no such file or directory".
+
+* text=auto eol=lf
+
+*.py        text eol=lf
+*.sh        text eol=lf
+*.yml       text eol=lf
+*.yaml      text eol=lf
+*.toml      text eol=lf
+*.txt       text eol=lf
+*.md        text eol=lf
+*.json      text eol=lf
+*.ts        text eol=lf
+*.tsx       text eol=lf
+Dockerfile  text eol=lf
+.env.example text eol=lf
+
+# Binary: never touch line endings.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.woff binary
+*.woff2 binary
