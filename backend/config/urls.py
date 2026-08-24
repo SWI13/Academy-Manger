@@ -11,6 +11,11 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from rest_framework.routers import DefaultRouter
 
 from apps.accounts.user_views import UserViewSet
+from apps.assessments.views import (
+    AssessmentViewSet,
+    CourseGradebookView,
+    EnrollmentAverageView,
+)
 from apps.core.health import health_view
 from apps.courses.views import CourseViewSet
 from apps.enrollments.views import EnrollmentViewSet
@@ -21,10 +26,14 @@ router.register("users", UserViewSet, basename="user")
 router.register("courses", CourseViewSet, basename="course")
 router.register("enrollments", EnrollmentViewSet, basename="enrollment")
 router.register("schedules", ScheduleViewSet, basename="schedule")
+router.register("assessments", AssessmentViewSet, basename="assessment")
 
 v1_patterns = [
     path("health/", health_view, name="health"),
     path("auth/", include("apps.accounts.urls")),
+    # Reports, not collections - a plain path each rather than a router entry.
+    path("enrollments/<int:pk>/average/", EnrollmentAverageView.as_view(), name="average"),
+    path("gradebook/", CourseGradebookView.as_view(), name="gradebook"),
     *router.urls,
     # Phase 6+: students, professors, courses, enrollments, schedules,
     #           payments, reviews, notifications, reports, audit.
