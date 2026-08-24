@@ -56,6 +56,7 @@ LOCAL_APPS = [
     "apps.enrollments",
     "apps.schedules",
     "apps.assessments",
+    "apps.payments",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -216,6 +217,9 @@ SPECTACULAR_SETTINGS = {
         "AssignmentStatusEnum": "apps.courses.models.AssignmentStatus.choices",
         "AssignmentRoleEnum": "apps.courses.models.AssignmentRole.choices",
         "AssessmentKindEnum": "apps.assessments.models.AssessmentKind.choices",
+        "PaymentStatusEnum": "apps.payments.models.PaymentStatus.choices",
+        "PaymentMethodEnum": "apps.payments.models.PaymentMethod.choices",
+        "ScanStatusEnum": "apps.payments.models.ScanStatus.choices",
     },
 }
 
