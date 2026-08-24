@@ -13,7 +13,7 @@ from apps.core.health import health_view
 
 v1_patterns = [
     path("health/", health_view, name="health"),
-    # Phase 4:  path("auth/", include("apps.accounts.urls")),
+    path("auth/", include("apps.accounts.urls")),
     # Phase 6+: students, professors, courses, enrollments, schedules,
     #           payments, reviews, notifications, reports, audit.
 ]
