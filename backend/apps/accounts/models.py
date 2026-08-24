@@ -41,7 +41,7 @@ class UserManager(BaseUserManager):
         first_name: str,
         last_name: str,
         primary_role: str,
-        phone: str = "",
+        phone: str | None = None,
         email: str | None = None,
         password: str | None = None,
         **extra,
@@ -54,7 +54,9 @@ class UserManager(BaseUserManager):
             first_name=first_name.strip(),
             last_name=last_name.strip(),
             primary_role=primary_role,
-            phone=phone.strip(),
+            # Empty string is not NULL: two users with phone="" would collide on
+            # the unique index, so an absent phone must be stored as NULL.
+            phone=(phone or "").strip() or None,
             email=self.normalize_email(email) if email else None,
             **extra,
         )

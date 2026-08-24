@@ -93,6 +93,25 @@ def test_email_is_optional():
 
 
 @pytest.mark.django_db
+def test_several_users_may_have_no_phone():
+    """
+    An absent phone must be NULL, not "". Empty string is a value, and a unique
+    index would reject the second student registered without a phone number -
+    which, for a reception desk taking walk-ins, is most of them.
+    """
+    first = make_user(phone=None)
+    second = make_user(phone=None)
+
+    assert first.phone is None
+    assert second.phone is None
+
+
+@pytest.mark.django_db
+def test_blank_phone_is_normalised_to_null():
+    assert make_user(phone="   ").phone is None
+
+
+@pytest.mark.django_db
 def test_username_field_is_the_public_id():
     """Staff log in with STU-000001, not with an email address."""
     assert User.USERNAME_FIELD == "public_id"
