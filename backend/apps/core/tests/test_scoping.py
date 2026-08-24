@@ -90,9 +90,7 @@ def test_a_student_listing_sees_only_themselves(logged_in, student, professor, o
 
 
 @pytest.mark.django_db
-def test_a_student_reading_another_students_record_gets_404_not_403(
-    logged_in, student, professor
-):
+def test_a_student_reading_another_students_record_gets_404_not_403(logged_in, student, professor):
     """
     THE test. 403 would confirm the row exists and let an attacker walk the
     table by incrementing an id; 404 tells them nothing.

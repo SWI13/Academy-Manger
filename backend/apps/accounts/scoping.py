@@ -33,9 +33,7 @@ def scope_users(queryset, user):
     if has_permission(user, "user.create"):
         # Reception. Sees the people it serves and the staff it works beside,
         # never the accounts that could be used to escalate.
-        return queryset.filter(
-            Q(primary_role__in=["STUDENT", "PROFESSOR"]) | Q(pk=user.pk)
-        )
+        return queryset.filter(Q(primary_role__in=["STUDENT", "PROFESSOR"]) | Q(pk=user.pk))
 
     # Professors and students: themselves only, for now.
     return queryset.filter(pk=user.pk)

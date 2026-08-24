@@ -352,9 +352,7 @@ def test_owner_can_grant_a_second_role(logged_in, owner, reception):
 def test_nobody_can_grant_themselves_a_role(logged_in, owner):
     """Self-escalation, closed even for the owner."""
     client = logged_in(owner)
-    response = client.post(
-        f"{USERS}{owner.public_id}/roles/", {"role": "STUDENT"}, format="json"
-    )
+    response = client.post(f"{USERS}{owner.public_id}/roles/", {"role": "STUDENT"}, format="json")
     assert response.status_code == 400
 
 
@@ -362,9 +360,7 @@ def test_nobody_can_grant_themselves_a_role(logged_in, owner):
 def test_admin_cannot_assign_roles_at_all(logged_in, admin, student):
     """user.assign_role is owner-only - an admin cannot build themselves a ladder."""
     client = logged_in(admin)
-    response = client.post(
-        f"{USERS}{student.public_id}/roles/", {"role": "ADMIN"}, format="json"
-    )
+    response = client.post(f"{USERS}{student.public_id}/roles/", {"role": "ADMIN"}, format="json")
     assert response.status_code == 403
 
 

@@ -52,6 +52,9 @@ LOCAL_APPS = [
     "apps.accounts",
     "apps.students",
     "apps.professors",
+    "apps.courses",
+    "apps.enrollments",
+    "apps.schedules",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -203,6 +206,14 @@ SPECTACULAR_SETTINGS = {
         "UserStatusEnum": "apps.core.enums.UserStatus.choices",
         "WilayaEnum": "apps.core.wilayas.Wilaya.choices",
         "PriorLevelEnum": "apps.students.models.PriorLevel.choices",
+        # Four models have a "status" field with different choice sets.
+        # Unnamed, drf-spectacular invents CourseStatus9c9Enum and friends,
+        # which become unreadable TypeScript type names.
+        "CourseStatusEnum": "apps.courses.models.CourseStatus.choices",
+        "EnrollmentStatusEnum": "apps.enrollments.models.EnrollmentStatus.choices",
+        "ScheduleStatusEnum": "apps.schedules.models.ScheduleStatus.choices",
+        "AssignmentStatusEnum": "apps.courses.models.AssignmentStatus.choices",
+        "AssignmentRoleEnum": "apps.courses.models.AssignmentRole.choices",
     },
 }
 
