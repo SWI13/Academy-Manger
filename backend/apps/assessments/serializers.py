@@ -197,9 +197,7 @@ class GradebookRowSerializer(serializers.Serializer):
     age = serializers.IntegerField(allow_null=True)
     wilaya = serializers.CharField(allow_blank=True)
     prior_level = serializers.CharField(allow_blank=True)
-    weighted_percentage = serializers.DecimalField(
-        max_digits=6, decimal_places=2, allow_null=True
-    )
+    weighted_percentage = serializers.DecimalField(max_digits=6, decimal_places=2, allow_null=True)
     marked_count = serializers.IntegerField()
     assessment_count = serializers.IntegerField()
 

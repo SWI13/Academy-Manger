@@ -78,16 +78,24 @@ def all_roles(db):
 
 
 @pytest.fixture
-def logged_in(api):
-    """Sign a user in over the real login endpoint, not force_authenticate."""
+def logged_in():
+    """
+    Sign a user in over the real login endpoint, not force_authenticate.
+
+    Returns a *fresh* client each call. Sharing one client would mean
+    `logged_in(admin)` silently re-authenticates a session a previous call
+    established, so a test that needs two actors - which is exactly what
+    separation of duty tests need - would quietly be testing one.
+    """
 
     def _login(user, password=PASSWORD):
-        response = api.post(
+        client = APIClient()
+        response = client.post(
             "/api/v1/auth/login/",
             {"identifier": user.public_id, "password": password},
             format="json",
         )
         assert response.status_code == 200, response.data
-        return api
+        return client
 
     return _login
