@@ -41,7 +41,7 @@ Run against the real stack on 24 August 2026, not asserted from reading the code
 | Compose valid | `docker compose config` | 7 services resolve |
 | Migrations | `manage.py migrate` | 17 applied, `accounts.0001` first |
 | Health | `GET /api/v1/health/` | `200 {"status":"ok","database":"ok","cache":"ok"}` |
-| Tests | `pytest` | 32 passed |
+| Tests | `pytest` | 32 passed (128 after Phase 2) |
 | Lint | `ruff check .` | clean |
 | Migration drift | `makemigrations --check` | no changes detected |
 | Production posture | `check --deploy` (prod settings) | 0 issues |
@@ -65,7 +65,7 @@ Run against the real stack on 24 August 2026, not asserted from reading the code
 | Phase | State | Notes |
 | --- | --- | --- |
 | 1–3 Skeleton | **Done** — merged to `develop` 24 Aug 2026 | Repo, Docker Compose, settings split, `core`, custom user model, health endpoint, CI. |
-| 4–5 Auth + RBAC | Not started | |
+| 4–5 Auth + RBAC | **Done** — merged to `develop` 24 Aug 2026 | `rbac` app, permission catalogue + seed, cached resolution, the two gates, session login, password change and staff reset. 128 tests. |
 | 6 User management | Not started | |
 | 7–9 Courses, enrolments, schedules | Not started | |
 | 9b Grades | Not started | `Assessment`, `AssessmentScore`, averages, professor roster and next-session view. Added by D-6. |
@@ -178,3 +178,40 @@ the control** — which puts two obligations on the implementation:
 
 Trade accepted deliberately: a professor fixing a typo months later does not
 have to chase an admin, and every such change is visible rather than silent.
+
+
+## Phase 2 verification record (24 Aug 2026)
+
+| Check | Result |
+| --- | --- |
+| Migrations | `rbac.0001` + `rbac.0002` applied |
+| Seed | 39 permissions, 5 roles — OWNER 38, ADMIN 34, RECEPTION 14, PROFESSOR 12, STUDENT 12 |
+| Tests | **128 passed** |
+| Lint | clean |
+| Migration drift | none |
+| `check --deploy` | 0 issues |
+| OpenAPI | 6 paths, generates clean |
+
+### Decisions made during Phase 2
+
+**Custom Role/Permission tables, not `contrib.auth` Group/Permission.**
+Django ties every `Permission` row to a `ContentType`, forcing each one to be
+about exactly one model. `report.view_financial` and `settings.manage` are not
+about a model.
+
+**`catalog.py` is the single source of truth.** The seed migration applies it
+and the tests assert against it, so the two cannot drift. Adding a permission
+without deciding who holds it fails the suite.
+
+**Cache invalidation by global version bump, not targeted deletion.**
+Permission changes are rare; a missed invalidation leaves a revoked power in
+place. One counter is blunt and impossible to get subtly wrong. Signals cover
+every route into the tables so invalidation never depends on a call site.
+
+**No self-service password reset.** Students frequently have no email and SMS
+is not in the MVP, so there is no delivery channel to trust. Reset is
+staff-initiated and returns a temporary password once, in the response.
+
+**Deny by default everywhere.** A view declaring no permission is closed. A
+viewset that never implements `scope_queryset` raises rather than returning
+every row. An action the view did not map is denied even for the owner.
