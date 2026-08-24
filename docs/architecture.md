@@ -6,7 +6,7 @@ and MVP scope — lives here:
 
 **<https://claude.ai/code/artifact/662f4709-1b5d-4b38-be8c-9beea1b4a5a3>**
 
-Revision B, 24 August 2026. Supersedes Revision A.
+Revision C, 24 August 2026. Phase 1 merged; grades added by D-6.
 
 ## Decisions carried into the code
 
