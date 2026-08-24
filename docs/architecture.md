@@ -22,7 +22,7 @@ them can still change; the note says what it would cost.
 | D-5 | Block double-booked rooms and professors? | Warn, allow override. | Low — a validator change, or a range-overlap exclusion constraint. |
 | D-6 | What do professors manage? | **Answered 24 Aug 2026: grades.** Plus the class roster (name, age, wilaya, prior level) and the next session date. New Phase 9b. | Settled. |
 | D-7 | Who may correct a mark, and until when? | Assigned professor while the course is `ACTIVE`; admin and owner at any time. Every change audited. | Low — a service-layer rule, before Phase 9b. |
-| D-8 | Professor "updates" — in-app only, or SMS? | In-app in MVP, behind a channel interface. | Medium — SMS pulls a provider into MVP scope. Answer before Phase 13. |
+| D-8 | Professor "updates" — in-app only, or SMS? | **Answered 24 Aug 2026: in-app now, SMS later, for students and professors both.** Notification carries `channel` + delivery status from the start; phone numbers stored in E.164 from day one. | Settled. Adding the SMS channel is a new class, not a schema change. |
 
 ## Deviations from the blueprint made during implementation
 
@@ -135,3 +135,25 @@ anything changed. Four events notify a professor, and no others:
 
 In-app in MVP, behind a channel interface so SMS is an added class rather
 than a refactor. See D-8.
+
+## Designed for SMS before SMS exists (D-8, 24 Aug 2026)
+
+SMS is planned for **students and professors both**, but not in the MVP. Two
+things are cheap now and expensive once there is production data, so they were
+done in Phase 1 rather than deferred with the feature:
+
+**1. Phone numbers are stored in E.164.** An SMS gateway cannot dial
+`0555123456`. Reception still types the local form and it is normalised on the
+way in with libphonenumber; `DEFAULT_PHONE_REGION` (default `DZ`) is a setting,
+not an assumption in the code. This also closed a duplicate-account hole:
+`+213555123456` and `0555123456` are different strings, so the unique index
+would have admitted both and given one student two accounts.
+
+**2. Notification carries `channel` and delivery status from the start** —
+`IN_APP` is the only channel in MVP, but the column and the per-recipient
+delivery record exist, so adding SMS is a new channel class rather than an
+ALTER on a table with history.
+
+What is deliberately *not* built yet: a provider integration, credentials,
+cost controls, opt-out handling, or delivery-receipt reconciliation. Those
+arrive with the feature.
