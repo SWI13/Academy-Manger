@@ -195,6 +195,15 @@ SPECTACULAR_SETTINGS = {
     "TITLE": "SM Academy API",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
+    # RoleCode appears on User.primary_role and in the role-assignment body.
+    # Naming the enum once keeps the generated TypeScript to a single type
+    # instead of PrimaryRoleEnum and RoleEnum that happen to be identical.
+    "ENUM_NAME_OVERRIDES": {
+        "RoleCodeEnum": "apps.core.enums.RoleCode.choices",
+        "UserStatusEnum": "apps.core.enums.UserStatus.choices",
+        "WilayaEnum": "apps.core.wilayas.Wilaya.choices",
+        "PriorLevelEnum": "apps.students.models.PriorLevel.choices",
+    },
 }
 
 # ---------------------------------------------------------------------------

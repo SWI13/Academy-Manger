@@ -38,18 +38,26 @@ class StudentProfile(TimeStampedModel):
     date_of_birth = models.DateField(null=True, blank=True)
 
     wilaya = models.CharField(
-        max_length=2, choices=Wilaya.choices, blank=True, db_index=True,
+        max_length=2,
+        choices=Wilaya.choices,
+        blank=True,
+        db_index=True,
         help_text="Official two-digit wilaya code.",
     )
     prior_level = models.CharField(
-        max_length=20, choices=PriorLevel.choices, blank=True, db_index=True,
+        max_length=20,
+        choices=PriorLevel.choices,
+        blank=True,
+        db_index=True,
         help_text="Level on arrival, for placement.",
     )
 
     address = models.TextField(blank=True)
     emergency_contact_name = models.CharField(max_length=150, blank=True)
     emergency_contact_phone = models.CharField(max_length=16, blank=True)
-    notes = models.TextField(blank=True, help_text="Administrative notes. Not visible to the student.")
+    notes = models.TextField(
+        blank=True, help_text="Administrative notes. Not visible to the student."
+    )
 
     class Meta:
         db_table = "students_profile"

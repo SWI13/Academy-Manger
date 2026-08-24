@@ -87,9 +87,7 @@ class UserSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "public_id", "primary_role", "last_login", "created_at"]
 
     def get_roles(self, user) -> list[str]:
-        return sorted(
-            r.role.code for r in user.user_roles.all() if r.revoked_at is None
-        )
+        return sorted(r.role.code for r in user.user_roles.all() if r.revoked_at is None)
 
     def validate_phone(self, value):
         try:
@@ -152,9 +150,7 @@ class UserCreateSerializer(serializers.Serializer):
         if not can_manage_role(actor, value):
             # Reception creating an admin is privilege escalation with extra
             # steps. Refused by role, not by hiding the field in the UI.
-            raise serializers.ValidationError(
-                f"Your role cannot create a {value} account."
-            )
+            raise serializers.ValidationError(f"Your role cannot create a {value} account.")
         return value
 
     def validate_phone(self, value):
@@ -175,7 +171,9 @@ class UserCreateSerializer(serializers.Serializer):
             email=validated.get("email") or None,
             password=validated.get("password") or None,
         )
-        assign_role(user, Role.objects.get(code=role_code), assigned_by=self.context["request"].user)
+        assign_role(
+            user, Role.objects.get(code=role_code), assigned_by=self.context["request"].user
+        )
 
         if role_code == RoleCode.STUDENT:
             StudentProfile.objects.create(
@@ -215,7 +213,14 @@ class UserUpdateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ["first_name", "last_name", "phone", "email", "student_profile", "professor_profile"]
+        fields = [
+            "first_name",
+            "last_name",
+            "phone",
+            "email",
+            "student_profile",
+            "professor_profile",
+        ]
 
     def validate_phone(self, value):
         try:
