@@ -1,0 +1,28 @@
+# Keep the build context small and the image clean.
+# Without this, COPY . /app drags in the local virtualenv - hundreds of
+# megabytes of Windows-built binaries that would shadow the Linux packages
+# installed inside the image.
+
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Secrets never enter an image layer. The container reads them from env_file
+# at run time, not from the build context.
+.env
+.env.*
+!.env.example
+
+staticfiles/
+mediafiles/
+*.sqlite3
+
+.git/
+.gitignore
