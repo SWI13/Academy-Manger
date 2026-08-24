@@ -21,7 +21,7 @@ them can still change; the note says what it would cost.
 | D-4 | Can an APPROVED payment be reversed? | No. Approved is terminal; a correction is a new record. | Medium — a reversal model and permission, before Phase 10. |
 | D-5 | Block double-booked rooms and professors? | Warn, allow override. | Low — a validator change, or a range-overlap exclusion constraint. |
 | D-6 | What do professors manage? | **Answered 24 Aug 2026: grades.** Plus the class roster (name, age, wilaya, prior level) and the next session date. New Phase 9b. | Settled. |
-| D-7 | Who may correct a mark, and until when? | Assigned professor while the course is `ACTIVE`; admin and owner at any time. Every change audited. | Low — a service-layer rule, before Phase 9b. |
+| D-7 | Who may correct a mark, and until when? | **Answered 24 Aug 2026: no time limit.** A professor may change marks on any course they are assigned to, whenever. Marks do not freeze when a course completes. | Settled. |
 | D-8 | Professor "updates" — in-app only, or SMS? | **Answered 24 Aug 2026: in-app now, SMS later, for students and professors both.** Notification carries `channel` + delivery status from the start; phone numbers stored in E.164 from day one. | Settled. Adding the SMS channel is a new class, not a schema change. |
 
 ## Deviations from the blueprint made during implementation
@@ -99,7 +99,8 @@ Professors manage **grades** (*les notes*), not free-text remarks.
 Professor scope, enforced in `get_queryset()` and tested per role:
 
 - Reads and writes reach only courses with an `ACTIVE` `CourseProfessor` row
-  for that professor, and only while the course itself is `ACTIVE`.
+  for that professor. The scope is a **who, not a when** — there is no deadline
+  on entering or correcting a mark (D-7).
 - Touching another professor's class returns **404, not 403** — an existing
   row the caller may not see must be indistinguishable from a missing one.
 - Professors hold no `payment.*` permission at all. They see who is in the
@@ -157,3 +158,23 @@ ALTER on a table with history.
 What is deliberately *not* built yet: a provider integration, credentials,
 cost controls, opt-out handling, or delivery-receipt reconciliation. Those
 arrive with the feature.
+
+
+## Marks never lock (D-7, 24 Aug 2026)
+
+A professor can change a mark at any time on a course they are assigned to.
+Marks do not freeze when a course completes. The scope constraint is unchanged:
+their own courses, never anyone else's.
+
+Because there is no time lock, **the audit trail carries the entire weight of
+the control** — which puts two obligations on the implementation:
+
+1. Every score write records actor, timestamp, old value and new value in
+   `AuditLog`. No exceptions, including bulk mark-sheet saves.
+2. `AssessmentScore` carries `last_changed_by`, `last_changed_at` and
+   `change_count` **on the row itself**, not only in the audit log. A mark
+   edited a year after the course ended must say so where people actually look
+   at marks, not only where an owner would have to go digging.
+
+Trade accepted deliberately: a professor fixing a typo months later does not
+have to chase an admin, and every such change is visible rather than silent.
