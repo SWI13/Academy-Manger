@@ -13,6 +13,9 @@ from decimal import Decimal
 from django.db import transaction
 from django.utils import timezone
 
+from apps.audit.models import AuditAction
+from apps.audit.services import record
+
 from .models import Assessment, AssessmentScore
 
 logger = logging.getLogger(__name__)
@@ -97,11 +100,29 @@ def save_mark_sheet(assessment, rows, *, actor) -> dict:
                 comment=row.get("comment", ""),
                 entered_by=actor,
             )
+            record(
+                AuditAction.MARK_ENTERED,
+                actor=actor,
+                obj=assessment,
+                new={"student": enrollment.student.public_id, "score": row["score"]},
+                label=f"{enrollment.student.public_id} {row['score']}/{assessment.max_score}",
+            )
             created += 1
             continue
 
         if score.score == row["score"] and score.comment == row.get("comment", ""):
             continue  # unchanged; do not inflate the edit count
+
+        # Marks never lock (D-7), so a correction is expected rather than
+        # exceptional - and every one has to leave a trail with both values.
+        record(
+            AuditAction.MARK_CHANGED,
+            actor=actor,
+            obj=assessment,
+            old={"student": enrollment.student.public_id, "score": score.score},
+            new={"student": enrollment.student.public_id, "score": row["score"]},
+            label=f"{enrollment.student.public_id} {score.score} -> {row['score']}",
+        )
 
         score.score = row["score"]
         score.comment = row.get("comment", "")

@@ -15,6 +15,8 @@ from rest_framework.decorators import action
 from rest_framework.exceptions import MethodNotAllowed
 from rest_framework.response import Response
 
+from apps.audit.models import AuditAction
+from apps.audit.services import diff, record
 from apps.core.enums import UserStatus
 from apps.core.viewsets import ScopedModelViewSet
 from apps.rbac.models import Role
@@ -86,6 +88,15 @@ class UserViewSet(ScopedModelViewSet):
             ),
         )
 
+    def perform_create(self, serializer):
+        user = serializer.save()
+        record(
+            AuditAction.USER_CREATED,
+            actor=self.request.user,
+            obj=user,
+            new={"primary_role": user.primary_role, "public_id": user.public_id},
+        )
+
     def get_serializer_class(self):
         if self.action == "create":
             return UserCreateSerializer
@@ -125,6 +136,9 @@ class UserViewSet(ScopedModelViewSet):
     def perform_update(self, serializer):
         target = serializer.instance
         actor = self.request.user
+        before = {
+            field: getattr(target, field) for field in ("first_name", "last_name", "phone", "email")
+        }
         # Editing yourself is always allowed; editing someone else is bounded
         # by whether your role may manage theirs.
         if actor.pk != target.pk and not can_manage_role(actor, target.primary_role):
@@ -132,6 +146,13 @@ class UserViewSet(ScopedModelViewSet):
 
             raise PermissionDenied("Your role cannot edit this user.")
         serializer.save()
+        target.refresh_from_db()
+        after = {
+            field: getattr(target, field) for field in ("first_name", "last_name", "phone", "email")
+        }
+        old, new = diff(before, after)
+        if old or new:
+            record(AuditAction.USER_UPDATED, actor=actor, obj=target, old=old, new=new)
         logger.info("User %s edited by %s", target.public_id, actor.public_id)
 
     @extend_schema(
@@ -145,6 +166,7 @@ class UserViewSet(ScopedModelViewSet):
         serializer = StatusChangeSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         new_status = serializer.validated_data["status"]
+        previous_status = target.status
 
         if target.pk == request.user.pk:
             return Response(
@@ -178,6 +200,13 @@ class UserViewSet(ScopedModelViewSet):
                 target.status = new_status
                 target.save(update_fields=["status"])
 
+        record(
+            AuditAction.USER_STATUS_CHANGED,
+            actor=request.user,
+            obj=target,
+            old={"status": previous_status},
+            new={"status": new_status, "reason": serializer.validated_data.get("reason", "")},
+        )
         logger.info(
             "Status of %s set to %s by %s (%s)",
             target.public_id,

@@ -7,6 +7,8 @@ from rest_framework.decorators import action
 from rest_framework.exceptions import MethodNotAllowed
 from rest_framework.response import Response
 
+from apps.audit.models import AuditAction
+from apps.audit.services import record
 from apps.core.viewsets import ScopedModelViewSet
 from apps.courses.scoping import scope_enrollments
 
@@ -82,6 +84,16 @@ class EnrollmentViewSet(ScopedModelViewSet):
 
     def perform_create(self, serializer):
         enrollment = serializer.save()
+        record(
+            AuditAction.ENROLLMENT_CREATED,
+            actor=self.request.user,
+            obj=enrollment,
+            new={
+                "student": enrollment.student.public_id,
+                "course": enrollment.course.public_id,
+                "price_minor": enrollment.price_at_enrollment_minor,
+            },
+        )
         logger.info(
             "Enrolled %s in %s by %s",
             enrollment.student.public_id,
@@ -100,8 +112,17 @@ class EnrollmentViewSet(ScopedModelViewSet):
         serializer = EnrollmentStatusSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
+        previous_status = enrollment.status
         enrollment.status = serializer.validated_data["status"]
         enrollment.save(update_fields=["status", "updated_at"])
+
+        record(
+            AuditAction.ENROLLMENT_STATUS_CHANGED,
+            actor=request.user,
+            obj=enrollment,
+            old={"status": previous_status},
+            new={"status": enrollment.status},
+        )
 
         logger.info(
             "Enrolment %s set to %s by %s (%s)",

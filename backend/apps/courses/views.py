@@ -10,6 +10,8 @@ from rest_framework.decorators import action
 from rest_framework.exceptions import MethodNotAllowed
 from rest_framework.response import Response
 
+from apps.audit.models import AuditAction
+from apps.audit.services import record
 from apps.core.viewsets import ScopedModelViewSet
 
 from .models import AssignmentStatus, Course, CourseProfessor, CourseStatus
@@ -91,6 +93,15 @@ class CourseViewSet(ScopedModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)
+        record(
+            AuditAction.COURSE_CREATED,
+            actor=self.request.user,
+            obj=serializer.instance,
+            new={
+                "title": serializer.instance.title,
+                "price_minor": serializer.instance.price_minor,
+            },
+        )
         logger.info(
             "Course %s created by %s",
             serializer.instance.public_id,
@@ -109,10 +120,18 @@ class CourseViewSet(ScopedModelViewSet):
         serializer.is_valid(raise_exception=True)
         new_status = serializer.validated_data["status"]
 
+        previous_status = course.status
         course.status = new_status
         course.archived_at = timezone.now() if new_status == CourseStatus.ARCHIVED else None
         course.save(update_fields=["status", "archived_at", "updated_at"])
 
+        record(
+            AuditAction.COURSE_STATUS_CHANGED,
+            actor=request.user,
+            obj=course,
+            old={"status": previous_status},
+            new={"status": new_status},
+        )
         logger.info(
             "Course %s set to %s by %s", course.public_id, new_status, request.user.public_id
         )
@@ -150,6 +169,12 @@ class CourseViewSet(ScopedModelViewSet):
                     },
                     status=status.HTTP_400_BAD_REQUEST,
                 )
+            record(
+                AuditAction.PROFESSOR_UNASSIGNED,
+                actor=request.user,
+                obj=course,
+                old={"professor": professor.public_id},
+            )
             logger.info(
                 "Professor %s unassigned from %s by %s",
                 professor.public_id,
@@ -168,6 +193,12 @@ class CourseViewSet(ScopedModelViewSet):
             },
         )
         if created:
+            record(
+                AuditAction.PROFESSOR_ASSIGNED,
+                actor=request.user,
+                obj=course,
+                new={"professor": professor.public_id},
+            )
             logger.info(
                 "Professor %s assigned to %s by %s",
                 professor.public_id,

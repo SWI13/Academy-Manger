@@ -57,6 +57,7 @@ LOCAL_APPS = [
     "apps.schedules",
     "apps.assessments",
     "apps.payments",
+    "apps.audit",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -69,6 +70,7 @@ INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
+    "apps.audit.context.AuditContextMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -220,6 +222,7 @@ SPECTACULAR_SETTINGS = {
         "PaymentStatusEnum": "apps.payments.models.PaymentStatus.choices",
         "PaymentMethodEnum": "apps.payments.models.PaymentMethod.choices",
         "ScanStatusEnum": "apps.payments.models.ScanStatus.choices",
+        "AuditActionEnum": "apps.audit.models.AuditAction.choices",
     },
 }
 

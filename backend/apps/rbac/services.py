@@ -109,6 +109,17 @@ def assign_role(user, role, *, assigned_by=None) -> UserRole:
         user=user, role=role, assigned_by=assigned_by, assigned_at=timezone.now()
     )
     bump_version()
+
+    from apps.audit.models import AuditAction
+    from apps.audit.services import record
+
+    record(
+        AuditAction.ROLE_GRANTED,
+        actor=assigned_by,
+        obj=user,
+        new={"role": role.code},
+        label=f"{role.code} granted to {user.public_id}",
+    )
     logger.info("Role %s granted to %s by %s", role.code, user.public_id, assigned_by)
     return user_role
 
@@ -122,5 +133,16 @@ def revoke_role(user, role, *, revoked_by=None) -> int:
     )
     if updated:
         bump_version()
+
+        from apps.audit.models import AuditAction
+        from apps.audit.services import record
+
+        record(
+            AuditAction.ROLE_REVOKED,
+            actor=revoked_by,
+            obj=user,
+            old={"role": role.code},
+            label=f"{role.code} revoked from {user.public_id}",
+        )
         logger.info("Role %s revoked from %s by %s", role.code, user.public_id, revoked_by)
     return updated
