@@ -48,6 +48,7 @@ THIRD_PARTY_APPS = [
 # through service functions, never by reaching into each other's querysets.
 LOCAL_APPS = [
     "apps.core",
+    "apps.rbac",
     "apps.accounts",
 ]
 
@@ -136,6 +137,10 @@ CSRF_COOKIE_SAMESITE = "Lax"
 # tables exist is a manual data migration across every FK to auth.User, so the
 # custom model ships in Phase 1 even though login lands in Phase 4.
 AUTH_USER_MODEL = "accounts.User"
+
+# Staff read User IDs aloud; students remember their phone. Both are unique,
+# so either works as the login identifier.
+AUTHENTICATION_BACKENDS = ["apps.accounts.backends.PublicIdOrPhoneBackend"]
 
 # Argon2 first: memory-hard, and the current OWASP recommendation. The
 # remaining hashers stay listed so any legacy hash still verifies and is
