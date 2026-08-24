@@ -112,6 +112,33 @@ def test_blank_phone_is_normalised_to_null():
 
 
 @pytest.mark.django_db
+def test_phone_typed_locally_is_stored_dialable():
+    """
+    Reception types 0555123456. An SMS gateway cannot dial that, so it is
+    stored in E.164 from the day the row is created rather than migrated later.
+    """
+    user = make_user(phone="0555123456")
+    assert user.phone == "+213555123456"
+
+
+@pytest.mark.django_db
+def test_the_same_number_typed_two_ways_collides():
+    """
+    Without normalisation these are different strings and the unique index
+    lets both in, giving one student two accounts.
+    """
+    make_user(phone="+213555123456")
+    with pytest.raises((IntegrityError, ValidationError)):
+        make_user(phone="0555123456")
+
+
+@pytest.mark.django_db
+def test_invalid_phone_is_refused_at_creation():
+    with pytest.raises(ValidationError):
+        make_user(phone="12345")
+
+
+@pytest.mark.django_db
 def test_username_field_is_the_public_id():
     """Staff log in with STU-000001, not with an email address."""
     assert User.USERNAME_FIELD == "public_id"
