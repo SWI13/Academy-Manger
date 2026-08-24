@@ -20,7 +20,8 @@ them can still change; the note says what it would cost.
 | D-3 | Recurring weekly schedule, or dated sessions? | Recurring weekly. Per-session cancellation is not modelled. | Medium — a second table, decided before Phase 9. |
 | D-4 | Can an APPROVED payment be reversed? | No. Approved is terminal; a correction is a new record. | Medium — a reversal model and permission, before Phase 10. |
 | D-5 | Block double-booked rooms and professors? | Warn, allow override. | Low — a validator change, or a range-overlap exclusion constraint. |
-| D-6 | What do professors manage? | Nothing. Read-only: assigned courses, rosters, own schedule. | Depends entirely on the answer. |
+| D-6 | What do professors manage? | **Answered 24 Aug 2026: grades.** Plus the class roster (name, age, wilaya, prior level) and the next session date. New Phase 9b. | Settled. |
+| D-7 | Who may correct a mark, and until when? | Assigned professor while the course is `ACTIVE`; admin and owner at any time. Every change audited. | Low — a service-layer rule, before Phase 9b. |
 
 ## Deviations from the blueprint made during implementation
 
@@ -66,6 +67,7 @@ Run against the real stack on 24 August 2026, not asserted from reading the code
 | 4–5 Auth + RBAC | Not started | |
 | 6 User management | Not started | |
 | 7–9 Courses, enrolments, schedules | Not started | |
+| 9b Grades | Not started | `Assessment`, `AssessmentScore`, averages, professor roster and next-session view. Added by D-6. |
 | 10–11 Payments and proofs | Not started | |
 | 16 Audit log | Not started | Brought forward, immediately after payments. |
 | 13–14 Notifications, dashboards | Not started | |
@@ -73,3 +75,31 @@ Run against the real stack on 24 August 2026, not asserted from reading the code
 | 15 Reports | Not started | |
 | 17–18 Hardening, tests | Not started | |
 | 19–20 Deployment | Not started | |
+
+## Domain rules settled by D-6 (24 Aug 2026)
+
+Professors manage **grades** (*les notes*), not free-text remarks.
+
+- `Assessment` belongs to a Course and carries its own `max_score` and `weight`.
+  The grading scale is data, so a /20 quiz and a /100 final coexist and next
+  term's change is a form rather than a deploy.
+- `AssessmentScore` is unique on `(assessment, enrollment)`. It hangs off the
+  enrolment, not the student, so a retaken course gets a clean second set of
+  marks and last year's results stay reproducible.
+- Averages are computed on read from raw marks. Never stored — a stored
+  average cannot be re-derived after the scheme changes.
+- **Age is never stored.** `StudentProfile.date_of_birth` is stored and age is
+  derived; a stored age is wrong within a year.
+- `StudentProfile.wilaya` is a fixed list of Algeria's 58 codes, not free
+  text, so rosters and reports can group by it.
+- `StudentProfile.prior_level` is a fixed level list, used for placement and
+  filtering.
+
+Professor scope, enforced in `get_queryset()` and tested per role:
+
+- Reads and writes reach only courses with an `ACTIVE` `CourseProfessor` row
+  for that professor, and only while the course itself is `ACTIVE`.
+- Touching another professor's class returns **404, not 403** — an existing
+  row the caller may not see must be indistinguishable from a missing one.
+- Professors hold no `payment.*` permission at all. They see who is in the
+  room, not who has paid.
