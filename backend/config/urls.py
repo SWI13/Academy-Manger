@@ -16,6 +16,7 @@ from apps.assessments.views import (
     CourseGradebookView,
     EnrollmentAverageView,
 )
+from apps.audit.views import AuditLogViewSet
 from apps.core.health import health_view
 from apps.courses.views import CourseViewSet
 from apps.enrollments.views import EnrollmentViewSet
@@ -34,6 +35,7 @@ router.register("enrollments", EnrollmentViewSet, basename="enrollment")
 router.register("schedules", ScheduleViewSet, basename="schedule")
 router.register("assessments", AssessmentViewSet, basename="assessment")
 router.register("payments", PaymentViewSet, basename="payment")
+router.register("audit", AuditLogViewSet, basename="audit")
 
 v1_patterns = [
     path("health/", health_view, name="health"),

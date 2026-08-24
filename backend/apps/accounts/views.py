@@ -21,6 +21,8 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from apps.audit.models import AuditAction
+from apps.audit.services import record
 from apps.rbac.permissions import IsAuthenticatedAndActive, RequirePermission
 
 from .serializers import (
@@ -51,6 +53,11 @@ class LoginView(APIView):
     def post(self, request):
         serializer = LoginSerializer(data=request.data, context={"request": request})
         if not serializer.is_valid():
+            record(
+                AuditAction.LOGIN_FAILED,
+                new={"identifier": str(request.data.get("identifier"))[:40]},
+                label="failed login",
+            )
             logger.info(
                 "Failed login for %r from %s",
                 str(request.data.get("identifier"))[:40],
@@ -121,6 +128,7 @@ class PasswordChangeView(APIView):
         # used to change it.
         update_session_auth_hash(request, user)
 
+        record(AuditAction.PASSWORD_CHANGED, actor=user, obj=user)
         logger.info("Password changed by %s", user.public_id)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -152,6 +160,12 @@ class PasswordResetView(APIView):
         # Every existing session for the target is now invalid, because the
         # session auth hash derives from the password. A reset locks out
         # whoever was using the account, which is the point of a reset.
+        record(
+            AuditAction.PASSWORD_RESET,
+            actor=request.user,
+            obj=target,
+            label=f"password reset for {target.public_id}",
+        )
         logger.info("Password reset for %s by %s", target.public_id, request.user.public_id)
 
         return Response(

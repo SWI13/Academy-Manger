@@ -11,6 +11,8 @@ from rest_framework.exceptions import MethodNotAllowed, PermissionDenied
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from apps.audit.models import AuditAction
+from apps.audit.services import record
 from apps.core import storage
 from apps.core.viewsets import ScopedModelViewSet
 from apps.courses.scoping import scope_enrollments
@@ -151,6 +153,16 @@ class PaymentViewSet(ScopedModelViewSet):
 
     def perform_create(self, serializer):
         payment = serializer.save()
+        record(
+            AuditAction.PAYMENT_CREATED,
+            actor=self.request.user,
+            obj=payment,
+            new={
+                "amount_minor": payment.amount_minor,
+                "method": payment.method,
+                "student": payment.enrollment.student.public_id,
+            },
+        )
         logger.info(
             "Payment %s recorded for %s by %s",
             payment.public_id,
@@ -309,6 +321,12 @@ class PaymentViewSet(ScopedModelViewSet):
             checksum_sha256=info.etag if len(info.etag) == 64 else "",
             uploaded_by=request.user,
         )
+        record(
+            AuditAction.PROOF_UPLOADED,
+            actor=request.user,
+            obj=payment,
+            new={"filename": proof.original_filename, "size_bytes": proof.size_bytes},
+        )
         logger.info(
             "Proof %s attached to %s by %s", proof.pk, payment.public_id, request.user.public_id
         )
@@ -354,6 +372,13 @@ class ProofDownloadView(APIView):
                 status=status.HTTP_503_SERVICE_UNAVAILABLE,
             )
 
+        # Who looked at a family's bank slip is itself worth recording.
+        record(
+            AuditAction.PROOF_DOWNLOADED,
+            actor=request.user,
+            obj=proof.payment,
+            new={"filename": proof.original_filename},
+        )
         logger.info("Proof %s downloaded by %s", proof.pk, request.user.public_id)
         return Response({"url": url, "expires_in": storage.settings.S3_DOWNLOAD_URL_TTL})
 

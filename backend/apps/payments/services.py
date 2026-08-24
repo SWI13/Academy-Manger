@@ -13,6 +13,9 @@ from django.db import transaction
 from django.db.models import Q, Sum
 from django.utils import timezone
 
+from apps.audit.models import AuditAction
+from apps.audit.services import record
+
 from .models import Payment, PaymentStatus
 
 logger = logging.getLogger(__name__)
@@ -54,6 +57,13 @@ def approve(payment: Payment, *, actor) -> Payment:
     locked.approved_at = timezone.now()
     locked.save(update_fields=["status", "approved_by", "approved_at", "updated_at"])
 
+    record(
+        AuditAction.PAYMENT_APPROVED,
+        actor=actor,
+        obj=locked,
+        old={"status": PaymentStatus.PENDING},
+        new={"status": PaymentStatus.APPROVED, "amount_minor": locked.amount_minor},
+    )
     logger.info("Payment %s approved by %s", locked.public_id, actor.public_id)
     return locked
 
@@ -75,6 +85,13 @@ def reject(payment: Payment, *, actor, reason: str) -> Payment:
         update_fields=["status", "rejected_by", "rejected_at", "rejection_reason", "updated_at"]
     )
 
+    record(
+        AuditAction.PAYMENT_REJECTED,
+        actor=actor,
+        obj=locked,
+        old={"status": PaymentStatus.PENDING},
+        new={"status": PaymentStatus.REJECTED, "reason": reason},
+    )
     logger.info("Payment %s rejected by %s: %s", locked.public_id, actor.public_id, reason)
     return locked
 
@@ -97,6 +114,13 @@ def cancel(payment: Payment, *, actor, reason: str = "") -> Payment:
         locked.notes = f"{locked.notes}\nCancelled: {reason}".strip()
     locked.save(update_fields=["status", "cancelled_by", "cancelled_at", "notes", "updated_at"])
 
+    record(
+        AuditAction.PAYMENT_CANCELLED,
+        actor=actor,
+        obj=locked,
+        old={"status": PaymentStatus.PENDING},
+        new={"status": PaymentStatus.CANCELLED, "reason": reason},
+    )
     logger.info("Payment %s cancelled by %s", locked.public_id, actor.public_id)
     return locked
 
