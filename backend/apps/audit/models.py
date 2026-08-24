@@ -55,6 +55,15 @@ class AuditAction(models.TextChoices):
     PROOF_UPLOADED = "PROOF_UPLOADED", "Payment proof uploaded"
     PROOF_DOWNLOADED = "PROOF_DOWNLOADED", "Payment proof downloaded"
 
+    # Engagement
+    REVIEW_CREATED = "REVIEW_CREATED", "Review written"
+    REVIEW_UPDATED = "REVIEW_UPDATED", "Review edited"
+    REVIEW_MODERATED = "REVIEW_MODERATED", "Review moderated"
+
+    # Oversight
+    REPORT_EXPORTED = "REPORT_EXPORTED", "Report exported"
+    EXPORT_DOWNLOADED = "EXPORT_DOWNLOADED", "Export downloaded"
+
 
 class AuditLog(models.Model):
     # Denormalised, not a foreign key. See the module docstring: a referential
