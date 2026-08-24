@@ -14,18 +14,13 @@ So the model ships now, minimal but correct, and later phases add to it.
 """
 
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
-from django.core.validators import RegexValidator
 from django.db import models, transaction
 from django.utils import timezone
 
 from apps.core.enums import RoleCode, UserStatus
 from apps.core.identifiers import next_user_identifier
 from apps.core.models import TimeStampedModel
-
-phone_validator = RegexValidator(
-    regex=r"^\+?[0-9]{6,20}$",
-    message="Enter a phone number in international or local digits, optionally starting with +.",
-)
+from apps.core.phone import E164_MAX_LENGTH, normalize_phone, validate_e164
 
 
 class UserManager(BaseUserManager):
@@ -54,9 +49,10 @@ class UserManager(BaseUserManager):
             first_name=first_name.strip(),
             last_name=last_name.strip(),
             primary_role=primary_role,
-            # Empty string is not NULL: two users with phone="" would collide on
-            # the unique index, so an absent phone must be stored as NULL.
-            phone=(phone or "").strip() or None,
+            # Stored in E.164 so an SMS gateway can dial it later, and as NULL
+            # when absent - empty string is a value, and two users with phone=""
+            # would collide on the unique index.
+            phone=normalize_phone(phone),
             email=self.normalize_email(email) if email else None,
             **extra,
         )
@@ -77,12 +73,12 @@ class User(AbstractBaseUser, TimeStampedModel):
     last_name = models.CharField(max_length=100)
 
     phone = models.CharField(
-        max_length=20,
+        max_length=E164_MAX_LENGTH,
         unique=True,
         null=True,
         blank=True,
-        validators=[phone_validator],
-        help_text="Optional second login identifier.",
+        validators=[validate_e164],
+        help_text="Stored in E.164 (+213555123456). Optional second login identifier.",
     )
     email = models.EmailField(unique=True, null=True, blank=True)
 

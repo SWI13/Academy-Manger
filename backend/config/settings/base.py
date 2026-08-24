@@ -239,6 +239,10 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 # All money is stored as integer minor units plus this code. Never a float.
 DEFAULT_CURRENCY = env("DEFAULT_CURRENCY", default="DZD")
 
+# Region assumed when staff type a local phone number ("0555123456").
+# Numbers are always stored in E.164 so an SMS gateway can dial them.
+DEFAULT_PHONE_REGION = env("DEFAULT_PHONE_REGION", default="DZ")
+
 # ---------------------------------------------------------------------------
 # Logging
 # ---------------------------------------------------------------------------
