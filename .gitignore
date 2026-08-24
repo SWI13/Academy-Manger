@@ -1,0 +1,34 @@
+# --- secrets ---
+.env
+.env.*
+!.env.example
+
+# --- python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# --- django ---
+/backend/staticfiles/
+/backend/mediafiles/
+*.sqlite3
+
+# --- node ---
+node_modules/
+.next/
+out/
+npm-debug.log*
+
+# --- os / editor ---
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/*
+!.vscode/extensions.json
