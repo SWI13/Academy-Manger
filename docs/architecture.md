@@ -30,11 +30,39 @@ them can still change; the note says what it would cost.
 | `User.last_login_at` | Django's built-in `last_login` | `AbstractBaseUser` already provides and maintains it. A second column would drift. |
 | `django.contrib.admin` available | Not installed | A second administrative surface with its own authorization model is a parallel access path the permission matrix does not cover. The owner dashboard is the administrative interface. |
 
+## Phase 1 verification record
+
+Run against the real stack on 24 August 2026, not asserted from reading the code.
+
+| Check | Command | Result |
+| --- | --- | --- |
+| Compose valid | `docker compose config` | 7 services resolve |
+| Migrations | `manage.py migrate` | 17 applied, `accounts.0001` first |
+| Health | `GET /api/v1/health/` | `200 {"status":"ok","database":"ok","cache":"ok"}` |
+| Tests | `pytest` | 32 passed |
+| Lint | `ruff check .` | clean |
+| Migration drift | `makemigrations --check` | no changes detected |
+| Production posture | `check --deploy` (prod settings) | 0 issues |
+| OpenAPI | `manage.py spectacular` | generates, no warnings |
+| Object storage | `minio-init` logs | bucket `sm-academy-private` created, access `none` |
+
+### Environment notes
+
+- Docker Desktop installs per-user on this machine
+  (`%LOCALAPPDATA%\Programs\DockerDesktop\resources\bin`), not to `Program Files`.
+  A terminal opened before the install will not have it on `PATH`.
+- WSL2 is required for the engine. Docker reports its absence as
+  "virtualisation support not detected", which is misleading — the CPU flags
+  were fine throughout.
+- Git Bash rewrites absolute paths before they reach a container. Prefix
+  `MSYS_NO_PATHCONV=1` when passing a container-side path to
+  `docker compose exec`.
+
 ## Phase log
 
 | Phase | State | Notes |
 | --- | --- | --- |
-| 1–3 Skeleton | In progress | Repo, Docker Compose, settings split, `core`, custom user model, health endpoint, CI. |
+| 1–3 Skeleton | **Done** — merged to `develop` 24 Aug 2026 | Repo, Docker Compose, settings split, `core`, custom user model, health endpoint, CI. |
 | 4–5 Auth + RBAC | Not started | |
 | 6 User management | Not started | |
 | 7–9 Courses, enrolments, schedules | Not started | |
