@@ -15,6 +15,8 @@ from django.utils import timezone
 
 from apps.audit.models import AuditAction
 from apps.audit.services import record
+from apps.notifications.models import NotificationKind
+from apps.notifications.services import notify
 
 from .models import Payment, PaymentStatus
 
@@ -64,6 +66,15 @@ def approve(payment: Payment, *, actor) -> Payment:
         old={"status": PaymentStatus.PENDING},
         new={"status": PaymentStatus.APPROVED, "amount_minor": locked.amount_minor},
     )
+    notify(
+        locked.enrollment.student,
+        NotificationKind.PAYMENT_APPROVED,
+        "Payment confirmed",
+        f"Your payment of {locked.amount_minor / 100:,.2f} {locked.currency} for "
+        f"{locked.enrollment.course.title} has been confirmed.",
+        target=locked,
+        link_path="/payments",
+    )
     logger.info("Payment %s approved by %s", locked.public_id, actor.public_id)
     return locked
 
@@ -91,6 +102,15 @@ def reject(payment: Payment, *, actor, reason: str) -> Payment:
         obj=locked,
         old={"status": PaymentStatus.PENDING},
         new={"status": PaymentStatus.REJECTED, "reason": reason},
+    )
+    notify(
+        locked.enrollment.student,
+        NotificationKind.PAYMENT_REJECTED,
+        "Payment could not be confirmed",
+        f"Your payment of {locked.amount_minor / 100:,.2f} {locked.currency} for "
+        f"{locked.enrollment.course.title} was not accepted. Reason: {reason}",
+        target=locked,
+        link_path="/payments",
     )
     logger.info("Payment %s rejected by %s: %s", locked.public_id, actor.public_id, reason)
     return locked

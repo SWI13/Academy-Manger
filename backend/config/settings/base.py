@@ -9,6 +9,7 @@ image runs in all three.
 from pathlib import Path
 
 import environ
+from celery.schedules import crontab
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
@@ -58,6 +59,8 @@ LOCAL_APPS = [
     "apps.assessments",
     "apps.payments",
     "apps.audit",
+    "apps.notifications",
+    "apps.reports",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -223,6 +226,9 @@ SPECTACULAR_SETTINGS = {
         "PaymentMethodEnum": "apps.payments.models.PaymentMethod.choices",
         "ScanStatusEnum": "apps.payments.models.ScanStatus.choices",
         "AuditActionEnum": "apps.audit.models.AuditAction.choices",
+        "NotificationKindEnum": "apps.notifications.models.NotificationKind.choices",
+        "ChannelEnum": "apps.notifications.models.Channel.choices",
+        "DeliveryStatusEnum": "apps.notifications.models.DeliveryStatus.choices",
     },
 }
 
@@ -248,6 +254,19 @@ CELERY_WORKER_PREFETCH_MULTIPLIER = 1
 CELERY_TASK_TIME_LIMIT = 60 * 10
 CELERY_TASK_SOFT_TIME_LIMIT = 60 * 9
 CELERY_TIMEZONE = "UTC"
+
+# Beat schedule. Both tasks are idempotent - beat can fire twice after a
+# restart, and a duplicate reminder is what gets notifications muted.
+CELERY_BEAT_SCHEDULE = {
+    "session-reminders": {
+        "task": "notifications.send_session_reminders",
+        "schedule": crontab(hour=18, minute=0),  # the evening before
+    },
+    "roster-digests": {
+        "task": "notifications.send_roster_digests",
+        "schedule": crontab(hour=7, minute=30),
+    },
+}
 
 # ---------------------------------------------------------------------------
 # CORS

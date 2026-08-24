@@ -13,6 +13,8 @@ from rest_framework.response import Response
 from apps.audit.models import AuditAction
 from apps.audit.services import record
 from apps.core.viewsets import ScopedModelViewSet
+from apps.notifications.models import NotificationKind
+from apps.notifications.services import notify
 
 from .models import AssignmentStatus, Course, CourseProfessor, CourseStatus
 from .scoping import scope_courses
@@ -193,6 +195,15 @@ class CourseViewSet(ScopedModelViewSet):
             },
         )
         if created:
+            notify(
+                professor,
+                NotificationKind.COURSE_ASSIGNED,
+                f"You have been assigned to {course.title}",
+                f"{course.title} ({course.public_id}) runs from "
+                f"{course.start_date:%d/%m/%Y} to {course.end_date:%d/%m/%Y}.",
+                target=course,
+                link_path="/dashboard",
+            )
             record(
                 AuditAction.PROFESSOR_ASSIGNED,
                 actor=request.user,

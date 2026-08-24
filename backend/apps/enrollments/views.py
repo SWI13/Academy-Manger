@@ -11,6 +11,8 @@ from apps.audit.models import AuditAction
 from apps.audit.services import record
 from apps.core.viewsets import ScopedModelViewSet
 from apps.courses.scoping import scope_enrollments
+from apps.notifications.models import NotificationKind
+from apps.notifications.services import notify
 
 from .models import Enrollment
 from .serializers import (
@@ -84,6 +86,15 @@ class EnrollmentViewSet(ScopedModelViewSet):
 
     def perform_create(self, serializer):
         enrollment = serializer.save()
+        notify(
+            enrollment.student,
+            NotificationKind.ENROLLED,
+            f"You are enrolled in {enrollment.course.title}",
+            f"{enrollment.course.title} ({enrollment.course.public_id}) starts "
+            f"{enrollment.course.start_date:%d/%m/%Y}.",
+            target=enrollment.course,
+            link_path="/courses",
+        )
         record(
             AuditAction.ENROLLMENT_CREATED,
             actor=self.request.user,

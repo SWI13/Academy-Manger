@@ -70,6 +70,11 @@ services:
     build:
       context: ./backend
       target: dev
+    # web, worker and beat share one image name on purpose. With three
+    # separate build blocks Compose produced three images that drifted the
+    # moment a dependency was added to only one of them - which is exactly
+    # what "same image, different command" is supposed to prevent.
+    image: sm-academy-backend:dev
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - ./backend:/app
@@ -86,6 +91,7 @@ services:
     build:
       context: ./backend
       target: dev
+    image: sm-academy-backend:dev
     command: celery -A config worker --loglevel=info
     volumes:
       - ./backend:/app
@@ -100,6 +106,7 @@ services:
     build:
       context: ./backend
       target: dev
+    image: sm-academy-backend:dev
     # --schedule keeps beat's state file out of the mounted source tree; by
     # default it writes celerybeat-schedule into the working directory, which
     # here is your checkout.
