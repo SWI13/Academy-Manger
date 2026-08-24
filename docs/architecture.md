@@ -22,6 +22,7 @@ them can still change; the note says what it would cost.
 | D-5 | Block double-booked rooms and professors? | Warn, allow override. | Low — a validator change, or a range-overlap exclusion constraint. |
 | D-6 | What do professors manage? | **Answered 24 Aug 2026: grades.** Plus the class roster (name, age, wilaya, prior level) and the next session date. New Phase 9b. | Settled. |
 | D-7 | Who may correct a mark, and until when? | Assigned professor while the course is `ACTIVE`; admin and owner at any time. Every change audited. | Low — a service-layer rule, before Phase 9b. |
+| D-8 | Professor "updates" — in-app only, or SMS? | In-app in MVP, behind a channel interface. | Medium — SMS pulls a provider into MVP scope. Answer before Phase 13. |
 
 ## Deviations from the blueprint made during implementation
 
