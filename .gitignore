@@ -19,6 +19,12 @@ htmlcov/
 /backend/mediafiles/
 *.sqlite3
 
+# --- celery ---
+# beat writes these into its working directory; compose redirects them to
+# /tmp, but keep the guard in case beat is ever run without that flag.
+celerybeat-schedule*
+celerybeat.pid
+
 # --- node ---
 node_modules/
 .next/

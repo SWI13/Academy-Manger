@@ -100,7 +100,10 @@ services:
     build:
       context: ./backend
       target: dev
-    command: celery -A config beat --loglevel=info
+    # --schedule keeps beat's state file out of the mounted source tree; by
+    # default it writes celerybeat-schedule into the working directory, which
+    # here is your checkout.
+    command: celery -A config beat --loglevel=info --schedule=/tmp/celerybeat-schedule
     volumes:
       - ./backend:/app
     env_file: .env
