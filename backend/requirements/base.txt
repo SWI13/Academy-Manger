@@ -1,0 +1,20 @@
+# Runtime dependencies shared by every environment.
+# Ranges now; a fully pinned lock file lands in Phase 19 (deployment).
+
+Django>=5.2,<5.3                 # LTS, supported to April 2028
+djangorestframework>=3.16,<3.17
+django-filter>=25.1,<26          # explicit filtersets only - see architecture SS6
+django-environ>=0.12,<0.13
+django-cors-headers>=4.7,<5
+
+psycopg[binary]>=3.2,<3.3
+redis>=5.2,<7
+django-redis>=5.4,<6             # cache + session backend
+
+celery>=5.5,<5.6
+
+boto3>=1.35,<2                   # S3-compatible object storage
+django-storages>=1.14,<2
+
+argon2-cffi>=23.1,<26            # password hashing - see settings/base.py
+drf-spectacular>=0.28,<0.29      # OpenAPI schema; frontend types generate from it
