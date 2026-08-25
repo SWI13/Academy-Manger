@@ -2,8 +2,10 @@
 
 import Link from "next/link";
 
+import { PersonCell } from "@/components/ui/Avatar";
 import { StatusBadge } from "@/components/ui/Badge";
 import type { Column } from "@/components/ui/DataTable";
+import { Icon } from "@/components/ui/Icon";
 import { formatDate, formatMoney } from "@/lib/format";
 import type { Permission } from "@/lib/permissions";
 import type { Payment } from "@/types";
@@ -23,37 +25,48 @@ import type { Payment } from "@/types";
 export function paymentColumns(
   can: (permission: Permission) => boolean,
 ): Column<Payment>[] {
-  const columns: Column<Payment>[] = [
-    {
-      key: "public_id",
-      header: "Reference",
-      cell: (payment) => (
-        <Link
-          href={`/payments/${payment.public_id}`}
-          className="tabular font-medium text-accent hover:underline"
-        >
-          {payment.public_id}
-        </Link>
-      ),
-    },
-  ];
+  const seesEveryone = can("payment.create");
+
+  const columns: Column<Payment>[] = [];
 
   // A student sees their own payments and nobody else's, so naming the payer
-  // in every row would just be their own name repeated down the page.
-  if (can("payment.create")) {
+  // in every row would just be their own name repeated down the page. For
+  // them the reference is the heading; for staff, the person is.
+  if (seesEveryone) {
     columns.push({
       key: "student",
       header: "Student",
+      lead: true,
       cell: (payment) => (
-        <div>
-          <p className="text-ink">{payment.student_name}</p>
-          <p className="tabular text-xs text-ink-faint">
-            {payment.student_public_id}
-          </p>
-        </div>
+        <PersonCell
+          name={payment.student_name}
+          publicId={payment.student_public_id}
+        />
       ),
     });
   }
+
+  columns.push({
+    key: "public_id",
+    header: "Reference",
+    lead: !seesEveryone,
+    cell: (payment) => (
+      <Link
+        href={`/payments/${payment.public_id}`}
+        className="tabular inline-flex items-center gap-1.5 font-medium text-ink hover:text-accent"
+      >
+        {payment.public_id}
+        {payment.proofs.length ? (
+          <Icon
+            name="file"
+            size={13}
+            title={`${payment.proofs.length} proof attached`}
+            className="text-ink-faint"
+          />
+        ) : null}
+      </Link>
+    ),
+  });
 
   columns.push(
     {
@@ -61,9 +74,9 @@ export function paymentColumns(
       header: "Course",
       secondary: true,
       cell: (payment) => (
-        <div>
-          <p className="text-ink">{payment.course_title}</p>
-          <p className="tabular text-xs text-ink-faint">
+        <div className="min-w-0">
+          <p className="truncate text-ink">{payment.course_title}</p>
+          <p className="tabular truncate text-xs text-ink-faint">
             {payment.course_public_id}
           </p>
         </div>
@@ -74,7 +87,18 @@ export function paymentColumns(
       header: "Amount",
       numeric: true,
       cell: (payment) => (
-        <span className="font-medium">
+        // Pending money is amber wherever it appears. A ledger that renders a
+        // claim and a confirmed receipt identically is a ledger that gets read
+        // as though the money is in.
+        <span
+          className={`font-semibold ${
+            payment.status === "APPROVED"
+              ? "text-ink"
+              : payment.status === "PENDING"
+                ? "text-warn"
+                : "text-ink-faint line-through"
+          }`}
+        >
           {formatMoney(payment.amount_minor, payment.currency)}
         </span>
       ),
@@ -83,14 +107,18 @@ export function paymentColumns(
       key: "paid_on",
       header: "Paid on",
       secondary: true,
-      cell: (payment) => formatDate(payment.paid_on),
+      cell: (payment) => (
+        <span className="tabular whitespace-nowrap text-ink-soft">
+          {formatDate(payment.paid_on)}
+        </span>
+      ),
     },
     {
       key: "method",
       header: "Method",
       secondary: true,
       cell: (payment) => (
-        <span className="text-ink-soft">
+        <span className="capitalize text-ink-soft">
           {payment.method.replace(/_/g, " ").toLowerCase()}
         </span>
       ),
@@ -98,6 +126,8 @@ export function paymentColumns(
     {
       key: "status",
       header: "Status",
+      trail: true,
+      width: "1%",
       cell: (payment) => <StatusBadge status={payment.status} />,
     },
   );
@@ -108,12 +138,16 @@ export function paymentColumns(
   if (can("payment.approve")) {
     columns.push({
       key: "handled",
-      header: "Recorded / approved",
+      header: "Recorded / decided",
       secondary: true,
       cell: (payment) => (
-        <div className="tabular text-xs text-ink-faint">
-          <p>{payment.created_by_public_id ?? "—"}</p>
-          <p>{payment.approved_by_public_id ?? payment.rejected_by_public_id ?? "—"}</p>
+        <div className="tabular text-xs">
+          <p className="text-ink-soft">{payment.created_by_public_id ?? "—"}</p>
+          <p className="text-ink-faint">
+            {payment.approved_by_public_id ??
+              payment.rejected_by_public_id ??
+              "—"}
+          </p>
         </div>
       ),
     });

@@ -1,5 +1,6 @@
-import Link from "next/link";
-
+import { LinkButton } from "@/components/ui/Button";
+import { ErrorState } from "@/components/ui/EmptyState";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { Pagination } from "@/components/ui/Pagination";
 import { Toolbar } from "@/components/ui/Toolbar";
 import { PAGE_SIZE, fetchPage, pageFrom, type SearchParams } from "@/lib/list";
@@ -26,11 +27,7 @@ export default async function UsersPage({
   ]);
 
   if (!page) {
-    return (
-      <p className="text-sm text-ink-soft">
-        People could not be loaded. Try refreshing.
-      </p>
-    );
+    return <ErrorState title="People could not be loaded" />;
   }
 
   const roles = manageableRoles((permission) => can(session, permission));
@@ -38,30 +35,26 @@ export default async function UsersPage({
 
   // A student holds user.view scoped to themselves, so this page is their own
   // record and a "filter by role" box would be furniture.
-  const seesOthers = can(session, "user.create") || can(session, "user.deactivate");
+  const seesOthers =
+    can(session, "user.create") || can(session, "user.deactivate");
 
   return (
-    <div className="flex flex-col gap-5">
-      <header className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-xl font-semibold tracking-tight text-ink">
-            {seesOthers ? "People" : "Your account"}
-          </h1>
-          <p className="mt-1 text-sm text-ink-soft">
-            {seesOthers
-              ? "Accounts are deactivated, never deleted — enrolments, payments and marks have to stay attributable to someone."
-              : "The details we hold for you. Ask reception to correct anything that is wrong."}
-          </p>
-        </div>
-        {mayCreate ? (
-          <Link
-            href="/users/new"
-            className="rounded border border-accent bg-accent px-3 py-1.5 text-sm font-medium text-accent-ink hover:opacity-90"
-          >
-            New person
-          </Link>
-        ) : null}
-      </header>
+    <div className="flex flex-col gap-6">
+      <PageHeader
+        title={seesOthers ? "People" : "Your account"}
+        lede={
+          seesOthers
+            ? "Accounts are deactivated, never deleted — enrolments, payments and marks have to stay attributable to someone."
+            : "The details we hold for you. Ask reception to correct anything that is wrong."
+        }
+        actions={
+          mayCreate ? (
+            <LinkButton href="/users/new" variant="primary" icon="user-plus">
+              New person
+            </LinkButton>
+          ) : null
+        }
+      />
 
       {seesOthers ? (
         <Toolbar
@@ -97,6 +90,8 @@ export default async function UsersPage({
         count={page.count}
         page={pageFrom(params)}
         pageSize={PAGE_SIZE}
+        unit="person"
+        plural="people"
       />
     </div>
   );

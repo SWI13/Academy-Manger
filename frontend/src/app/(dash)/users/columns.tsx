@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 
-import { StatusBadge } from "@/components/ui/Badge";
+import { PersonCell } from "@/components/ui/Avatar";
+import { Badge, StatusBadge } from "@/components/ui/Badge";
 import type { Column } from "@/components/ui/DataTable";
 import { formatDate } from "@/lib/format";
 import { ROLE_LABELS, type Permission, type RoleCode } from "@/lib/permissions";
@@ -24,15 +25,10 @@ export function userColumns(
     {
       key: "name",
       header: "Name",
+      lead: true,
       cell: (user) => (
-        <Link
-          href={`/users/${user.public_id}`}
-          className="text-accent hover:underline"
-        >
-          <span className="block font-medium">{user.full_name}</span>
-          <span className="tabular block text-xs text-ink-faint">
-            {user.public_id}
-          </span>
+        <Link href={`/users/${user.public_id}`} className="block min-w-0">
+          <PersonCell name={user.full_name} publicId={user.public_id} />
         </Link>
       ),
     },
@@ -42,18 +38,15 @@ export function userColumns(
       cell: (user) => {
         const extra = user.roles.filter((code) => code !== user.primary_role);
         return (
-          <div>
-            <p className="text-ink">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <Badge tone="neutral" size="sm">
               {ROLE_LABELS[user.primary_role as RoleCode] ?? user.primary_role}
-            </p>
-            {extra.length ? (
-              <p className="text-xs text-ink-faint">
-                also{" "}
-                {extra
-                  .map((code) => ROLE_LABELS[code as RoleCode] ?? code)
-                  .join(", ")}
-              </p>
-            ) : null}
+            </Badge>
+            {extra.map((code) => (
+              <Badge key={code} tone="info" size="sm">
+                {ROLE_LABELS[code as RoleCode] ?? code}
+              </Badge>
+            ))}
           </div>
         );
       },
@@ -65,7 +58,9 @@ export function userColumns(
       cell: (user) => (
         <div className="text-ink-soft">
           <p className="tabular">{user.phone || "—"}</p>
-          {user.email ? <p className="text-xs">{user.email}</p> : null}
+          {user.email ? (
+            <p className="truncate text-xs text-ink-faint">{user.email}</p>
+          ) : null}
         </div>
       ),
     },
@@ -80,7 +75,9 @@ export function userColumns(
       secondary: true,
       cell: (user) =>
         user.last_login ? (
-          formatDate(user.last_login)
+          <span className="tabular whitespace-nowrap text-ink-soft">
+            {formatDate(user.last_login)}
+          </span>
         ) : (
           <span className="text-ink-faint">never signed in</span>
         ),
@@ -90,6 +87,8 @@ export function userColumns(
   columns.push({
     key: "status",
     header: "Status",
+    trail: true,
+    width: "1%",
     cell: (user) => <StatusBadge status={user.status} />,
   });
 

@@ -75,3 +75,35 @@ export function formatNumber(value: number | null | undefined): string {
   if (value === null || value === undefined) return "—";
   return new Intl.NumberFormat("fr-DZ").format(value);
 }
+
+/**
+ * A typed amount, turned into the integer minor units the API takes.
+ *
+ * By string, never by `value * 100`. Binary floating point cannot hold 0.1,
+ * so `20000.10 * 100` is 2000009.9999999998 and the payment recorded is a
+ * centime short of the one that was handed over. Splitting on the separator
+ * and padding the fraction is exact for every amount a person can type.
+ *
+ * This is not arithmetic on money in the sense the architecture forbids -
+ * nothing here adds two amounts together or derives a balance. It converts
+ * one number a person typed into the unit the contract uses, at the edge,
+ * which is the same job `formatMoney` does in the other direction.
+ *
+ * Returns null when the text is not an amount, so the caller can say so
+ * rather than posting NaN.
+ */
+export function toMinorUnits(
+  input: string,
+  currency = "DZD",
+): number | null {
+  const text = input.trim().replace(/\s/g, "").replace(",", ".");
+  if (!/^\d+(\.\d*)?$/.test(text)) return null;
+
+  const exponent = MINOR_UNITS[currency] ?? 2;
+  const [whole, fraction = ""] = text.split(".");
+  if (fraction.length > exponent) return null;
+
+  const padded = fraction.padEnd(exponent, "0");
+  const minor = Number(`${whole}${padded}`);
+  return Number.isSafeInteger(minor) ? minor : null;
+}

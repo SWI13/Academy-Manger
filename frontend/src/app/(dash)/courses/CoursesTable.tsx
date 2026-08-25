@@ -15,7 +15,10 @@ export function CoursesTable({ rows }: { rows: Course[] }) {
       columns={courseColumns(can)}
       rows={rows}
       rowKey={(course) => course.public_id}
-      empty="No courses match these filters."
+      rowHref={(course) => `/courses/${course.public_id}`}
+      emptyIcon="book"
+      empty="No courses match these filters"
+      emptyDescription="Clear the filters to see the whole catalogue."
     />
   );
 }

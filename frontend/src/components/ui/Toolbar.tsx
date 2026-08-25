@@ -1,7 +1,9 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
+
+import { Icon } from "./Icon";
 
 /**
  * Filters that live in the URL.
@@ -10,6 +12,10 @@ import { useTransition } from "react";
  * to one student and one month needs to be able to send that view to someone
  * else, and to still have it after a refresh or a browser back. Filter state
  * kept in `useState` is state nobody can share.
+ *
+ * On a phone the controls collapse behind a button that carries the count of
+ * what is active, because five filter boxes above a list is five boxes
+ * between the reader and the list.
  */
 
 export type FilterSpec = {
@@ -31,6 +37,9 @@ export function Toolbar({
   const pathname = usePathname();
   const params = useSearchParams();
   const [pending, startTransition] = useTransition();
+  const [open, setOpen] = useState(false);
+
+  const activeCount = filters.filter((filter) => params.get(filter.param)).length;
 
   function apply(param: string, value: string) {
     const next = new URLSearchParams(params.toString());
@@ -39,63 +48,128 @@ export function Toolbar({
     // Any filter change resets paging: page 3 of the old result set is not
     // page 3 of the new one.
     next.delete("page");
-    startTransition(() => router.push(`${pathname}?${next.toString()}`));
+    const query = next.toString();
+    startTransition(() => router.push(query ? `${pathname}?${query}` : pathname));
   }
 
-  const active = filters.some((filter) => params.get(filter.param));
-
-  return (
-    <div
-      className="flex flex-wrap items-end gap-3"
-      aria-busy={pending || undefined}
-    >
+  const controls = (
+    <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
       {filters.map((filter) => (
-        <label key={filter.param} className="flex flex-col gap-1 text-sm">
-          <span className="text-xs font-medium uppercase tracking-wide text-ink-faint">
-            {filter.label}
-          </span>
+        <label key={filter.param} className="flex min-w-0 flex-col gap-1.5">
+          <span className="eyebrow">{filter.label}</span>
           {filter.options ? (
-            <select
-              value={params.get(filter.param) ?? ""}
-              onChange={(event) => apply(filter.param, event.target.value)}
-              className="rounded border border-rule-strong bg-surface px-2 py-1.5 text-sm text-ink"
-            >
-              <option value="">Any</option>
-              {filter.options.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+            <div className="relative flex items-center">
+              <select
+                value={params.get(filter.param) ?? ""}
+                onChange={(event) => apply(filter.param, event.target.value)}
+                className="h-9 w-full appearance-none rounded-md border border-rule-strong bg-surface pl-3 pr-9 text-sm text-ink shadow-xs transition-colors hover:border-ink-faint focus:border-accent sm:w-auto sm:min-w-36"
+              >
+                <option value="">Any</option>
+                {filter.options.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              <Icon
+                name="chevron-down"
+                size={15}
+                className="pointer-events-none absolute right-3 text-ink-faint"
+              />
+            </div>
           ) : (
-            <input
-              type={filter.param === "from" || filter.param === "to" ? "date" : "text"}
-              defaultValue={params.get(filter.param) ?? ""}
-              placeholder={filter.placeholder}
-              onBlur={(event) => apply(filter.param, event.target.value.trim())}
-              onKeyDown={(event) => {
-                if (event.key === "Enter") {
-                  event.preventDefault();
-                  apply(filter.param, event.currentTarget.value.trim());
+            <div className="relative flex items-center">
+              {filter.param === "from" || filter.param === "to" ? null : (
+                <Icon
+                  name="search"
+                  size={15}
+                  className="pointer-events-none absolute left-3 text-ink-faint"
+                />
+              )}
+              <input
+                type={
+                  filter.param === "from" || filter.param === "to"
+                    ? "date"
+                    : "search"
                 }
-              }}
-              className="rounded border border-rule-strong bg-surface px-2 py-1.5 text-sm text-ink placeholder:text-ink-faint"
-            />
+                defaultValue={params.get(filter.param) ?? ""}
+                placeholder={filter.placeholder}
+                aria-label={filter.label}
+                onBlur={(event) => apply(filter.param, event.target.value.trim())}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    event.preventDefault();
+                    apply(filter.param, event.currentTarget.value.trim());
+                  }
+                }}
+                className={`h-9 w-full rounded-md border border-rule-strong bg-surface pr-3 text-sm text-ink shadow-xs transition-colors placeholder:text-ink-faint hover:border-ink-faint focus:border-accent sm:w-52 ${
+                  filter.param === "from" || filter.param === "to"
+                    ? "pl-3"
+                    : "pl-9"
+                }`}
+              />
+            </div>
           )}
         </label>
       ))}
 
-      {active ? (
+      {activeCount ? (
         <button
           type="button"
           onClick={() => startTransition(() => router.push(pathname))}
-          className="rounded border border-transparent px-2 py-1.5 text-sm text-ink-soft hover:bg-sunk hover:text-ink"
+          className="inline-flex h-9 items-center gap-1.5 self-start rounded-md px-2.5 text-sm text-ink-soft transition-colors hover:bg-sunk hover:text-ink"
         >
+          <Icon name="close" size={14} />
           Clear
         </button>
       ) : null}
+    </div>
+  );
 
-      <div className="ml-auto flex items-end gap-2">{children}</div>
+  return (
+    <div
+      className="flex flex-col gap-3"
+      aria-busy={pending || undefined}
+      data-pending={pending || undefined}
+    >
+      <div className="flex items-center justify-between gap-3">
+        {/* The toggle, on small screens only. */}
+        <button
+          type="button"
+          onClick={() => setOpen((current) => !current)}
+          aria-expanded={open}
+          className="inline-flex h-9 items-center gap-2 rounded-md border border-rule-strong bg-surface px-3 text-sm font-medium text-ink shadow-xs transition-colors hover:bg-sunk sm:hidden"
+        >
+          <Icon name="filter" size={15} />
+          Filters
+          {activeCount ? (
+            <span className="tabular inline-flex size-5 items-center justify-center rounded-full bg-accent text-[11px] font-semibold text-accent-ink">
+              {activeCount}
+            </span>
+          ) : null}
+          <Icon
+            name="chevron-down"
+            size={14}
+            className={`text-ink-faint transition-transform ${open ? "rotate-180" : ""}`}
+          />
+        </button>
+
+        <div className="hidden flex-1 sm:block">{controls}</div>
+
+        {children ? (
+          <div className="flex shrink-0 items-center gap-2">{children}</div>
+        ) : null}
+      </div>
+
+      {open ? (
+        <div className="animate-rise sm:hidden">{controls}</div>
+      ) : null}
+
+      {pending ? (
+        <span className="sr-only" role="status">
+          Updating the list
+        </span>
+      ) : null}
     </div>
   );
 }

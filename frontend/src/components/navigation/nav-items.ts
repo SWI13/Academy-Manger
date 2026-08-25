@@ -1,3 +1,4 @@
+import type { IconName } from "@/components/ui/Icon";
 import type { Permission } from "@/lib/permissions";
 
 /**
@@ -16,58 +17,108 @@ import type { Permission } from "@/lib/permissions";
 export type NavItem = {
   href: string;
   label: string;
+  icon: IconName;
   /** Rendered only if the caller holds this. Undefined means everyone. */
   needs?: Permission;
-  group: "Work" | "People" | "Oversight";
+  group: NavGroup;
 };
 
+export type NavGroup = "Work" | "People" | "Oversight";
+
 export const NAV_ITEMS: NavItem[] = [
-  { href: "/dashboard", label: "Dashboard", group: "Work" },
-  { href: "/courses", label: "Courses", needs: "course.view", group: "Work" },
+  { href: "/dashboard", label: "Dashboard", icon: "gauge", group: "Work" },
+  {
+    href: "/courses",
+    label: "Courses",
+    icon: "book",
+    needs: "course.view",
+    group: "Work",
+  },
   {
     href: "/enrollments",
     label: "Enrolments",
+    icon: "graduation",
     needs: "enrollment.view",
     group: "Work",
   },
   {
     href: "/schedules",
     label: "Schedule",
+    icon: "calendar",
     needs: "schedule.view",
     group: "Work",
   },
-  { href: "/grades", label: "Grades", needs: "score.view", group: "Work" },
+  {
+    href: "/grades",
+    label: "Grades",
+    icon: "check-circle",
+    needs: "score.view",
+    group: "Work",
+  },
   {
     href: "/payments",
     label: "Payments",
+    icon: "wallet",
     needs: "payment.view",
     group: "Work",
   },
-  { href: "/users", label: "People", needs: "user.view", group: "People" },
-  { href: "/reviews", label: "Reviews", needs: "review.view", group: "People" },
+  {
+    href: "/users",
+    label: "People",
+    icon: "users",
+    needs: "user.view",
+    group: "People",
+  },
+  {
+    href: "/reviews",
+    label: "Reviews",
+    icon: "star",
+    needs: "review.view",
+    group: "People",
+  },
   {
     href: "/notifications",
     label: "Notifications",
+    icon: "bell",
     group: "People",
   },
   {
     href: "/reports",
     label: "Reports",
+    icon: "activity",
     needs: "report.view_operational",
     group: "Oversight",
   },
-  { href: "/audit", label: "Audit log", needs: "audit.view", group: "Oversight" },
   {
-    href: "/settings",
-    label: "Settings",
-    needs: "settings.manage",
+    href: "/audit",
+    label: "Audit log",
+    icon: "shield",
+    needs: "audit.view",
     group: "Oversight",
   },
 ];
 
-export const NAV_GROUPS = ["Work", "People", "Oversight"] as const;
+export const NAV_GROUPS: NavGroup[] = ["Work", "People", "Oversight"];
 
 export function visibleItems(permissions: readonly Permission[]): NavItem[] {
   const held = new Set<string>(permissions);
   return NAV_ITEMS.filter((item) => !item.needs || held.has(item.needs));
+}
+
+/**
+ * The item whose page is being shown, for the name in the top bar.
+ *
+ * Filtered by the caller's permissions for the same reason the sidebar is:
+ * naming a section somebody cannot reach tells them it exists, which is a
+ * small thing to leak and free not to.
+ */
+export function currentItem(
+  pathname: string,
+  permissions: readonly Permission[],
+): NavItem | undefined {
+  return visibleItems(permissions)
+    .filter(
+      (item) => pathname === item.href || pathname.startsWith(`${item.href}/`),
+    )
+    .sort((a, b) => b.href.length - a.href.length)[0];
 }

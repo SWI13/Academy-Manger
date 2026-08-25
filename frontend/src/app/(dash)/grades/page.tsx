@@ -1,10 +1,15 @@
 import Link from "next/link";
 
-import { Toolbar } from "@/components/ui/Toolbar";
+import { Badge } from "@/components/ui/Badge";
+import { SectionHeader } from "@/components/ui/Card";
+import { EmptyState, NoAccess } from "@/components/ui/EmptyState";
+import { Icon } from "@/components/ui/Icon";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { getJson } from "@/lib/django";
 import type { SearchParams } from "@/lib/list";
+import { formatNumber } from "@/lib/format";
 import { can, cookieHeader, getSession } from "@/lib/session";
-import type { Assessment, Gradebook, Score } from "@/types";
+import type { Assessment, Course, Gradebook, Score } from "@/types";
 
 import { GradebookTable } from "./GradebookTable";
 import { MyMarks } from "./MyMarks";
@@ -18,6 +23,10 @@ export const metadata = { title: "Grades · SM Academy" };
  * Those are different questions over the same rows, and the permission the
  * caller holds is what decides which one this page answers - not their role
  * name, and not two separate URLs to keep in step.
+ *
+ * The course is chosen from the ones the caller actually teaches rather than
+ * typed as an identifier. The list comes from the scoped courses endpoint, so
+ * the picker cannot offer a course whose gradebook would come back empty.
  */
 export default async function GradesPage({
   searchParams,
@@ -28,6 +37,11 @@ export default async function GradesPage({
   const cookie = await cookieHeader();
   const session = await getSession();
 
+  // Reception holds neither score permission. Without this the page would
+  // fall through to the student branch and render an empty mark list, which
+  // says "you have no marks" to somebody who was never going to have any.
+  if (!can(session, "score.view")) return <NoAccess what="Grades" />;
+
   if (!can(session, "score.enter")) {
     const marks = await getJson<Score[]>(
       "/api/v1/assessments/my-marks/",
@@ -36,9 +50,20 @@ export default async function GradesPage({
     return <MyMarks marks={marks ?? []} />;
   }
 
-  const course = (
+  const requested = (
     Array.isArray(params.course) ? params.course[0] : params.course
   )?.trim();
+
+  const courses = await getJson<{ results: Course[] }>(
+    "/api/v1/courses/?page_size=100",
+    cookie,
+  );
+  const teaching = courses?.results ?? [];
+
+  // One course and nothing chosen: open it rather than making somebody pick
+  // from a list of one.
+  const course =
+    requested ?? (teaching.length === 1 ? teaching[0].public_id : undefined);
 
   const [gradebook, assessments] = course
     ? await Promise.all([
@@ -51,61 +76,119 @@ export default async function GradesPage({
     : [null, null];
 
   return (
-    <div className="flex flex-col gap-5">
-      <header>
-        <h1 className="text-xl font-semibold tracking-tight text-ink">Grades</h1>
-        <p className="mt-1 text-sm text-ink-soft">
-          Averages are worked out from the raw marks every time they are asked
-          for, never stored. Change an assessment&rsquo;s weight and every
-          average moves with it.
-        </p>
-      </header>
-
-      <Toolbar
-        filters={[
-          { param: "course", label: "Course", placeholder: "C-2026-001" },
-        ]}
+    <div className="flex flex-col gap-6">
+      <PageHeader
+        title="Grades"
+        lede="Averages are worked out from the raw marks every time they are asked for, never stored. Change an assessment’s weight and every average moves with it."
       />
 
-      {!course ? (
-        <p className="rounded border border-rule bg-surface px-4 py-10 text-center text-sm text-ink-soft">
-          Enter a course ID to see its gradebook.
-        </p>
+      {/* --- which course ------------------------------------------- */}
+      {teaching.length > 1 ? (
+        <div className="scroll-slim -mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
+          {teaching.map((row) => {
+            const active = row.public_id === course;
+            return (
+              <Link
+                key={row.public_id}
+                href={`/grades?course=${row.public_id}`}
+                aria-current={active ? "page" : undefined}
+                className={`inline-flex shrink-0 items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-colors ${
+                  active
+                    ? "border-accent bg-accent-soft font-medium text-accent"
+                    : "border-rule bg-surface text-ink-soft shadow-xs hover:border-rule-strong hover:text-ink"
+                }`}
+              >
+                <Icon name="book" size={15} />
+                {row.title}
+                <span className="tabular text-xs text-ink-faint">
+                  {row.public_id}
+                </span>
+              </Link>
+            );
+          })}
+        </div>
+      ) : null}
+
+      {!teaching.length ? (
+        <EmptyState
+          icon="book"
+          title="No courses assigned to you"
+          description="A gradebook appears here once you are assigned to a course."
+        />
+      ) : !course ? (
+        <EmptyState
+          icon="check-circle"
+          title="Choose a course"
+          description="Pick one above to see its gradebook and mark sheets."
+        />
       ) : !gradebook ? (
-        <p className="rounded border border-rule bg-surface px-4 py-10 text-center text-sm text-ink-soft">
-          No course {course} that you teach.
-        </p>
+        <EmptyState
+          icon="alert"
+          title={`No course ${course} that you teach`}
+          description="The gradebook is scoped to the courses you are assigned to."
+        />
       ) : (
         <>
           <section>
-            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-ink-faint">
-              {gradebook.course_title}
-            </h2>
+            <SectionHeader
+              title={gradebook.course_title}
+              description={`${formatNumber(gradebook.students.length)} ${
+                gradebook.students.length === 1 ? "student" : "students"
+              } · weighted averages over published and unpublished marks alike`}
+            />
             <GradebookTable rows={gradebook.students} />
           </section>
 
           {assessments?.results.length ? (
             <section>
-              <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-ink-faint">
-                Mark sheets
-              </h2>
-              <ul className="flex flex-wrap gap-2">
+              <SectionHeader
+                title="Mark sheets"
+                description="Open one to enter or correct marks."
+              />
+              <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                 {assessments.results.map((assessment) => (
                   <li key={assessment.id}>
                     <Link
                       href={`/grades/${assessment.id}`}
-                      className="inline-flex items-center gap-2 rounded border border-rule-strong bg-surface px-3 py-1.5 text-sm text-ink hover:bg-sunk"
+                      className="group flex h-full items-start justify-between gap-3 rounded-xl border border-rule bg-surface p-4 shadow-xs transition-[border-color,box-shadow] hover:border-rule-strong hover:shadow-sm"
                     >
-                      {assessment.title}
-                      <span className="tabular text-xs text-ink-faint">
-                        {assessment.marked_count} marked
+                      <span className="min-w-0">
+                        <span className="block truncate font-medium text-ink transition-colors group-hover:text-accent">
+                          {assessment.title}
+                        </span>
+                        <span className="tabular mt-1 block text-xs text-ink-faint">
+                          {formatNumber(assessment.marked_count)} marked · out of{" "}
+                          {assessment.max_score}
+                        </span>
+                        <span className="mt-2.5 block">
+                          {assessment.is_published ? (
+                            <Badge tone="ok" size="sm" dot>
+                              Published
+                            </Badge>
+                          ) : (
+                            <Badge tone="warn" size="sm" dot>
+                              Not published
+                            </Badge>
+                          )}
+                        </span>
                       </span>
+                      <Icon
+                        name="chevron-right"
+                        size={16}
+                        className="mt-0.5 shrink-0 text-ink-faint transition-transform group-hover:translate-x-0.5"
+                      />
                     </Link>
                   </li>
                 ))}
               </ul>
             </section>
-          ) : null}
+          ) : (
+            <EmptyState
+              icon="check-circle"
+              title="No assessments on this course"
+              description="Marks are entered against an assessment, so one has to exist before the sheet does."
+            />
+          )}
         </>
       )}
     </div>

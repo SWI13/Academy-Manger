@@ -1,5 +1,7 @@
 import { redirect } from "next/navigation";
 
+import { ErrorState } from "@/components/ui/EmptyState";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { Toolbar } from "@/components/ui/Toolbar";
 import { getJson } from "@/lib/django";
 import type { SearchParams } from "@/lib/list";
@@ -59,18 +61,11 @@ export default async function AuditPage({
   );
 
   return (
-    <div className="flex flex-col gap-5">
-      <header>
-        <h1 className="text-xl font-semibold tracking-tight text-ink">
-          Audit log
-        </h1>
-        <p className="mt-1 text-sm text-ink-soft">
-          Append-only, enforced by the database rather than by convention —
-          there is no endpoint that edits or deletes a row at any version, and
-          the actions most worth recording here are exactly the ones someone
-          would want to erase.
-        </p>
-      </header>
+    <div className="flex flex-col gap-6">
+      <PageHeader
+        title="Audit log"
+        lede="Append-only, enforced by the database rather than by convention — there is no endpoint that edits or deletes a row at any version, and the actions most worth recording here are exactly the ones someone would want to erase."
+      />
 
       <Toolbar
         filters={[
@@ -94,9 +89,7 @@ export default async function AuditPage({
       />
 
       {!page ? (
-        <p className="text-sm text-ink-soft">
-          The log could not be read. Try refreshing.
-        </p>
+        <ErrorState title="The log could not be read" />
       ) : (
         <AuditFeed initial={page.results} initialNext={page.next} />
       )}

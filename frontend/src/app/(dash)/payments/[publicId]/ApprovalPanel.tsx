@@ -5,7 +5,12 @@ import { useState } from "react";
 
 import { useCan, useSession } from "@/components/SessionProvider";
 import { Button } from "@/components/ui/Button";
+import { Card, CardHeader } from "@/components/ui/Card";
+import { FormError, Note, TextArea } from "@/components/ui/Field";
+import { ConfirmDialog } from "@/components/ui/Modal";
+import { useToast } from "@/components/ui/Toast";
 import { ApiFailure, api } from "@/lib/api";
+import { formatMoney } from "@/lib/format";
 import type { Payment } from "@/types";
 
 type Action = "approve" | "reject" | "cancel";
@@ -18,15 +23,21 @@ type Action = "approve" | "reject" | "cancel";
  * says so instead of letting someone press a button that returns 409. A
  * separation-of-duty rule people discover by being refused is a rule they
  * learn to resent; one the screen explains is a rule they understand.
+ *
+ * All three outcomes are final, so all three go through a dialog. The
+ * dialog's job is not to slow anyone down - it is to put the amount and the
+ * name in front of them one more time, which is the check that actually
+ * catches a misclick.
  */
 export function ApprovalPanel({ payment }: { payment: Payment }) {
   const router = useRouter();
   const can = useCan();
   const session = useSession();
+  const toast = useToast();
 
   const [busy, setBusy] = useState<Action | null>(null);
-  const [reason, setReason] = useState("");
   const [prompting, setPrompting] = useState<Action | null>(null);
+  const [reason, setReason] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   if (payment.status !== "PENDING") {
@@ -43,6 +54,8 @@ export function ApprovalPanel({ payment }: { payment: Payment }) {
     return null;
   }
 
+  const amount = formatMoney(payment.amount_minor, payment.currency);
+
   async function run(action: Action) {
     setBusy(action);
     setError(null);
@@ -52,6 +65,19 @@ export function ApprovalPanel({ payment }: { payment: Payment }) {
       });
       setPrompting(null);
       setReason("");
+      toast({
+        tone: action === "approve" ? "ok" : "info",
+        title:
+          action === "approve"
+            ? "Payment approved"
+            : action === "reject"
+              ? "Payment rejected"
+              : "Entry cancelled",
+        description:
+          action === "approve"
+            ? `${amount} now counts against the balance.`
+            : `${payment.public_id} is closed. The record stays in the ledger.`,
+      });
       router.refresh();
     } catch (failure) {
       setError(
@@ -65,101 +91,154 @@ export function ApprovalPanel({ payment }: { payment: Payment }) {
   }
 
   return (
-    <section className="rounded border border-rule bg-surface p-4">
-      <h2 className="text-sm font-semibold uppercase tracking-wide text-ink-faint">
-        Decision
-      </h2>
+    <Card>
+      <CardHeader
+        title="Decision"
+        icon="check-circle"
+        description="Recorded by one person, confirmed by another."
+        divider
+        className="mb-4"
+      />
 
       {recordedByMe && mayApprove ? (
-        <p className="mt-3 rounded border border-info/25 bg-info-wash px-3 py-2 text-sm text-info">
+        <Note tone="info" icon="lock">
           You recorded this payment, so you cannot be the one who approves it.
           Someone else has to confirm the money arrived.
-        </p>
+        </Note>
       ) : null}
 
-      {prompting ? (
-        <div className="mt-3 flex flex-col gap-2">
-          <label className="text-sm font-medium text-ink" htmlFor="reason">
-            {prompting === "reject"
-              ? "Why is this being rejected?"
-              : "Why is this being cancelled? (optional)"}
-          </label>
-          <textarea
-            id="reason"
-            rows={3}
-            value={reason}
-            onChange={(event) => setReason(event.target.value)}
-            className="rounded border border-rule-strong bg-surface px-3 py-2 text-sm text-ink"
-            placeholder={
-              prompting === "reject"
-                ? "The person who was refused has to be able to be told why."
-                : "Recorded against the wrong enrolment."
+      <div className="mt-4 flex flex-wrap gap-2">
+        {mayApprove ? (
+          <Button
+            variant="primary"
+            icon="check"
+            busy={busy === "approve"}
+            disabled={recordedByMe}
+            title={
+              recordedByMe
+                ? "You recorded this payment. Someone else must approve it."
+                : undefined
             }
-          />
-          <div className="flex gap-2">
-            <Button
-              variant={prompting === "reject" ? "danger" : "secondary"}
-              busy={busy === prompting}
-              disabled={prompting === "reject" && !reason.trim()}
-              onClick={() => run(prompting)}
-            >
-              Confirm {prompting}
-            </Button>
-            <Button
-              variant="quiet"
-              onClick={() => {
-                setPrompting(null);
-                setReason("");
-                setError(null);
-              }}
-            >
-              Back
-            </Button>
-          </div>
-        </div>
-      ) : (
-        <div className="mt-3 flex flex-wrap gap-2">
-          {mayApprove ? (
-            <Button
-              variant="primary"
-              busy={busy === "approve"}
-              disabled={recordedByMe}
-              title={
-                recordedByMe
-                  ? "You recorded this payment. Someone else must approve it."
-                  : undefined
-              }
-              onClick={() => run("approve")}
-            >
-              Approve
-            </Button>
-          ) : null}
-          {mayReject ? (
-            <Button variant="danger" onClick={() => setPrompting("reject")}>
-              Reject
-            </Button>
-          ) : null}
-          {mayCancel ? (
-            <Button variant="secondary" onClick={() => setPrompting("cancel")}>
-              Cancel entry
-            </Button>
-          ) : null}
-        </div>
-      )}
+            onClick={() => setPrompting("approve")}
+          >
+            Approve payment
+          </Button>
+        ) : null}
+        {mayReject ? (
+          <Button
+            variant="danger"
+            icon="close"
+            onClick={() => setPrompting("reject")}
+          >
+            Reject
+          </Button>
+        ) : null}
+        {mayCancel ? (
+          <Button icon="minus" onClick={() => setPrompting("cancel")}>
+            Cancel entry
+          </Button>
+        ) : null}
+      </div>
 
-      {error ? (
-        <p
-          role="alert"
-          className="mt-3 rounded border border-bad/30 bg-bad-wash px-3 py-2 text-sm text-bad"
-        >
-          {error}
-        </p>
-      ) : null}
+      {error ? <div className="mt-4">{<FormError>{error}</FormError>}</div> : null}
 
-      <p className="mt-3 text-xs text-ink-faint">
+      <p className="mt-4 border-t border-rule pt-4 text-xs leading-relaxed text-ink-faint">
         All three outcomes are final. There is no un-approve: a correction
         after the fact is a new record, so the ledger keeps both.
       </p>
-    </section>
+
+      {/* --- approve --------------------------------------------------- */}
+      <ConfirmDialog
+        open={prompting === "approve"}
+        onClose={() => setPrompting(null)}
+        onConfirm={() => run("approve")}
+        busy={busy === "approve"}
+        tone="primary"
+        icon="check"
+        title="Approve this payment?"
+        confirmLabel="Approve payment"
+        description="This counts the money against the balance and cannot be undone."
+      >
+        <Summary payment={payment} amount={amount} />
+      </ConfirmDialog>
+
+      {/* --- reject: a reason is required ------------------------------ */}
+      <ConfirmDialog
+        open={prompting === "reject"}
+        onClose={() => {
+          setPrompting(null);
+          setReason("");
+        }}
+        onConfirm={() => run("reject")}
+        busy={busy === "reject"}
+        disabled={!reason.trim()}
+        tone="danger"
+        icon="close"
+        title="Reject this payment?"
+        confirmLabel="Reject payment"
+        description="The record stays in the ledger with the reason attached."
+      >
+        <Summary payment={payment} amount={amount} />
+        <div className="mt-4">
+          <TextArea
+            label="Why is this being rejected?"
+            required
+            rows={3}
+            value={reason}
+            onChange={(event) => setReason(event.target.value)}
+            placeholder="The person who was refused has to be able to be told why."
+            hint="Recorded against the payment and shown to whoever reads it."
+          />
+        </div>
+      </ConfirmDialog>
+
+      {/* --- cancel: reason optional ----------------------------------- */}
+      <ConfirmDialog
+        open={prompting === "cancel"}
+        onClose={() => {
+          setPrompting(null);
+          setReason("");
+        }}
+        onConfirm={() => run("cancel")}
+        busy={busy === "cancel"}
+        tone="danger"
+        icon="minus"
+        title="Cancel this entry?"
+        confirmLabel="Cancel entry"
+        description="For an entry that should not have been made. It stays in the ledger, closed."
+      >
+        <Summary payment={payment} amount={amount} />
+        <div className="mt-4">
+          <TextArea
+            label="Why is this being cancelled?"
+            optional
+            rows={2}
+            value={reason}
+            onChange={(event) => setReason(event.target.value)}
+            placeholder="Recorded against the wrong enrolment."
+          />
+        </div>
+      </ConfirmDialog>
+    </Card>
+  );
+}
+
+/** The amount and the name, once more, inside the dialog. */
+function Summary({ payment, amount }: { payment: Payment; amount: string }) {
+  return (
+    <dl className="rounded-lg border border-rule bg-sunk/60 p-3.5">
+      <div className="flex items-baseline justify-between gap-4">
+        <dt className="text-xs text-ink-faint">Amount</dt>
+        <dd className="tabular text-lg font-semibold text-ink">{amount}</dd>
+      </div>
+      <div className="mt-2 flex items-baseline justify-between gap-4">
+        <dt className="text-xs text-ink-faint">Student</dt>
+        <dd className="truncate text-sm text-ink">{payment.student_name}</dd>
+      </div>
+      <div className="mt-2 flex items-baseline justify-between gap-4">
+        <dt className="text-xs text-ink-faint">Reference</dt>
+        <dd className="tabular text-sm text-ink-soft">{payment.public_id}</dd>
+      </div>
+    </dl>
   );
 }

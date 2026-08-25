@@ -1,11 +1,13 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { StatusBadge } from "@/components/ui/Badge";
+import { LinkButton } from "@/components/ui/Button";
+import { Card, CardHeader } from "@/components/ui/Card";
 import { DescriptionList } from "@/components/ui/DescriptionList";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { getJson } from "@/lib/django";
 import { formatDate, formatMoney } from "@/lib/format";
-import { cookieHeader, getSession, can } from "@/lib/session";
+import { can, cookieHeader, getSession } from "@/lib/session";
 import type { Enrollment, Payment } from "@/types";
 
 import { BalanceCard, type Balance } from "./BalanceCard";
@@ -49,56 +51,88 @@ export default async function EnrollmentPage({ params }: Props) {
 
   return (
     <div className="flex flex-col gap-6">
-      <header className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <Link
-            href="/enrollments"
-            className="text-sm text-ink-soft hover:text-ink"
-          >
-            ← Enrolments
-          </Link>
-          <h1 className="mt-1 text-xl font-semibold tracking-tight text-ink">
-            {student.full_name}
-          </h1>
-          <p className="tabular mt-1 text-sm text-ink-soft">
+      <PageHeader
+        back={{ href: "/enrollments", label: "Enrolments" }}
+        title={student.full_name}
+        eyebrow={
+          <span className="tabular">
             {student.public_id} · {enrollment.course_title} (
             {enrollment.course_public_id})
-          </p>
-        </div>
-        <StatusBadge status={enrollment.status} />
-      </header>
+          </span>
+        }
+        badge={<StatusBadge status={enrollment.status} />}
+        actions={
+          <>
+            <LinkButton
+              href={`/courses/${enrollment.course_public_id}`}
+              icon="book"
+            >
+              Course
+            </LinkButton>
+            {can(session, "user.view") ? (
+              <LinkButton href={`/users/${student.public_id}`} icon="user">
+                Profile
+              </LinkButton>
+            ) : null}
+          </>
+        }
+      />
 
-      <section className="rounded border border-rule bg-surface p-4">
+      <Card>
+        <CardHeader
+          title="Enrolment"
+          description="One student, one course — and everything attached to that pairing."
+          icon="graduation"
+          divider
+          className="mb-5"
+        />
         <DescriptionList
           items={[
-            { label: "Enrolled", value: formatDate(enrollment.enrolled_at) },
+            {
+              label: "Enrolled",
+              value: (
+                <span className="tabular">{formatDate(enrollment.enrolled_at)}</span>
+              ),
+            },
             student.age !== null && student.age !== undefined
-              ? { label: "Age", value: student.age }
+              ? { label: "Age", value: String(student.age) }
               : null,
             student.wilaya ? { label: "Wilaya", value: student.wilaya } : null,
             student.prior_level
               ? { label: "Prior level", value: student.prior_level }
               : null,
-            student.phone ? { label: "Phone", value: student.phone } : null,
+            student.phone
+              ? { label: "Phone", value: <span className="tabular">{student.phone}</span> }
+              : null,
             showsMoney
               ? {
                   label: "Price agreed at enrolment",
-                  value: formatMoney(
-                    enrollment.price_at_enrollment_minor,
-                    enrollment.currency,
+                  value: (
+                    <span className="tabular font-medium">
+                      {formatMoney(
+                        enrollment.price_at_enrollment_minor,
+                        enrollment.currency,
+                      )}
+                    </span>
                   ),
                 }
               : null,
             enrollment.notes
-              ? { label: "Notes", value: enrollment.notes }
+              ? { label: "Notes", value: enrollment.notes, wide: true }
               : null,
           ]}
         />
-      </section>
+      </Card>
 
       {balance ? <BalanceCard balance={balance} /> : null}
 
-      {payments ? <EnrollmentPayments payments={payments.results} /> : null}
+      {payments ? (
+        <EnrollmentPayments
+          payments={payments.results}
+          enrollmentId={enrollment.id}
+          mayRecord={can(session, "payment.create")}
+        />
+      ) : null}
     </div>
   );
 }

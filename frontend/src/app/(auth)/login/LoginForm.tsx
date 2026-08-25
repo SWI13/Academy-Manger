@@ -1,14 +1,15 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/Button";
-import { Field } from "@/components/ui/Field";
+import { Field, FormError } from "@/components/ui/Field";
 import { ApiFailure, api } from "@/lib/api";
 
 export function LoginForm() {
   const router = useRouter();
+  const params = useSearchParams();
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -21,9 +22,20 @@ export function LoginForm() {
 
     try {
       await api.post("/auth/login/", { identifier, password });
+
+      // Back to whatever they were reaching for, if the proxy put it in the
+      // URL. Only a path from our own origin: `next=https://elsewhere` would
+      // be an open redirect, and a sign-in form is exactly where one gets
+      // used.
+      const wanted = params.get("next");
+      const target =
+        wanted && wanted.startsWith("/") && !wanted.startsWith("//")
+          ? wanted
+          : "/dashboard";
+
       // A full navigation, not a client-side push: the shell reads the
       // session on the server, and it must be read after the cookie exists.
-      router.replace("/dashboard");
+      router.replace(target);
       router.refresh();
     } catch (failure) {
       if (failure instanceof ApiFailure) {
@@ -44,7 +56,9 @@ export function LoginForm() {
         label="ID or phone number"
         name="identifier"
         autoComplete="username"
+        autoFocus
         required
+        icon="user"
         value={identifier}
         onChange={(event) => setIdentifier(event.target.value)}
         placeholder="STU-000042"
@@ -56,20 +70,22 @@ export function LoginForm() {
         type="password"
         autoComplete="current-password"
         required
+        icon="lock"
         value={password}
         onChange={(event) => setPassword(event.target.value)}
       />
 
-      {error ? (
-        <p
-          role="alert"
-          className="rounded border border-bad/30 bg-bad-wash px-3 py-2 text-sm text-bad"
-        >
-          {error}
-        </p>
-      ) : null}
+      {error ? <FormError>{error}</FormError> : null}
 
-      <Button type="submit" variant="primary" busy={busy} className="mt-1 py-2">
+      <Button
+        type="submit"
+        variant="primary"
+        size="lg"
+        block
+        busy={busy}
+        className="mt-1"
+        trailing={busy ? undefined : "arrow-right"}
+      >
         Sign in
       </Button>
     </form>

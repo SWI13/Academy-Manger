@@ -1,9 +1,13 @@
-import { Toolbar } from "@/components/ui/Toolbar";
+import { Card, SectionHeader } from "@/components/ui/Card";
+import { EmptyState, ErrorState, NoAccess } from "@/components/ui/EmptyState";
+import { Note } from "@/components/ui/Field";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { Pagination } from "@/components/ui/Pagination";
 import { Stars } from "@/components/ui/Stars";
+import { Toolbar } from "@/components/ui/Toolbar";
 import { getJson } from "@/lib/django";
 import { PAGE_SIZE, fetchPage, pageFrom, type SearchParams } from "@/lib/list";
 import { can, cookieHeader, getSession } from "@/lib/session";
-import { Pagination } from "@/components/ui/Pagination";
 import type { Enrollment, Review } from "@/types";
 
 import { ReviewCard } from "./ReviewCard";
@@ -35,12 +39,12 @@ export default async function ReviewsPage({
     getJson<Summary[]>("/api/v1/reviews/summary/", cookie),
   ]);
 
+  // Reception holds no review permission - the feedback channel is not part
+  // of the desk's work - so the list would come back 403.
+  if (!can(session, "review.view")) return <NoAccess what="Reviews" />;
+
   if (!page) {
-    return (
-      <p className="text-sm text-ink-soft">
-        Reviews could not be loaded. Try refreshing.
-      </p>
-    );
+    return <ErrorState title="Reviews could not be loaded" />;
   }
 
   const mayModerate = can(session, "review.moderate");
@@ -55,7 +59,9 @@ export default async function ReviewsPage({
         cookie,
       )
     : null;
-  const alreadyReviewed = new Set(page.results.map((review) => review.enrollment));
+  const alreadyReviewed = new Set(
+    page.results.map((review) => review.enrollment),
+  );
   const options = (reviewable?.results ?? []).filter(
     (row) => !alreadyReviewed.has(row.id),
   );
@@ -63,53 +69,55 @@ export default async function ReviewsPage({
 
   return (
     <div className="flex flex-col gap-6">
-      <header>
-        <h1 className="text-xl font-semibold tracking-tight text-ink">Reviews</h1>
-        <p className="mt-1 text-sm text-ink-soft">
-          {mayModerate
+      <PageHeader
+        title="Reviews"
+        lede={
+          mayModerate
             ? "Written by students who finished a course. Nothing is deleted — hiding or rejecting keeps the row, the decision and who made it."
-            : "What students said about the courses you can see. Approved reviews only."}
-        </p>
-      </header>
+            : "What students said about the courses you can see. Approved reviews only, and never with the author’s name attached for a professor."
+        }
+      />
 
       {mayWrite ? <WriteReview options={options} /> : null}
 
       {summary?.length ? (
         <section>
-          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-ink-faint">
-            By course
-          </h2>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <SectionHeader
+            title="By course"
+            description="Approved reviews only, worked out on read. A stored average could not be re-derived once a review is hidden."
+          />
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
             {summary.map((row) => (
-              <div
-                key={row.course_public_id}
-                className="rounded border border-rule bg-surface p-3"
-              >
-                <p className="text-sm font-medium text-ink">{row.course_title}</p>
-                <p className="tabular text-xs text-ink-faint">
+              <Card key={row.course_public_id} as="div">
+                <p className="truncate text-sm font-medium text-ink">
+                  {row.course_title}
+                </p>
+                <p className="tabular truncate text-xs text-ink-faint">
                   {row.course_public_id}
                 </p>
-                <div className="mt-2">
-                  {row.average_rating === null ? (
-                    <p className="text-sm text-ink-faint">No reviews yet</p>
-                  ) : (
-                    <>
-                      <Stars rating={Math.round(row.average_rating)} />
-                      <p className="tabular mt-1 text-xs text-ink-soft">
-                        {row.average_rating.toFixed(2)} average over{" "}
-                        {row.review_count}{" "}
-                        {row.review_count === 1 ? "review" : "reviews"}
-                      </p>
-                    </>
-                  )}
-                </div>
-              </div>
+
+                {row.average_rating === null ? (
+                  <p className="mt-3 text-sm text-ink-faint">No reviews yet</p>
+                ) : (
+                  <>
+                    <div className="mt-3 flex items-baseline gap-2.5">
+                      <span className="tabular text-2xl font-semibold text-ink">
+                        {row.average_rating.toFixed(2)}
+                      </span>
+                      <Stars
+                        rating={Math.round(row.average_rating)}
+                        showValue={false}
+                      />
+                    </div>
+                    <p className="mt-1 text-xs text-ink-faint">
+                      over {row.review_count}{" "}
+                      {row.review_count === 1 ? "review" : "reviews"}
+                    </p>
+                  </>
+                )}
+              </Card>
             ))}
           </div>
-          <p className="mt-2 text-xs text-ink-faint">
-            Approved reviews only, worked out on read. A stored average could
-            not be re-derived once a review is hidden.
-          </p>
         </section>
       ) : null}
 
@@ -140,10 +148,10 @@ export default async function ReviewsPage({
       ) : null}
 
       {mayModerate && pending.length ? (
-        <p className="rounded border border-warn/25 bg-warn-wash px-3 py-2 text-sm text-warn">
+        <Note tone="warn">
           {pending.length} on this page {pending.length === 1 ? "is" : "are"}{" "}
           waiting for a decision.
-        </p>
+        </Note>
       ) : null}
 
       <section className="flex flex-col gap-3">
@@ -152,9 +160,18 @@ export default async function ReviewsPage({
             <ReviewCard key={review.id} review={review} />
           ))
         ) : (
-          <p className="rounded border border-rule bg-surface px-4 py-10 text-center text-sm text-ink-soft">
-            Nothing here yet.
-          </p>
+          <EmptyState
+            icon="star"
+            title={
+              mayModerate ? "Nothing to moderate" : "No reviews here yet"
+            }
+            description={
+              mayModerate
+                ? "You are all caught up. New reviews arrive as students finish their courses."
+                : "A review appears once a student has finished a course and a moderator has approved what they wrote."
+            }
+            tone={mayModerate ? "ok" : "neutral"}
+          />
         )}
       </section>
 
@@ -162,6 +179,7 @@ export default async function ReviewsPage({
         count={page.count}
         page={pageFrom(params)}
         pageSize={PAGE_SIZE}
+        unit="review"
       />
     </div>
   );

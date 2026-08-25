@@ -15,7 +15,10 @@ export function UsersTable({ rows }: { rows: User[] }) {
       columns={userColumns(can)}
       rows={rows}
       rowKey={(user) => user.public_id}
-      empty="Nobody matches these filters."
+      rowHref={(user) => `/users/${user.public_id}`}
+      emptyIcon="users"
+      empty="Nobody matches these filters"
+      emptyDescription="Accounts you cannot reach are not listed at all — the search only covers the people your role can see."
     />
   );
 }

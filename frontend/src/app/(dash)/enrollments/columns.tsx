@@ -3,6 +3,7 @@
 import Link from "next/link";
 
 import { StatusBadge } from "@/components/ui/Badge";
+import { PersonCell } from "@/components/ui/Avatar";
 import type { Column } from "@/components/ui/DataTable";
 import { formatDate, formatMoney } from "@/lib/format";
 import type { Permission } from "@/lib/permissions";
@@ -22,30 +23,27 @@ export function enrollmentColumns(
     {
       key: "student",
       header: "Student",
+      lead: true,
       cell: (enrollment) => (
-        <Link
-          href={`/enrollments/${enrollment.id}`}
-          className="text-accent hover:underline"
-        >
-          <span className="block font-medium">
-            {enrollment.student.full_name}
-          </span>
-          <span className="tabular block text-xs text-ink-faint">
-            {enrollment.student.public_id}
-          </span>
-        </Link>
+        <PersonCell
+          name={enrollment.student.full_name}
+          publicId={enrollment.student.public_id}
+        />
       ),
     },
     {
       key: "course",
       header: "Course",
       cell: (enrollment) => (
-        <div>
-          <p className="text-ink">{enrollment.course_title}</p>
-          <p className="tabular text-xs text-ink-faint">
+        <Link
+          href={`/courses/${enrollment.course_public_id}`}
+          className="block min-w-0 hover:text-accent"
+        >
+          <span className="block truncate text-ink">{enrollment.course_title}</span>
+          <span className="tabular block truncate text-xs text-ink-faint">
             {enrollment.course_public_id}
-          </p>
-        </div>
+          </span>
+        </Link>
       ),
     },
   ];
@@ -66,13 +64,19 @@ export function enrollmentColumns(
         key: "level",
         header: "Level",
         secondary: true,
-        cell: (enrollment) => enrollment.student.prior_level || "—",
+        cell: (enrollment) => (
+          <span className="text-ink-soft">
+            {enrollment.student.prior_level || "—"}
+          </span>
+        ),
       },
       {
         key: "wilaya",
         header: "Wilaya",
         secondary: true,
-        cell: (enrollment) => enrollment.student.wilaya || "—",
+        cell: (enrollment) => (
+          <span className="text-ink-soft">{enrollment.student.wilaya || "—"}</span>
+        ),
       },
     );
   }
@@ -82,9 +86,14 @@ export function enrollmentColumns(
       key: "price",
       header: "Agreed price",
       numeric: true,
-      secondary: true,
-      cell: (enrollment) =>
-        formatMoney(enrollment.price_at_enrollment_minor, enrollment.currency),
+      cell: (enrollment) => (
+        <span className="font-medium text-ink">
+          {formatMoney(
+            enrollment.price_at_enrollment_minor,
+            enrollment.currency,
+          )}
+        </span>
+      ),
     });
   }
 
@@ -93,11 +102,17 @@ export function enrollmentColumns(
       key: "enrolled_at",
       header: "Enrolled",
       secondary: true,
-      cell: (enrollment) => formatDate(enrollment.enrolled_at),
+      cell: (enrollment) => (
+        <span className="tabular whitespace-nowrap text-ink-soft">
+          {formatDate(enrollment.enrolled_at)}
+        </span>
+      ),
     },
     {
       key: "status",
       header: "Status",
+      trail: true,
+      width: "1%",
       cell: (enrollment) => <StatusBadge status={enrollment.status} />,
     },
   );

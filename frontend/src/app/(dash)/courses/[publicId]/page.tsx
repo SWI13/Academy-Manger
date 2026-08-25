@@ -2,7 +2,14 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { Badge, StatusBadge } from "@/components/ui/Badge";
+import { LinkButton } from "@/components/ui/Button";
+import { Card, SectionHeader } from "@/components/ui/Card";
 import { DescriptionList } from "@/components/ui/DescriptionList";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { Icon } from "@/components/ui/Icon";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { Meter } from "@/components/ui/Stars";
+import { Figure } from "@/components/ui/StatTile";
 import { getJson } from "@/lib/django";
 import { formatDate, formatMoney, formatNumber } from "@/lib/format";
 import { can, cookieHeader, getSession } from "@/lib/session";
@@ -20,10 +27,7 @@ export default async function CoursePage({ params }: Props) {
   const { publicId } = await params;
   const cookie = await cookieHeader();
 
-  const course = await getJson<Course>(
-    `/api/v1/courses/${publicId}/`,
-    cookie,
-  );
+  const course = await getJson<Course>(`/api/v1/courses/${publicId}/`, cookie);
   if (!course) notFound();
 
   const session = await getSession();
@@ -50,154 +54,212 @@ export default async function CoursePage({ params }: Props) {
       : null,
   ]);
 
+  const professors = course.professors;
+
   return (
     <div className="flex flex-col gap-6">
-      <header className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <Link href="/courses" className="text-sm text-ink-soft hover:text-ink">
-            ← Courses
-          </Link>
-          <h1 className="mt-1 text-xl font-semibold tracking-tight text-ink">
-            {course.title}
-          </h1>
-          <p className="tabular mt-1 text-sm text-ink-soft">
-            {course.public_id}
-          </p>
-        </div>
-        <StatusBadge status={course.status} />
-      </header>
+      <PageHeader
+        back={{ href: "/courses", label: "Courses" }}
+        title={course.title}
+        eyebrow={
+          <span className="tabular">
+            {course.public_id} · {formatDate(course.start_date)} —{" "}
+            {formatDate(course.end_date)}
+          </span>
+        }
+        badge={<StatusBadge status={course.status} />}
+        actions={
+          <>
+            {can(session, "enrollment.view") ? (
+              <LinkButton
+                href={`/enrollments?course=${course.public_id}`}
+                icon="graduation"
+              >
+                {seesTheClass
+                  ? `Class list (${formatNumber(course.seats_taken)})`
+                  : "Your enrolment"}
+              </LinkButton>
+            ) : null}
+            {can(session, "score.view") ? (
+              <LinkButton
+                href={`/grades?course=${course.public_id}`}
+                icon="check-circle"
+              >
+                {seesTheClass ? "Gradebook" : "Your marks"}
+              </LinkButton>
+            ) : null}
+            {showsPrice ? (
+              <LinkButton
+                href={`/payments?course=${course.public_id}`}
+                icon="wallet"
+              >
+                Payments
+              </LinkButton>
+            ) : null}
+          </>
+        }
+      />
 
-      <section className="rounded border border-rule bg-surface p-4">
-        <DescriptionList
-          items={[
-            {
-              label: "Runs",
-              value: `${formatDate(course.start_date)} — ${formatDate(course.end_date)}`,
-            },
-            {
-              label: "Seats",
-              value: course.capacity
-                ? `${formatNumber(course.seats_taken)} of ${formatNumber(course.capacity)} taken`
-                : `${formatNumber(course.seats_taken)} enrolled, uncapped`,
-            },
-            showsPrice
-              ? {
-                  label: "Price",
-                  value: formatMoney(course.price_minor, course.currency),
-                }
-              : null,
-            {
-              label: "Taught by",
-              value: course.professors.length ? (
-                <ul>
-                  {course.professors.map((assignment) => (
-                    <li key={assignment.id}>
-                      {assignment.professor.full_name}{" "}
-                      <span className="tabular text-ink-faint">
-                        {assignment.professor.public_id}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <span className="text-ink-faint">Unassigned</span>
-              ),
-            },
-            course.description
-              ? { label: "About", value: course.description }
-              : null,
-          ]}
-        />
+      {/* --- the figures that describe the course itself --------------- */}
+      <div className="grid gap-4 lg:grid-cols-[1fr_20rem]">
+        <Card>
+          <DescriptionList
+            items={[
+              {
+                label: "Runs",
+                value: (
+                  <span className="tabular">
+                    {formatDate(course.start_date)} — {formatDate(course.end_date)}
+                  </span>
+                ),
+              },
+              {
+                label: "Taught by",
+                value: professors.length ? (
+                  <ul className="flex flex-col gap-1">
+                    {professors.map((assignment) => (
+                      <li key={assignment.id}>
+                        {assignment.professor.full_name}{" "}
+                        <span className="tabular text-ink-faint">
+                          {assignment.professor.public_id}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <span className="text-ink-faint">Unassigned</span>
+                ),
+              },
+              course.description
+                ? { label: "About", value: course.description, wide: true }
+                : null,
+            ]}
+          />
+        </Card>
 
-        {/*
-          Labels follow the permission, not the route. A student following
-          "Class list" reaches a page containing one row - their own - and a
-          link that promised a roster and delivered a mirror is a link that
-          teaches people the navigation lies to them.
-        */}
-        <div className="mt-4 flex flex-wrap gap-3 border-t border-rule pt-4 text-sm">
-          {can(session, "enrollment.view") ? (
-            <Link
-              href={`/enrollments?course=${course.public_id}`}
-              className="text-accent hover:underline"
-            >
-              {seesTheClass
-                ? `Class list (${formatNumber(course.seats_taken)})`
-                : "Your enrolment"}
-            </Link>
-          ) : null}
-          {can(session, "score.view") ? (
-            <Link
-              href={`/grades?course=${course.public_id}`}
-              className="text-accent hover:underline"
-            >
-              {seesTheClass ? "Gradebook" : "Your marks"}
-            </Link>
-          ) : null}
-          {can(session, "payment.view") ? (
-            <Link
-              href={`/payments?course=${course.public_id}`}
-              className="text-accent hover:underline"
-            >
-              Payments
-            </Link>
-          ) : null}
-        </div>
-      </section>
+        <Card className="flex flex-col gap-5">
+          <div>
+            <p className="eyebrow">Seats</p>
+            <p className="tabular mt-2 text-2xl font-semibold text-ink">
+              {formatNumber(course.seats_taken)}
+              {course.capacity ? (
+                <span className="text-base font-medium text-ink-faint">
+                  {" "}
+                  / {formatNumber(course.capacity)}
+                </span>
+              ) : null}
+            </p>
+            {course.capacity ? (
+              <>
+                <Meter
+                  value={course.seats_taken}
+                  max={course.capacity}
+                  tone={course.seats_taken >= course.capacity ? "warn" : "accent"}
+                  label={`${course.seats_taken} of ${course.capacity} seats taken`}
+                  className="mt-3"
+                />
+                <p className="mt-2 text-xs text-ink-faint">
+                  {course.seats_taken >= course.capacity
+                    ? "Full."
+                    : `${formatNumber(course.capacity - course.seats_taken)} left`}
+                </p>
+              </>
+            ) : (
+              <p className="mt-2 text-xs text-ink-faint">Uncapped</p>
+            )}
+          </div>
 
+          {showsPrice ? (
+            <div className="border-t border-rule pt-4">
+              <Figure
+                label="Price"
+                value={formatMoney(course.price_minor, course.currency)}
+                note="Frozen onto each enrolment as it is made"
+              />
+            </div>
+          ) : null}
+        </Card>
+      </div>
+
+      {/* --- the week ------------------------------------------------- */}
       {schedules ? (
         <section>
-          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-ink-faint">
-            Weekly schedule
-          </h2>
+          <SectionHeader
+            title="Weekly schedule"
+            description="A recurring pattern, not a diary of dated sessions."
+            action={
+              <Link
+                href={`/schedules?course=${course.public_id}`}
+                className="inline-flex items-center gap-1 text-sm font-medium text-accent hover:underline"
+              >
+                Full timetable
+                <Icon name="arrow-right" size={14} />
+              </Link>
+            }
+          />
           <WeekGrid slots={schedules.results} showCourse={false} />
         </section>
       ) : null}
 
+      {/* --- assessments ---------------------------------------------- */}
       {assessments ? (
         <section>
-          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-ink-faint">
-            Assessments
-          </h2>
+          <SectionHeader
+            title="Assessments"
+            description={
+              seesTheClass
+                ? "Each carries a weight, which is its share of the course average."
+                : "Only published assessments show a mark."
+            }
+          />
           {assessments.results.length ? (
             <ul className="flex flex-col gap-2">
               {assessments.results.map((assessment) => (
-                <li
-                  key={assessment.id}
-                  className="flex flex-wrap items-center justify-between gap-3 rounded border border-rule bg-surface px-3 py-2"
-                >
-                  <div>
-                    <Link
-                      href={`/grades/${assessment.id}`}
-                      className="font-medium text-accent hover:underline"
-                    >
-                      {assessment.title}
-                    </Link>
-                    <p className="tabular text-xs text-ink-faint">
-                      out of {assessment.max_score} · weight{" "}
-                      {assessment.weight} ·{" "}
-                      {assessment.held_on
-                        ? formatDate(assessment.held_on)
-                        : "no date"}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="tabular text-xs text-ink-faint">
-                      {formatNumber(assessment.marked_count)} marked
-                    </span>
-                    {assessment.is_published ? (
-                      <Badge tone="ok">Published</Badge>
-                    ) : (
-                      <Badge tone="warn">Not published</Badge>
-                    )}
-                  </div>
+                <li key={assessment.id}>
+                  <Link
+                    href={`/grades/${assessment.id}`}
+                    className="group flex flex-wrap items-center justify-between gap-3 rounded-xl border border-rule bg-surface px-4 py-3 shadow-xs transition-[border-color,box-shadow] hover:border-rule-strong hover:shadow-sm"
+                  >
+                    <div className="min-w-0">
+                      <p className="font-medium text-ink transition-colors group-hover:text-accent">
+                        {assessment.title}
+                      </p>
+                      <p className="tabular mt-0.5 text-xs text-ink-faint">
+                        out of {assessment.max_score} · weight {assessment.weight}
+                        {assessment.held_on
+                          ? ` · ${formatDate(assessment.held_on)}`
+                          : ""}
+                      </p>
+                    </div>
+                    <div className="flex shrink-0 items-center gap-2.5">
+                      <span className="tabular text-xs text-ink-faint">
+                        {formatNumber(assessment.marked_count)} marked
+                      </span>
+                      {assessment.is_published ? (
+                        <Badge tone="ok" dot>
+                          Published
+                        </Badge>
+                      ) : (
+                        <Badge tone="warn" dot>
+                          Not published
+                        </Badge>
+                      )}
+                      <Icon
+                        name="chevron-right"
+                        size={16}
+                        className="text-ink-faint transition-transform group-hover:translate-x-0.5"
+                      />
+                    </div>
+                  </Link>
                 </li>
               ))}
             </ul>
           ) : (
-            <p className="rounded border border-rule bg-surface px-4 py-8 text-center text-sm text-ink-soft">
-              No assessments yet.
-            </p>
+            <EmptyState
+              icon="check-circle"
+              title="No assessments yet"
+              description="Marks and averages appear here once an assessment exists on this course."
+            />
           )}
         </section>
       ) : null}

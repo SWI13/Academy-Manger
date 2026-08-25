@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { PageHeader } from "@/components/ui/PageHeader";
 import { getJson } from "@/lib/django";
 import { can, cookieHeader, getSession } from "@/lib/session";
 import type { Course, Enrollment, User } from "@/types";
@@ -39,18 +39,11 @@ export default async function NewEnrolmentPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <header>
-        <Link href="/enrollments" className="text-sm text-ink-soft hover:text-ink">
-          ← Enrolments
-        </Link>
-        <h1 className="mt-1 text-xl font-semibold tracking-tight text-ink">
-          Enrol a student
-        </h1>
-        <p className="mt-1 text-sm text-ink-soft">
-          One student, one course. Everything else — payments, marks, a review —
-          hangs off the enrolment this creates.
-        </p>
-      </header>
+      <PageHeader
+        back={{ href: "/enrollments", label: "Enrolments" }}
+        title="Enrol a student"
+        lede="One student, one course. Everything else — payments, marks, a review — hangs off the enrolment this creates."
+      />
 
       <EnrolForm
         students={students?.results ?? []}

@@ -4,6 +4,10 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/Button";
+import { Card, CardHeader } from "@/components/ui/Card";
+import { FormError, Select, TextArea } from "@/components/ui/Field";
+import { Icon } from "@/components/ui/Icon";
+import { useToast } from "@/components/ui/Toast";
 import { ApiFailure, api } from "@/lib/api";
 import type { Enrollment } from "@/types";
 
@@ -27,6 +31,7 @@ import type { Enrollment } from "@/types";
  */
 export function WriteReview({ options }: { options: Enrollment[] }) {
   const router = useRouter();
+  const toast = useToast();
   const [enrollment, setEnrollment] = useState("");
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
@@ -35,10 +40,13 @@ export function WriteReview({ options }: { options: Enrollment[] }) {
 
   if (!options.length) {
     return (
-      <p className="rounded border border-rule bg-surface px-3 py-2 text-sm text-ink-soft">
-        You can review a course once it is complete. Nothing of yours is
-        finished and unreviewed just now.
-      </p>
+      <Card>
+        <p className="flex items-start gap-2.5 text-sm leading-relaxed text-ink-soft">
+          <Icon name="star" size={16} className="mt-0.5 shrink-0 text-ink-faint" />
+          You can review a course once it is complete. Nothing of yours is
+          finished and unreviewed just now.
+        </p>
+      </Card>
     );
   }
 
@@ -54,6 +62,11 @@ export function WriteReview({ options }: { options: Enrollment[] }) {
       });
       setComment("");
       setEnrollment("");
+      toast({
+        tone: "ok",
+        title: "Review submitted",
+        description: "A moderator reads it before anyone else sees it.",
+      });
       // The server recomputes which enrolments are still reviewable, so the
       // one just used disappears from the list on its own.
       router.refresh();
@@ -69,75 +82,95 @@ export function WriteReview({ options }: { options: Enrollment[] }) {
   }
 
   return (
-    <form
-      onSubmit={submit}
-      className="flex flex-col gap-3 rounded border border-rule bg-surface p-4"
-    >
-      <h2 className="text-sm font-semibold uppercase tracking-wide text-ink-faint">
-        Review a course
-      </h2>
+    <Card as="div">
+      <form onSubmit={submit} className="flex flex-col gap-4">
+        <CardHeader
+          title="Review a course"
+          icon="star"
+          description="Your professor never learns who wrote it."
+          divider
+        />
 
-      <div className="grid gap-3 sm:grid-cols-2">
-        <label className="flex flex-col gap-1.5 text-sm">
-          <span className="font-medium text-ink">Course</span>
-          <select
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Select
+            label="Course"
             required
             value={enrollment}
             onChange={(event) => setEnrollment(event.target.value)}
-            className="rounded border border-rule-strong bg-surface px-3 py-2 text-sm text-ink"
+            placeholder="Choose one"
+            options={options.map((row) => ({
+              value: String(row.id),
+              label: `${row.course_title} (${row.course_public_id})`,
+            }))}
+          />
+
+          <div className="flex min-w-0 flex-col gap-1.5">
+            <span className="text-[13px] font-medium text-ink">Rating</span>
+            <div
+              role="radiogroup"
+              aria-label="Rating"
+              className="flex h-9 items-center gap-1"
+            >
+              {[1, 2, 3, 4, 5].map((star) => (
+                <button
+                  key={star}
+                  type="button"
+                  role="radio"
+                  aria-checked={rating === star}
+                  aria-label={`${star} out of 5`}
+                  onClick={() => setRating(star)}
+                  className="rounded p-0.5 transition-transform hover:scale-110"
+                >
+                  <svg
+                    width={24}
+                    height={24}
+                    viewBox="0 0 24 24"
+                    className={star <= rating ? "text-warn" : "text-rule-strong"}
+                    fill={star <= rating ? "currentColor" : "none"}
+                    stroke="currentColor"
+                    strokeWidth={1.75}
+                    strokeLinejoin="round"
+                  >
+                    <path d="m12 3 2.9 5.9 6.5.9-4.7 4.6 1.1 6.5-5.8-3-5.8 3 1.1-6.5L2.6 9.8l6.5-.9L12 3Z" />
+                  </svg>
+                </button>
+              ))}
+              <span className="tabular ml-1.5 text-sm text-ink-soft">
+                {rating}/5
+              </span>
+            </div>
+          </div>
+
+          <TextArea
+            label="Comment"
+            optional
+            rows={3}
+            maxLength={4000}
+            value={comment}
+            onChange={(event) => setComment(event.target.value)}
+            placeholder="What was good, what could be better."
+            wrapperClassName="sm:col-span-2"
+          />
+        </div>
+
+        {error ? <FormError>{error}</FormError> : null}
+
+        <div className="flex flex-wrap items-center gap-3">
+          <Button
+            type="submit"
+            variant="primary"
+            icon="check"
+            busy={busy}
+            disabled={!enrollment}
           >
-            <option value="">Choose one</option>
-            {options.map((row) => (
-              <option key={row.id} value={row.id}>
-                {row.course_title} ({row.course_public_id})
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <label className="flex flex-col gap-1.5 text-sm">
-          <span className="font-medium text-ink">Rating</span>
-          <select
-            value={rating}
-            onChange={(event) => setRating(Number(event.target.value))}
-            className="rounded border border-rule-strong bg-surface px-3 py-2 text-sm text-ink"
-          >
-            {[5, 4, 3, 2, 1].map((star) => (
-              <option key={star} value={star}>
-                {"★".repeat(star)} — {star}/5
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
-
-      <label className="flex flex-col gap-1.5 text-sm">
-        <span className="font-medium text-ink">Comment</span>
-        <textarea
-          rows={3}
-          maxLength={4000}
-          value={comment}
-          onChange={(event) => setComment(event.target.value)}
-          className="rounded border border-rule-strong bg-surface px-3 py-2 text-sm text-ink"
-          placeholder="What was good, what could be better."
-        />
-      </label>
-
-      {error ? (
-        <p role="alert" className="text-sm text-bad">
-          {error}
-        </p>
-      ) : null}
-
-      <div className="flex flex-wrap items-center gap-3">
-        <Button type="submit" variant="primary" busy={busy} disabled={!enrollment}>
-          Submit review
-        </Button>
-        <p className="text-xs text-ink-faint">
-          It is read by a moderator before anyone else sees it. You can change
-          it until then.
-        </p>
-      </div>
-    </form>
+            Submit review
+          </Button>
+          <p className="text-[13px] text-ink-faint">
+            It is read by a moderator before anyone else sees it. You can change
+            it until then.
+          </p>
+        </div>
+      </form>
+    </Card>
   );
 }

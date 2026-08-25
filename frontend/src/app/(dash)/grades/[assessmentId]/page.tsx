@@ -1,7 +1,9 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { DescriptionList } from "@/components/ui/DescriptionList";
+import { Badge } from "@/components/ui/Badge";
+import { Card } from "@/components/ui/Card";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { Figure } from "@/components/ui/StatTile";
 import { getJson } from "@/lib/django";
 import { formatDate } from "@/lib/format";
 import { cookieHeader } from "@/lib/session";
@@ -39,45 +41,56 @@ export default async function AssessmentPage({ params }: Props) {
 
   const rows = roster?.results ?? [];
   const marked = new Set((scores ?? []).map((score) => score.student_public_id));
-  const unmarked = rows.filter((row) => !marked.has(row.student.public_id)).length;
+  const unmarked = rows.filter(
+    (row) => !marked.has(row.student.public_id),
+  ).length;
 
   return (
     <div className="flex flex-col gap-6">
-      <header>
-        <Link
-          href={`/grades?course=${assessment.course_public_id}`}
-          className="text-sm text-ink-soft hover:text-ink"
-        >
-          ← {assessment.course_title}
-        </Link>
-        <h1 className="mt-1 text-xl font-semibold tracking-tight text-ink">
-          {assessment.title}
-        </h1>
-      </header>
+      <PageHeader
+        back={{
+          href: `/grades?course=${assessment.course_public_id}`,
+          label: assessment.course_title,
+        }}
+        title={assessment.title}
+        badge={
+          assessment.is_published ? (
+            <Badge tone="ok" dot>
+              Published
+            </Badge>
+          ) : (
+            <Badge tone="warn" dot>
+              Not published
+            </Badge>
+          )
+        }
+        eyebrow={
+          <span className="capitalize">
+            {(assessment.kind ?? "").toLowerCase() || "Assessment"}
+            {assessment.held_on ? ` · ${formatDate(assessment.held_on)}` : ""}
+          </span>
+        }
+      />
 
-      <section className="rounded border border-rule bg-surface p-4">
-        <DescriptionList
-          items={[
-            { label: "Type", value: (assessment.kind ?? "").toLowerCase() || "—" },
-            { label: "Out of", value: String(assessment.max_score) },
-            {
-              label: "Weight",
-              value: (
-                <>
-                  {assessment.weight}
-                  <span className="text-ink-faint">
-                    {" "}
-                    — its share of the course average
-                  </span>
-                </>
-              ),
-            },
-            assessment.held_on
-              ? { label: "Held on", value: formatDate(assessment.held_on) }
-              : null,
-          ]}
-        />
-      </section>
+      <Card>
+        <dl className="grid grid-cols-2 gap-x-6 gap-y-5 sm:grid-cols-4">
+          <Figure label="Out of" value={String(assessment.max_score)} />
+          <Figure
+            label="Weight"
+            value={String(assessment.weight)}
+            note="Its share of the course average"
+          />
+          <Figure
+            label="Marked"
+            value={`${rows.length - unmarked} / ${rows.length}`}
+            tone={unmarked ? "warn" : "ok"}
+          />
+          <Figure
+            label="Held on"
+            value={assessment.held_on ? formatDate(assessment.held_on) : "—"}
+          />
+        </dl>
+      </Card>
 
       <PublishPanel assessment={assessment} unmarked={unmarked} />
 

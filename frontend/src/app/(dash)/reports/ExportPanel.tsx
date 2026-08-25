@@ -4,6 +4,10 @@ import { useEffect, useRef, useState } from "react";
 
 import { Badge, StatusBadge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
+import { Card, CardHeader } from "@/components/ui/Card";
+import { FormError } from "@/components/ui/Field";
+import { Icon, Spinner } from "@/components/ui/Icon";
+import { useToast } from "@/components/ui/Toast";
 import { ApiFailure, api } from "@/lib/api";
 import { formatDateTime, formatNumber } from "@/lib/format";
 import type { ReportExport } from "@/types";
@@ -29,6 +33,7 @@ export function ExportPanel({
   report: string;
   filters: Record<string, string>;
 }) {
+  const toast = useToast();
   const [job, setJob] = useState<ReportExport | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -50,6 +55,13 @@ export function ExportPanel({
       try {
         const next = await api.get<ReportExport>(`/exports/${job.public_id}`);
         setJob(next);
+        if (next.status === "READY") {
+          toast({
+            tone: "ok",
+            title: "Export ready",
+            description: `${formatNumber(next.row_count)} rows.`,
+          });
+        }
       } catch {
         clearInterval(timer);
         setError("Lost track of the export. Reload to see its state.");
@@ -57,14 +69,16 @@ export function ExportPanel({
     }, POLL_MS);
 
     return () => clearInterval(timer);
-  }, [waiting, job]);
+  }, [waiting, job, toast]);
 
   async function queue() {
     setBusy(true);
     setError(null);
     polls.current = 0;
     try {
-      setJob(await api.post<ReportExport>(`/reports/${report}/export`, { filters }));
+      setJob(
+        await api.post<ReportExport>(`/reports/${report}/export`, { filters }),
+      );
     } catch (failure) {
       setError(
         failure instanceof ApiFailure
@@ -94,47 +108,76 @@ export function ExportPanel({
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-3">
-      <Button busy={busy} onClick={queue}>
-        {job ? "Export again" : "Export CSV"}
-      </Button>
+    <Card>
+      <CardHeader
+        title="Export"
+        icon="download"
+        description="A CSV of exactly the rows above, built in the background."
+        divider
+        className="mb-4"
+        action={
+          <Button
+            icon="download"
+            busy={busy}
+            onClick={queue}
+            disabled={waiting}
+          >
+            {job ? "Export again" : "Export CSV"}
+          </Button>
+        }
+      />
 
       {job ? (
-        <div className="flex flex-wrap items-center gap-2 text-sm">
+        <div className="flex flex-wrap items-center gap-3">
           <StatusBadge status={job.status} />
+
           {waiting ? (
-            <span className="text-ink-soft">Building the file…</span>
+            <span className="flex items-center gap-2 text-sm text-ink-soft">
+              <Spinner size={13} />
+              Building the file…
+            </span>
           ) : null}
+
           {job.status === "READY" ? (
             <>
-              <span className="tabular text-ink-soft">
+              <span className="tabular text-sm text-ink-soft">
                 {formatNumber(job.row_count)} rows ·{" "}
                 {formatDateTime(job.finished_at)}
               </span>
-              <Button variant="primary" onClick={download}>
+              <Button variant="primary" icon="download" onClick={download}>
                 Download
               </Button>
             </>
           ) : null}
+
           {job.status === "FAILED" ? (
-            <span className="text-bad">{job.error || "The export failed."}</span>
+            <span className="text-sm text-bad">
+              {job.error || "The export failed."}
+            </span>
           ) : null}
+        </div>
+      ) : (
+        <p className="text-[13px] text-ink-faint">
+          Nothing queued yet.
+        </p>
+      )}
+
+      {error ? (
+        <div className="mt-4">
+          <FormError>{error}</FormError>
         </div>
       ) : null}
 
-      {error ? (
-        <p role="alert" className="text-sm text-bad">
-          {error}
-        </p>
-      ) : null}
-
       {job?.status === "READY" ? (
-        <p className="basis-full text-xs text-ink-faint">
-          <Badge tone="info">Private</Badge> The file is yours alone — nobody
-          else can download it, the owner included. The link expires in
-          seconds, and who fetched it is recorded.
+        <p className="mt-4 flex flex-wrap items-center gap-2 border-t border-rule pt-4 text-xs leading-relaxed text-ink-faint">
+          <Badge tone="info" size="sm">
+            <Icon name="lock" size={11} />
+            Private
+          </Badge>
+          The file is yours alone — nobody else can download it, the owner
+          included. The link expires in seconds, and who fetched it is recorded.
         </p>
       ) : null}
-    </div>
+    </Card>
   );
 }

@@ -6,10 +6,17 @@ import { useState } from "react";
 import { useCan, useSession } from "@/components/SessionProvider";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
+import { Card, CardHeader } from "@/components/ui/Card";
+import { Field, FormError, Note } from "@/components/ui/Field";
+import { Icon } from "@/components/ui/Icon";
+import { ConfirmDialog } from "@/components/ui/Modal";
+import { useToast } from "@/components/ui/Toast";
 import { ApiFailure, api } from "@/lib/api";
 import { manageableRoles } from "@/lib/manageable";
 import { ROLE_LABELS, type RoleCode } from "@/lib/permissions";
 import type { User } from "@/types";
+
+type StatusCode = "ACTIVE" | "SUSPENDED" | "INACTIVE";
 
 /**
  * Roles, status and password reset, with the rules said out loud.
@@ -30,11 +37,14 @@ export function AccountPanel({ user }: { user: User }) {
   const router = useRouter();
   const can = useCan();
   const session = useSession();
+  const toast = useToast();
 
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [temporary, setTemporary] = useState<string | null>(null);
   const [reason, setReason] = useState("");
+  const [asking, setAsking] = useState<StatusCode | null>(null);
+  const [resetting, setResetting] = useState(false);
 
   const isSelf = user.public_id === session.public_id;
   const mayAssignRoles = can("user.assign_role");
@@ -42,11 +52,12 @@ export function AccountPanel({ user }: { user: User }) {
   const mayReset = can("user.reset_password");
   const grantable = manageableRoles(can);
 
-  async function call(label: string, run: () => Promise<unknown>) {
+  async function call(label: string, run: () => Promise<unknown>, done?: string) {
     setBusy(label);
     setError(null);
     try {
       await run();
+      if (done) toast({ tone: "ok", title: done });
       router.refresh();
     } catch (failure) {
       setError(
@@ -59,6 +70,24 @@ export function AccountPanel({ user }: { user: User }) {
     }
   }
 
+  async function changeStatus(status: StatusCode) {
+    await call(
+      status,
+      () =>
+        api.post(`/users/${user.public_id}/status`, {
+          status,
+          reason,
+        }),
+      status === "ACTIVE"
+        ? "Account reactivated"
+        : status === "SUSPENDED"
+          ? "Account suspended"
+          : "Account deactivated",
+    );
+    setAsking(null);
+    setReason("");
+  }
+
   async function resetPassword() {
     setBusy("reset");
     setError(null);
@@ -69,6 +98,7 @@ export function AccountPanel({ user }: { user: User }) {
         { public_id: user.public_id },
       );
       setTemporary(result.temporary_password);
+      setResetting(false);
       router.refresh();
     } catch (failure) {
       setError(
@@ -82,17 +112,24 @@ export function AccountPanel({ user }: { user: User }) {
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      {/* --- roles --- */}
-      <section className="rounded border border-rule bg-surface p-4">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-ink-faint">
-          Roles
-        </h2>
+    <div className="flex flex-col gap-5">
+      {/* --- roles ---------------------------------------------------- */}
+      <Card>
+        <CardHeader
+          title="Roles"
+          icon="shield"
+          description="A role is a set of permissions, not a label. The primary one decides which dashboard they land on."
+          divider
+          className="mb-4"
+        />
 
-        <div className="mt-3 flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2">
           {user.roles.length ? (
             user.roles.map((code) => (
-              <Badge key={code} tone={code === user.primary_role ? "info" : "neutral"}>
+              <Badge
+                key={code}
+                tone={code === user.primary_role ? "accent" : "neutral"}
+              >
                 {ROLE_LABELS[code as RoleCode] ?? code}
                 {code === user.primary_role ? " · primary" : ""}
               </Badge>
@@ -103,21 +140,28 @@ export function AccountPanel({ user }: { user: User }) {
         </div>
 
         {isSelf ? (
-          <p className="mt-3 border-t border-rule pt-3 text-sm text-ink-faint">
+          <p className="mt-4 border-t border-rule pt-4 text-[13px] leading-relaxed text-ink-faint">
             Nobody changes their own roles, the owner included. Self-escalation
             is exactly what that rule closes.
           </p>
         ) : mayAssignRoles ? (
-          <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-rule pt-3">
+          <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-rule pt-4">
             {grantable
               .filter((code) => !user.roles.includes(code))
               .map((code) => (
                 <Button
                   key={code}
+                  size="sm"
+                  icon="plus"
                   busy={busy === `grant-${code}`}
                   onClick={() =>
-                    call(`grant-${code}`, () =>
-                      api.post(`/users/${user.public_id}/roles`, { role: code }),
+                    call(
+                      `grant-${code}`,
+                      () =>
+                        api.post(`/users/${user.public_id}/roles`, {
+                          role: code,
+                        }),
+                      `${ROLE_LABELS[code]} granted`,
                     )
                   }
                 >
@@ -130,13 +174,18 @@ export function AccountPanel({ user }: { user: User }) {
                   .map((code) => (
                     <Button
                       key={`revoke-${code}`}
+                      size="sm"
                       variant="danger"
+                      icon="minus"
                       busy={busy === `revoke-${code}`}
                       onClick={() =>
-                        call(`revoke-${code}`, () =>
-                          api.delete(`/users/${user.public_id}/roles`, {
-                            role: code,
-                          }),
+                        call(
+                          `revoke-${code}`,
+                          () =>
+                            api.delete(`/users/${user.public_id}/roles`, {
+                              role: code,
+                            }),
+                          `${ROLE_LABELS[code as RoleCode] ?? code} revoked`,
                         )
                       }
                     >
@@ -146,142 +195,166 @@ export function AccountPanel({ user }: { user: User }) {
               : null}
           </div>
         ) : (
-          <p className="mt-3 border-t border-rule pt-3 text-sm text-ink-faint">
+          <p className="mt-4 border-t border-rule pt-4 text-[13px] leading-relaxed text-ink-faint">
             Only the owner grants and revokes roles — an administrator manages
             people but cannot hand out powers, including to themselves.
           </p>
         )}
-      </section>
+      </Card>
 
-      {/* --- status --- */}
-      <section className="rounded border border-rule bg-surface p-4">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-ink-faint">
-          Account status
-        </h2>
+      {/* --- status --------------------------------------------------- */}
+      <Card>
+        <CardHeader
+          title="Account status"
+          icon="lock"
+          description="Accounts are deactivated, never deleted — their enrolments, payments and marks stay attributable."
+          divider
+          className="mb-4"
+        />
 
         {isSelf ? (
-          <p className="mt-3 text-sm text-ink-faint">
+          <Note tone="neutral">
             This is your own account. Nobody changes their own status — a
             deactivate button here would be a way to lock yourself out of the
             system you administer.
-          </p>
+          </Note>
         ) : mayChangeStatus ? (
           <>
-            <input
-              type="text"
-              value={reason}
-              onChange={(event) => setReason(event.target.value)}
-              placeholder="Reason (recorded in the audit log)"
-              aria-label="Reason for the status change"
-              className="mt-3 w-full rounded border border-rule-strong bg-surface px-3 py-2 text-sm text-ink placeholder:text-ink-faint"
-            />
-            <div className="mt-3 flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2">
               {user.status !== "ACTIVE" ? (
                 <Button
                   variant="primary"
-                  busy={busy === "ACTIVE"}
-                  onClick={() =>
-                    call("ACTIVE", () =>
-                      api.post(`/users/${user.public_id}/status`, {
-                        status: "ACTIVE",
-                        reason,
-                      }),
-                    )
-                  }
+                  icon="check"
+                  onClick={() => setAsking("ACTIVE")}
                 >
                   Reactivate
                 </Button>
               ) : null}
               {user.status !== "SUSPENDED" ? (
-                <Button
-                  busy={busy === "SUSPENDED"}
-                  onClick={() =>
-                    call("SUSPENDED", () =>
-                      api.post(`/users/${user.public_id}/status`, {
-                        status: "SUSPENDED",
-                        reason,
-                      }),
-                    )
-                  }
-                >
+                <Button icon="clock" onClick={() => setAsking("SUSPENDED")}>
                   Suspend
                 </Button>
               ) : null}
               {user.status !== "INACTIVE" ? (
                 <Button
                   variant="danger"
-                  busy={busy === "INACTIVE"}
-                  onClick={() =>
-                    call("INACTIVE", () =>
-                      api.post(`/users/${user.public_id}/status`, {
-                        status: "INACTIVE",
-                        reason,
-                      }),
-                    )
-                  }
+                  icon="close"
+                  onClick={() => setAsking("INACTIVE")}
                 >
                   Deactivate
                 </Button>
               ) : null}
             </div>
-            <p className="mt-3 text-xs text-ink-faint">
+
+            <p className="mt-4 text-xs leading-relaxed text-ink-faint">
               Deactivating takes effect on their very next request — the session
               lives on the server, not in a token that has to expire.
             </p>
           </>
         ) : (
-          <p className="mt-3 text-sm text-ink-faint">
-            Your role cannot change this account&rsquo;s status.
-          </p>
+          <Note tone="neutral">
+            Your role cannot change this account’s status.
+          </Note>
         )}
-      </section>
+      </Card>
 
-      {/* --- password --- */}
+      {/* --- password ------------------------------------------------- */}
       {mayReset && !isSelf ? (
-        <section className="rounded border border-rule bg-surface p-4">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-ink-faint">
-            Password
-          </h2>
+        <Card>
+          <CardHeader title="Password" icon="key" divider className="mb-4" />
 
           {temporary ? (
-            <div className="mt-3 rounded border border-warn/30 bg-warn-wash p-3">
-              <p className="text-sm font-medium text-warn">
+            <div className="rounded-lg border border-warn-line bg-warn-wash p-3.5">
+              <p className="flex items-center gap-2 text-sm font-medium text-warn">
+                <Icon name="alert" size={16} />
                 Give this to them now. It is not shown again.
               </p>
-              <p className="tabular mt-2 select-all break-all font-mono text-base text-ink">
+              <p className="tabular mt-3 select-all break-all rounded-md border border-warn-line bg-surface px-3 py-2.5 font-mono text-base text-ink">
                 {temporary}
               </p>
-              <p className="mt-2 text-xs text-ink-soft">
+              <p className="mt-2.5 text-xs leading-relaxed text-ink-soft">
                 Their existing sessions are already invalid — a reset locks out
                 whoever was using the account, which is the point of a reset.
               </p>
             </div>
           ) : (
             <>
-              <p className="mt-2 text-sm text-ink-soft">
+              <p className="text-sm leading-relaxed text-ink-soft">
                 Issues a temporary password, shown once. Nobody can read their
                 old one — it was never stored in a readable form.
               </p>
               <Button
-                className="mt-3"
+                className="mt-4"
+                icon="key"
                 busy={busy === "reset"}
-                onClick={resetPassword}
+                onClick={() => setResetting(true)}
               >
                 Reset password
               </Button>
             </>
           )}
-        </section>
+        </Card>
       ) : null}
 
-      {error ? (
-        <p
-          role="alert"
-          className="rounded border border-bad/30 bg-bad-wash px-3 py-2 text-sm text-bad"
-        >
-          {error}
-        </p>
-      ) : null}
+      {error ? <FormError>{error}</FormError> : null}
+
+      {/* --- confirmations -------------------------------------------- */}
+      <ConfirmDialog
+        open={asking !== null}
+        onClose={() => {
+          setAsking(null);
+          setReason("");
+        }}
+        onConfirm={() => asking && changeStatus(asking)}
+        busy={busy === asking}
+        tone={asking === "ACTIVE" ? "primary" : "danger"}
+        icon={asking === "ACTIVE" ? "check" : "alert"}
+        title={
+          asking === "ACTIVE"
+            ? `Reactivate ${user.full_name}?`
+            : asking === "SUSPENDED"
+              ? `Suspend ${user.full_name}?`
+              : `Deactivate ${user.full_name}?`
+        }
+        confirmLabel={
+          asking === "ACTIVE"
+            ? "Reactivate"
+            : asking === "SUSPENDED"
+              ? "Suspend"
+              : "Deactivate"
+        }
+        description={
+          asking === "ACTIVE"
+            ? "They will be able to sign in again."
+            : "They are signed out on their next request and cannot sign back in. Their records stay exactly where they are."
+        }
+      >
+        <Field
+          label="Reason"
+          optional
+          value={reason}
+          onChange={(event) => setReason(event.target.value)}
+          placeholder="Left the institute at the end of the term."
+          hint="Recorded in the audit log beside who made the change."
+        />
+      </ConfirmDialog>
+
+      <ConfirmDialog
+        open={resetting}
+        onClose={() => setResetting(false)}
+        onConfirm={resetPassword}
+        busy={busy === "reset"}
+        tone="danger"
+        icon="key"
+        title="Reset this password?"
+        confirmLabel="Reset password"
+        description="Every session they have open stops working immediately, and the new password is shown to you once."
+      >
+        <Note tone="warn">
+          Only do this with them in front of you or on the phone. The temporary
+          password appears once and cannot be retrieved afterwards.
+        </Note>
+      </ConfirmDialog>
     </div>
   );
 }

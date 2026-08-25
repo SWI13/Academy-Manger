@@ -1,8 +1,11 @@
+import { ErrorState } from "@/components/ui/EmptyState";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { Toolbar } from "@/components/ui/Toolbar";
+import { formatNumber } from "@/lib/format";
 import { fetchPage, type SearchParams } from "@/lib/list";
 import type { Schedule } from "@/types";
 
-import { WeekGrid } from "./WeekGrid";
+import { WeekGrid, WeekList } from "./WeekGrid";
 
 export const metadata = { title: "Schedule · SM Academy" };
 
@@ -23,24 +26,15 @@ export default async function SchedulesPage({
   );
 
   if (!page) {
-    return (
-      <p className="text-sm text-ink-soft">
-        The schedule could not be loaded. Try refreshing.
-      </p>
-    );
+    return <ErrorState title="The schedule could not be loaded" />;
   }
 
   return (
-    <div className="flex flex-col gap-5">
-      <header>
-        <h1 className="text-xl font-semibold tracking-tight text-ink">
-          Schedule
-        </h1>
-        <p className="mt-1 text-sm text-ink-soft">
-          A recurring weekly pattern, not a diary of dated sessions. Each slot
-          runs every week between its effective dates.
-        </p>
-      </header>
+    <div className="flex flex-col gap-6">
+      <PageHeader
+        title="Schedule"
+        lede="A recurring weekly pattern, not a diary of dated sessions. Each slot runs every week between its effective dates."
+      />
 
       <Toolbar
         filters={[
@@ -61,10 +55,20 @@ export default async function SchedulesPage({
         ]}
       />
 
-      <WeekGrid slots={page.results} />
+      {/* The grid from md up, the same slots as a day-by-day list below. */}
+      <div className="hidden md:block">
+        <WeekGrid slots={page.results} />
+      </div>
+      <div className="md:hidden">
+        {page.results.length ? (
+          <WeekList slots={page.results} />
+        ) : (
+          <WeekGrid slots={page.results} />
+        )}
+      </div>
 
-      <p className="text-sm text-ink-faint">
-        {page.count} {page.count === 1 ? "slot" : "slots"}
+      <p className="text-[13px] text-ink-faint">
+        {formatNumber(page.count)} {page.count === 1 ? "slot" : "slots"}
       </p>
     </div>
   );

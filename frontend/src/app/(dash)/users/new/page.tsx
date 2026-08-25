@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { PageHeader } from "@/components/ui/PageHeader";
 import { can, getSession } from "@/lib/session";
 
 import { NewPersonForm } from "./NewPersonForm";
@@ -16,18 +16,11 @@ export default async function NewPersonPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <header>
-        <Link href="/users" className="text-sm text-ink-soft hover:text-ink">
-          ← People
-        </Link>
-        <h1 className="mt-1 text-xl font-semibold tracking-tight text-ink">
-          New person
-        </h1>
-        <p className="mt-1 text-sm text-ink-soft">
-          There is no public registration — every account is created here by
-          staff.
-        </p>
-      </header>
+      <PageHeader
+        back={{ href: "/users", label: "People" }}
+        title="New person"
+        lede="There is no public registration — every account is created here by staff, and the roles you can hand out are bounded by your own."
+      />
 
       <NewPersonForm />
     </div>

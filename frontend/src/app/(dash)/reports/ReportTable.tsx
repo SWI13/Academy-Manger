@@ -1,3 +1,4 @@
+import { EmptyState } from "@/components/ui/EmptyState";
 import { formatMoney, formatNumber } from "@/lib/format";
 
 /**
@@ -5,10 +6,10 @@ import { formatMoney, formatNumber } from "@/lib/format";
  *
  * The three reports have different columns, so the table is built from the
  * keys of the first row rather than from a hard-coded list. That is
- * deliberate: adding a column to a report should be a change in
- * `queries.py` and nothing else. A `*_minor` suffix is the signal to format
- * as money — the same convention the API uses to say "these are integer minor
- * units, not a decimal".
+ * deliberate: adding a column to a report should be a change in `queries.py`
+ * and nothing else. A `*_minor` suffix is the signal to format as money — the
+ * same convention the API uses to say "these are integer minor units, not a
+ * decimal".
  */
 function heading(key: string): string {
   const base = key.replace(/_minor$/, "").replace(/_public_id$/, " ID");
@@ -20,7 +21,7 @@ function render(key: string, value: unknown, currency: string) {
     return <span className="text-ink-faint">—</span>;
   }
   if (key.endsWith("_minor") && typeof value === "number") {
-    return formatMoney(value, currency);
+    return <span className="font-medium">{formatMoney(value, currency)}</span>;
   }
   if (typeof value === "number") return formatNumber(value);
   return String(value);
@@ -29,9 +30,11 @@ function render(key: string, value: unknown, currency: string) {
 export function ReportTable({ rows }: { rows: Record<string, unknown>[] }) {
   if (!rows.length) {
     return (
-      <p className="rounded border border-rule bg-surface px-4 py-10 text-center text-sm text-ink-soft">
-        Nothing matches these filters.
-      </p>
+      <EmptyState
+        icon="activity"
+        title="Nothing matches these filters"
+        description="Widen the date range, or clear the course, to see more rows."
+      />
     );
   }
 
@@ -41,15 +44,15 @@ export function ReportTable({ rows }: { rows: Record<string, unknown>[] }) {
   const keys = Object.keys(rows[0]).filter((key) => key !== "currency");
 
   return (
-    <div className="overflow-x-auto rounded border border-rule bg-surface">
-      <table className="w-full min-w-max border-collapse text-sm">
+    <div className="scroll-slim overflow-x-auto rounded-xl border border-rule bg-surface shadow-xs">
+      <table className="w-full border-collapse text-sm">
         <thead>
-          <tr className="border-b border-rule">
+          <tr className="border-b border-rule bg-sunk/60">
             {keys.map((key) => (
               <th
                 key={key}
                 scope="col"
-                className={`px-3 py-2 text-xs font-semibold uppercase tracking-wide text-ink-faint ${
+                className={`eyebrow whitespace-nowrap px-4 py-2.5 ${
                   typeof rows[0][key] === "number" ? "text-right" : "text-left"
                 }`}
               >
@@ -62,15 +65,15 @@ export function ReportTable({ rows }: { rows: Record<string, unknown>[] }) {
           {rows.map((row, index) => (
             <tr
               key={index}
-              className="border-b border-rule last:border-b-0 hover:bg-sunk/60"
+              className="border-b border-rule transition-colors last:border-b-0 hover:bg-sunk/60"
             >
               {keys.map((key) => (
                 <td
                   key={key}
-                  className={`px-3 py-2 ${
+                  className={`whitespace-nowrap px-4 py-3 ${
                     typeof row[key] === "number"
-                      ? "tabular text-right"
-                      : "text-left"
+                      ? "tabular text-right text-ink"
+                      : "text-left text-ink-soft"
                   }`}
                 >
                   {render(key, row[key], String(row.currency ?? "DZD"))}

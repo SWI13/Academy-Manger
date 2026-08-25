@@ -1,3 +1,7 @@
+import { LinkButton } from "@/components/ui/Button";
+import { ErrorState, NoAccess } from "@/components/ui/EmptyState";
+import { Note } from "@/components/ui/Field";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { Pagination } from "@/components/ui/Pagination";
 import { Toolbar } from "@/components/ui/Toolbar";
 import { PAGE_SIZE, fetchPage, pageFrom, type SearchParams } from "@/lib/list";
@@ -21,28 +25,39 @@ export default async function PaymentsPage({
     getSession(),
   ]);
 
+  // A professor holds no payment permission at all, so the list would come
+  // back 403 and read as a broken page. Said plainly instead.
+  if (!can(session, "payment.view")) return <NoAccess what="Payments" />;
+
+  if (!page) {
+    return <ErrorState title="Payments could not be loaded" />;
+  }
+
   // A student's ledger is already only their own, so a "Student" box that
   // can match nobody else is a control that only ever disappoints.
   const seesEveryone = can(session, "payment.create");
+  const mayApprove = can(session, "payment.approve");
 
-  if (!page) {
-    return (
-      <p className="text-sm text-ink-soft">
-        Payments could not be loaded. Try refreshing.
-      </p>
-    );
-  }
+  // Counted from this page's rows, and labelled as such. The total across
+  // every page is a figure the API would have to send; inventing it here from
+  // 25 rows would be a number that disagrees with the ledger.
+  const pendingHere = page.results.filter(
+    (payment) => payment.status === "PENDING",
+  ).length;
 
   return (
-    <div className="flex flex-col gap-5">
-      <header>
-        <h1 className="text-xl font-semibold tracking-tight text-ink">Payments</h1>
-        <p className="mt-1 text-sm text-ink-soft">
-          Every entry is recorded, then approved by someone else. Nothing here
-          is edited or deleted — a mistake before approval is cancelled, and one
-          after it is corrected with a new record.
-        </p>
-      </header>
+    <div className="flex flex-col gap-6">
+      <PageHeader
+        title={seesEveryone ? "Payments" : "Your payments"}
+        lede="Every entry is recorded, then approved by someone else. Nothing here is edited or deleted — a mistake before approval is cancelled, and one after it is corrected with a new record."
+        actions={
+          can(session, "payment.create") ? (
+            <LinkButton href="/payments/new" variant="primary" icon="plus">
+              Record a payment
+            </LinkButton>
+          ) : null
+        }
+      />
 
       <Toolbar
         filters={[
@@ -65,12 +80,21 @@ export default async function PaymentsPage({
         ]}
       />
 
+      {mayApprove && pendingHere ? (
+        <Note tone="warn">
+          {pendingHere} {pendingHere === 1 ? "payment" : "payments"} on this page{" "}
+          {pendingHere === 1 ? "is" : "are"} waiting for a decision. You cannot
+          approve one you recorded yourself.
+        </Note>
+      ) : null}
+
       <PaymentsTable rows={page.results} />
 
       <Pagination
         count={page.count}
         page={pageFrom(params)}
         pageSize={PAGE_SIZE}
+        unit="payment"
       />
     </div>
   );

@@ -1,59 +1,141 @@
 @import "tailwindcss";
 
 /*
- * Tokens, not colours, at the call site.
+ * The design system, as tokens.
  *
- * Every surface, rule and text colour is named for its job rather than its
- * hue, so the dark palette is a redefinition of eight variables instead of a
- * sweep through every component. Statuses get their own pair (text + wash)
- * because a payment badge and an enrolment badge must not drift apart.
+ * Every surface, rule, text colour, radius, shadow and duration is named for
+ * its job rather than its value, so the dark palette is a redefinition of a
+ * variable list instead of a sweep through every component, and "how round is
+ * a card" is one decision rather than forty.
+ *
+ * Statuses get their own trio (text + wash + line) because a payment badge
+ * and an enrolment badge must not drift apart.
+ *
+ * The navigation has its own scale and keeps it in both themes. A deep navy
+ * rail beside a light workspace is the one piece of chrome that says which
+ * product this is, and chrome that inverts with the theme says nothing.
  */
 
 :root {
-  --paper: #fbfaf7;
+  color-scheme: light;
+
+  /* --- surfaces ------------------------------------------------------ */
+  --paper: #f6f7f9;
   --surface: #ffffff;
-  --surface-sunk: #f4f2ee;
-  --ink: #1a1a18;
-  --ink-soft: #5d5b55;
-  --ink-faint: #8a8780;
-  --rule: #e3e0d8;
-  --rule-strong: #c9c5ba;
-  --accent: #1f5c4f;
-  --accent-soft: #e6efec;
+  --surface-sunk: #f2f4f7;
+  --surface-raised: #ffffff;
+
+  /* --- text ---------------------------------------------------------- */
+  --ink: #101828;
+  --ink-soft: #475467;
+  --ink-faint: #8894a8;
+
+  /* --- lines --------------------------------------------------------- */
+  --rule: #e7eaee;
+  --rule-strong: #cfd5df;
+
+  /* --- brand --------------------------------------------------------- */
+  --accent: #3a4ed8;
+  --accent-hover: #3141bc;
+  --accent-soft: #eef0fe;
+  --accent-line: #c7cdfa;
   --accent-ink: #ffffff;
 
-  --ok: #1f6b45;
-  --ok-wash: #e5f2ea;
-  --warn: #8a5a12;
-  --warn-wash: #fbf0dc;
-  --bad: #9b2c2c;
-  --bad-wash: #fbe9e9;
-  --info: #1e4e7a;
-  --info-wash: #e5eef6;
+  /* --- the navigation rail, theme-independent ------------------------ */
+  --nav: #0d1224;
+  --nav-raised: #161c34;
+  --nav-ink: #eef1f8;
+  --nav-ink-soft: #98a2bd;
+  --nav-ink-faint: #6b7699;
+  --nav-rule: #242b45;
+  --nav-active: #232b4a;
+  --nav-accent: #8b9bff;
+
+  /* --- meaning ------------------------------------------------------- */
+  --ok: #067647;
+  --ok-wash: #ecfdf3;
+  --ok-line: #a9efc5;
+  --warn: #b54708;
+  --warn-wash: #fffaeb;
+  --warn-line: #fedf89;
+  --bad: #b42318;
+  --bad-wash: #fef3f2;
+  --bad-line: #fecdc9;
+  --info: #175cd3;
+  --info-wash: #eff8ff;
+  --info-line: #b2ddff;
+
+  /* --- shape --------------------------------------------------------- */
+  --r-xs: 4px;
+  --r-sm: 6px;
+  --r-md: 8px;
+  --r-lg: 12px;
+  --r-xl: 16px;
+  --r-2xl: 20px;
+
+  /* --- depth: five steps, each barely there -------------------------- */
+  --shade-xs: 0 1px 2px 0 rgb(16 24 40 / 0.04);
+  --shade-sm: 0 1px 3px 0 rgb(16 24 40 / 0.07), 0 1px 2px -1px rgb(16 24 40 / 0.04);
+  --shade-md: 0 4px 8px -2px rgb(16 24 40 / 0.08), 0 2px 4px -2px rgb(16 24 40 / 0.04);
+  --shade-lg: 0 12px 16px -4px rgb(16 24 40 / 0.08), 0 4px 6px -2px rgb(16 24 40 / 0.03);
+  --shade-xl: 0 20px 24px -4px rgb(16 24 40 / 0.1), 0 8px 8px -4px rgb(16 24 40 / 0.04);
+
+  /* --- motion: fast enough to feel like the interface, not a film ---- */
+  --dur-fast: 110ms;
+  --dur: 170ms;
+  --dur-slow: 260ms;
+  --ease: cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --paper: #14140f;
-    --surface: #1c1c17;
-    --surface-sunk: #232320;
-    --ink: #f0eee8;
-    --ink-soft: #b3afa5;
-    --ink-faint: #85817a;
-    --rule: #33322c;
-    --rule-strong: #4a4842;
-    --accent: #5fb39c;
-    --accent-soft: #1d2f2b;
-    --accent-ink: #10231e;
+    color-scheme: dark;
 
-    --ok: #6fc294;
-    --ok-wash: #16281f;
-    --warn: #d8a45a;
-    --warn-wash: #2a2116;
-    --bad: #e08585;
-    --bad-wash: #2b1a1a;
-    --info: #7ab0dd;
-    --info-wash: #16232e;
+    --paper: #0b0d14;
+    --surface: #13161f;
+    --surface-sunk: #1a1e29;
+    --surface-raised: #191d28;
+
+    --ink: #edeff4;
+    --ink-soft: #a3adc0;
+    --ink-faint: #77819a;
+
+    --rule: #232734;
+    --rule-strong: #343a4b;
+
+    --accent: #8b9bff;
+    --accent-hover: #a3b0ff;
+    --accent-soft: #1a1f3d;
+    --accent-line: #2f3767;
+    --accent-ink: #0b0d14;
+
+    --nav: #080a11;
+    --nav-raised: #12161f;
+    --nav-ink: #edeff4;
+    --nav-ink-soft: #8b95ad;
+    --nav-ink-faint: #626c85;
+    --nav-rule: #1c2130;
+    --nav-active: #1b2033;
+    --nav-accent: #8b9bff;
+
+    --ok: #75e0a7;
+    --ok-wash: #0a2c1c;
+    --ok-line: #124f31;
+    --warn: #fec84b;
+    --warn-wash: #35240a;
+    --warn-line: #593d10;
+    --bad: #fda29b;
+    --bad-wash: #3a1614;
+    --bad-line: #63241f;
+    --info: #84caff;
+    --info-wash: #0d2544;
+    --info-line: #17427a;
+
+    --shade-xs: 0 1px 2px 0 rgb(0 0 0 / 0.32);
+    --shade-sm: 0 1px 3px 0 rgb(0 0 0 / 0.4), 0 1px 2px -1px rgb(0 0 0 / 0.3);
+    --shade-md: 0 4px 8px -2px rgb(0 0 0 / 0.44), 0 2px 4px -2px rgb(0 0 0 / 0.3);
+    --shade-lg: 0 12px 16px -4px rgb(0 0 0 / 0.5), 0 4px 6px -2px rgb(0 0 0 / 0.3);
+    --shade-xl: 0 20px 24px -4px rgb(0 0 0 / 0.56), 0 8px 8px -4px rgb(0 0 0 / 0.32);
   }
 }
 
@@ -61,23 +143,53 @@
   --color-paper: var(--paper);
   --color-surface: var(--surface);
   --color-sunk: var(--surface-sunk);
+  --color-raised: var(--surface-raised);
   --color-ink: var(--ink);
   --color-ink-soft: var(--ink-soft);
   --color-ink-faint: var(--ink-faint);
   --color-rule: var(--rule);
   --color-rule-strong: var(--rule-strong);
+
   --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
   --color-accent-soft: var(--accent-soft);
+  --color-accent-line: var(--accent-line);
   --color-accent-ink: var(--accent-ink);
+
+  --color-nav: var(--nav);
+  --color-nav-raised: var(--nav-raised);
+  --color-nav-ink: var(--nav-ink);
+  --color-nav-ink-soft: var(--nav-ink-soft);
+  --color-nav-ink-faint: var(--nav-ink-faint);
+  --color-nav-rule: var(--nav-rule);
+  --color-nav-active: var(--nav-active);
+  --color-nav-accent: var(--nav-accent);
 
   --color-ok: var(--ok);
   --color-ok-wash: var(--ok-wash);
+  --color-ok-line: var(--ok-line);
   --color-warn: var(--warn);
   --color-warn-wash: var(--warn-wash);
+  --color-warn-line: var(--warn-line);
   --color-bad: var(--bad);
   --color-bad-wash: var(--bad-wash);
+  --color-bad-line: var(--bad-line);
   --color-info: var(--info);
   --color-info-wash: var(--info-wash);
+  --color-info-line: var(--info-line);
+
+  --radius-xs: var(--r-xs);
+  --radius-sm: var(--r-sm);
+  --radius-md: var(--r-md);
+  --radius-lg: var(--r-lg);
+  --radius-xl: var(--r-xl);
+  --radius-2xl: var(--r-2xl);
+
+  --shadow-xs: var(--shade-xs);
+  --shadow-sm: var(--shade-sm);
+  --shadow-md: var(--shade-md);
+  --shadow-lg: var(--shade-lg);
+  --shadow-xl: var(--shade-xl);
 
   --font-sans: var(--font-body);
   --font-mono: var(--font-mono-face);
@@ -86,14 +198,183 @@
 body {
   background: var(--paper);
   color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Inter leaves headings a touch loose at display sizes. Set once, here,
+   rather than as a tracking utility on every title in the application. */
+h1,
+h2,
+h3 {
+  letter-spacing: -0.014em;
 }
 
 /* Identifiers, amounts and anything meant to be compared down a column. */
 .tabular {
   font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+/* The small capitalised label above a group of tiles or a description list. */
+.eyebrow {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.055em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
 }
 
 *:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
+  border-radius: var(--r-xs);
+}
+
+::selection {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+/* Thin, and only over long lists - a scrollbar is furniture. */
+.scroll-slim::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+.scroll-slim::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scroll-slim::-webkit-scrollbar-thumb {
+  background: var(--rule-strong);
+  border: 3px solid transparent;
+  background-clip: content-box;
+  border-radius: 999px;
+}
+.scroll-slim::-webkit-scrollbar-thumb:hover {
+  background: var(--ink-faint);
+  background-clip: content-box;
+}
+
+/* --- motion ---------------------------------------------------------- */
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes slide-from-left {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-rise {
+  animation: rise var(--dur) var(--ease) both;
+}
+.animate-fade {
+  animation: fade var(--dur) var(--ease) both;
+}
+.animate-pop {
+  animation: pop var(--dur) var(--ease) both;
+}
+.animate-drawer {
+  animation: slide-from-left var(--dur-slow) var(--ease) both;
+}
+.animate-toast {
+  animation: toast-in var(--dur) var(--ease) both;
+}
+
+/* The page itself, on every navigation. Four pixels and a quarter of a
+   second: enough to say "this is new", not enough to wait for. */
+.page-enter {
+  animation: rise var(--dur-slow) var(--ease) both;
+}
+
+/* Skeletons sweep rather than pulse. A pulsing block reads as a warning; a
+   sweep reads as loading. */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--surface-sunk);
+  border-radius: var(--r-sm);
+}
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--surface) 65%, transparent),
+    transparent
+  );
+  animation: shimmer 1.6s infinite;
+}
+
+/*
+ * Reduced motion is a preference, not a hint.
+ *
+ * Everything above communicates through position or opacity on top of a
+ * layout that is already correct, so it can all be turned off rather than
+ * merely shortened.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .skeleton::after {
+    display: none;
+  }
 }

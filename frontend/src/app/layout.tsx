@@ -1,9 +1,18 @@
-import type { Metadata } from "next";
-import { IBM_Plex_Mono, Source_Sans_3 } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import { IBM_Plex_Mono, Inter } from "next/font/google";
+
+import { ToastProvider } from "@/components/ui/Toast";
 
 import "./globals.css";
 
-const body = Source_Sans_3({
+/*
+ * Inter, with its optical sizing left on.
+ *
+ * A management interface is read at two sizes that matter - a dashboard
+ * figure and a table row - and a face that adjusts its own contrast between
+ * them keeps the small end legible without the large end looking spindly.
+ */
+const body = Inter({
   variable: "--font-body",
   subsets: ["latin"],
   display: "swap",
@@ -23,6 +32,17 @@ export const metadata: Metadata = {
   description: "Course and institute management.",
 };
 
+export const viewport: Viewport = {
+  // The shell is built for 320px upwards; a page that can be pinched is a
+  // page nobody has to fight, and blocking that is an accessibility failure.
+  width: "device-width",
+  initialScale: 1,
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f6f7f9" },
+    { media: "(prefers-color-scheme: dark)", color: "#0b0d14" },
+  ],
+};
+
 export default function RootLayout({
   children,
 }: {
@@ -33,7 +53,9 @@ export default function RootLayout({
       lang="en"
       className={`${body.variable} ${mono.variable} h-full antialiased`}
     >
-      <body className="font-sans min-h-full flex flex-col">{children}</body>
+      <body className="font-sans min-h-full flex flex-col">
+        <ToastProvider>{children}</ToastProvider>
+      </body>
     </html>
   );
 }

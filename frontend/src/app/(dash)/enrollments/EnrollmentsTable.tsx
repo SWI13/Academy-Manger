@@ -15,7 +15,10 @@ export function EnrollmentsTable({ rows }: { rows: Enrollment[] }) {
       columns={enrollmentColumns(can)}
       rows={rows}
       rowKey={(enrollment) => String(enrollment.id)}
-      empty="No enrolments match these filters."
+      rowHref={(enrollment) => `/enrollments/${enrollment.id}`}
+      emptyIcon="graduation"
+      empty="No enrolments match these filters"
+      emptyDescription="An enrolment is one student on one course. Clear the filters to see them all."
     />
   );
 }

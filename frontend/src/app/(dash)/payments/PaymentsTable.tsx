@@ -15,7 +15,10 @@ export function PaymentsTable({ rows }: { rows: Payment[] }) {
       columns={paymentColumns(can)}
       rows={rows}
       rowKey={(payment) => payment.public_id}
-      empty="No payments match these filters."
+      rowHref={(payment) => `/payments/${payment.public_id}`}
+      emptyIcon="wallet"
+      empty="No payments match these filters"
+      emptyDescription="Nothing recorded in this range. Clearing the filters shows the whole ledger."
     />
   );
 }

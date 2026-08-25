@@ -1,8 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { StatusBadge } from "@/components/ui/Badge";
+import { Avatar } from "@/components/ui/Avatar";
+import { Badge, StatusBadge } from "@/components/ui/Badge";
+import { Card, CardHeader, SectionHeader } from "@/components/ui/Card";
 import { DescriptionList } from "@/components/ui/DescriptionList";
+import { Icon } from "@/components/ui/Icon";
+import { BackLink } from "@/components/ui/PageHeader";
 import { getJson } from "@/lib/django";
 import { formatDate, formatDateTime, formatMoney } from "@/lib/format";
 import { ROLE_LABELS, type RoleCode } from "@/lib/permissions";
@@ -39,59 +43,96 @@ export default async function UserPage({ params }: Props) {
 
   const student = user.student_profile;
   const professor = user.professor_profile;
+  const extraRoles = user.roles.filter((code) => code !== user.primary_role);
 
   return (
     <div className="flex flex-col gap-6">
-      <header className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <Link href="/users" className="text-sm text-ink-soft hover:text-ink">
-            ← People
-          </Link>
-          <h1 className="mt-1 text-xl font-semibold tracking-tight text-ink">
-            {user.full_name}
-          </h1>
-          <p className="tabular mt-1 text-sm text-ink-soft">
-            {user.public_id} ·{" "}
-            {ROLE_LABELS[user.primary_role as RoleCode] ?? user.primary_role}
-          </p>
-        </div>
-        <StatusBadge status={user.status} />
-      </header>
+      <BackLink href="/users" label="People" />
 
-      <section className="rounded border border-rule bg-surface p-4">
-        <DescriptionList
-          items={[
-            { label: "Phone", value: user.phone || "—" },
-            { label: "Email", value: user.email || "—" },
-            { label: "Account created", value: formatDate(user.created_at) },
-            {
-              label: "Last signed in",
-              value: user.last_login ? (
-                formatDateTime(user.last_login)
-              ) : (
-                <span className="text-ink-faint">never</span>
-              ),
-            },
-          ]}
-        />
-      </section>
+      {/* --- the identity card ---------------------------------------- */}
+      <Card>
+        <div className="flex flex-wrap items-start gap-5">
+          <Avatar
+            name={user.full_name}
+            seed={user.public_id}
+            size="xl"
+            className="ring-4 ring-sunk"
+          />
+
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+              <h1 className="text-2xl font-semibold text-ink">
+                {user.full_name}
+              </h1>
+              <StatusBadge status={user.status} />
+            </div>
+
+            <p className="tabular mt-1 text-sm text-ink-soft">
+              {user.public_id}
+            </p>
+
+            <div className="mt-3 flex flex-wrap items-center gap-1.5">
+              <Badge tone="accent" size="sm">
+                {ROLE_LABELS[user.primary_role as RoleCode] ?? user.primary_role}
+                {" · primary"}
+              </Badge>
+              {extraRoles.map((code) => (
+                <Badge key={code} tone="info" size="sm">
+                  {ROLE_LABELS[code as RoleCode] ?? code}
+                </Badge>
+              ))}
+            </div>
+
+            <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm text-ink-soft">
+              <span className="inline-flex items-center gap-1.5">
+                <Icon name="phone" size={14} className="text-ink-faint" />
+                <span className="tabular">{user.phone || "—"}</span>
+              </span>
+              <span className="inline-flex min-w-0 items-center gap-1.5">
+                <Icon name="mail" size={14} className="text-ink-faint" />
+                <span className="truncate">{user.email || "—"}</span>
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <Icon name="clock" size={14} className="text-ink-faint" />
+                {user.last_login ? (
+                  <span className="tabular">
+                    {formatDateTime(user.last_login)}
+                  </span>
+                ) : (
+                  <span className="text-ink-faint">never signed in</span>
+                )}
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <Icon name="user-plus" size={14} className="text-ink-faint" />
+                <span className="tabular">{formatDate(user.created_at)}</span>
+              </span>
+            </div>
+          </div>
+        </div>
+      </Card>
 
       {student ? (
-        <section className="rounded border border-rule bg-surface p-4">
-          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-ink-faint">
-            Student record
-          </h2>
+        <Card>
+          <CardHeader
+            title="Student record"
+            icon="graduation"
+            divider
+            className="mb-5"
+          />
           <DescriptionList
             items={[
               {
                 label: "Date of birth",
                 // Age is derived, never stored - a stored age is wrong within
                 // a year.
-                value: student.date_of_birth
-                  ? `${formatDate(student.date_of_birth)}${
-                      student.age !== null ? ` · ${student.age} years old` : ""
-                    }`
-                  : "—",
+                value: student.date_of_birth ? (
+                  <span className="tabular">
+                    {formatDate(student.date_of_birth)}
+                    {student.age !== null ? ` · ${student.age} years old` : ""}
+                  </span>
+                ) : (
+                  "—"
+                ),
               },
               { label: "Wilaya", value: student.wilaya_name || "—" },
               { label: "Prior level", value: student.prior_level || "—" },
@@ -99,30 +140,45 @@ export default async function UserPage({ params }: Props) {
               {
                 label: "Emergency contact",
                 value: student.emergency_contact_name
-                  ? `${student.emergency_contact_name} · ${student.emergency_contact_phone || "no number"}`
+                  ? `${student.emergency_contact_name} · ${
+                      student.emergency_contact_phone || "no number"
+                    }`
                   : "—",
               },
               // Absent entirely when the student is looking at their own
               // record: the serializer drops it, so there is nothing to hide.
-              student.notes ? { label: "Staff notes", value: student.notes } : null,
+              student.notes
+                ? { label: "Staff notes", value: student.notes, wide: true }
+                : null,
             ]}
           />
-        </section>
+        </Card>
       ) : null}
 
       {professor ? (
-        <section className="rounded border border-rule bg-surface p-4">
-          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-ink-faint">
-            Professor record
-          </h2>
+        <Card>
+          <CardHeader
+            title="Professor record"
+            icon="book"
+            divider
+            className="mb-5"
+          />
           <DescriptionList
             items={[
-              { label: "Specialisation", value: professor.specialisation || "—" },
-              { label: "Qualifications", value: professor.qualifications || "—" },
+              {
+                label: "Specialisation",
+                value: professor.specialisation || "—",
+              },
               { label: "Wilaya", value: professor.wilaya_name || "—" },
               {
                 label: "Hired",
-                value: professor.hired_at ? formatDate(professor.hired_at) : "—",
+                value: professor.hired_at ? (
+                  <span className="tabular">
+                    {formatDate(professor.hired_at)}
+                  </span>
+                ) : (
+                  "—"
+                ),
               },
               // Pay is financial data. The serializer sends it only to holders
               // of report.view_financial, so its absence here is the API's
@@ -131,38 +187,57 @@ export default async function UserPage({ params }: Props) {
               professor.hourly_rate_minor !== null
                 ? {
                     label: "Hourly rate",
-                    value: formatMoney(
-                      professor.hourly_rate_minor,
-                      professor.currency,
+                    value: (
+                      <span className="tabular">
+                        {formatMoney(
+                          professor.hourly_rate_minor,
+                          professor.currency,
+                        )}
+                      </span>
                     ),
                   }
                 : null,
+              {
+                label: "Qualifications",
+                value: professor.qualifications || "—",
+                wide: true,
+              },
             ]}
           />
-        </section>
+        </Card>
       ) : null}
 
       {enrolments?.results.length ? (
-        <section className="rounded border border-rule bg-surface p-4">
-          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-ink-faint">
-            Enrolments
-          </h2>
+        <section>
+          <SectionHeader
+            title="Enrolments"
+            description={`${enrolments.results.length} on record`}
+          />
           <ul className="flex flex-col gap-2">
             {enrolments.results.map((enrolment) => (
-              <li
-                key={enrolment.id}
-                className="flex flex-wrap items-center justify-between gap-3 border-b border-rule pb-2 last:border-b-0 last:pb-0"
-              >
+              <li key={enrolment.id}>
                 <Link
                   href={`/enrollments/${enrolment.id}`}
-                  className="text-sm text-accent hover:underline"
+                  className="group flex flex-wrap items-center justify-between gap-3 rounded-xl border border-rule bg-surface px-4 py-3 shadow-xs transition-[border-color,box-shadow] hover:border-rule-strong hover:shadow-sm"
                 >
-                  {enrolment.course_title}{" "}
-                  <span className="tabular text-ink-faint">
-                    {enrolment.course_public_id}
+                  <span className="min-w-0">
+                    <span className="block truncate font-medium text-ink transition-colors group-hover:text-accent">
+                      {enrolment.course_title}
+                    </span>
+                    <span className="tabular block text-xs text-ink-faint">
+                      {enrolment.course_public_id} ·{" "}
+                      {formatDate(enrolment.enrolled_at)}
+                    </span>
+                  </span>
+                  <span className="flex shrink-0 items-center gap-2.5">
+                    <StatusBadge status={enrolment.status} />
+                    <Icon
+                      name="chevron-right"
+                      size={16}
+                      className="text-ink-faint transition-transform group-hover:translate-x-0.5"
+                    />
                   </span>
                 </Link>
-                <StatusBadge status={enrolment.status} />
               </li>
             ))}
           </ul>

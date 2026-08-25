@@ -43,21 +43,37 @@ see different things. So the useful test is to open **the same page** as two
 people and compare.
 
 **Payments** — open as the owner, then as `STU-000001`. The owner's table has
-a *Student* column and a *Recorded / approved* column; the student's has
+a *Student* column and a *Recorded / decided* column; the student's has
 neither, because every row is theirs and they cannot approve anything. Then
-open a pending payment as the owner: **Approve** is disabled if the owner
-recorded it, with the reason beside it. Reception has no Approve button at
-all.
+open a pending payment as the owner: **Approve payment** is disabled if the
+owner recorded it, with the reason beside it. Reception has no Approve button
+at all. A professor opening `/payments` is told the screen is not part of
+their role rather than shown a page that failed to load.
+
+Note what the amounts do: a pending amount is amber everywhere it appears, and
+on the enrolment it sits *beside* the remainder rather than being taken off
+it. Money claimed is not money received.
+
+**Record a payment** — as reception, **Payments → Record a payment**, or the
+button on an enrolment. Choosing the enrolment fetches its balance from the
+backend and shows it; nothing on the form subtracts what is being typed from
+what is owed, because that figure is Django's to change and only once the
+payment is approved. The entry lands *pending*, and the form says up front
+that whoever records it will not be the one who approves it.
 
 **Enrolments** — open as `PROF-000002`, then as reception. The professor sees
 *Age*, *Level* and *Wilaya* and no price; reception sees the price and none of
 the roster fields. A professor holds no payment permission, so the price is
 not hidden from them — the API never sends it.
 
-**Grades** — as `PROF-000002`, put a course ID (`C-2026-002`) in the box. One
-student is deliberately unmarked, so the gradebook shows an honest blank
-rather than a 0%. Open a mark sheet: the *Final exam* is unpublished, so
-`STU-000001` cannot see their mark for it. Publish it and they can.
+**Grades** — as `PROF-000002`, pick a course from the row of chips (the list
+is the courses you actually teach; a professor with one course lands on it).
+One student is deliberately unmarked, so the gradebook shows an honest blank
+rather than a 0%. Open a mark sheet: the mark boxes are keyboard-driven —
+Enter or ↓ moves to the next student — the student name column stays put while
+the sheet scrolls, and the save bar says *Unsaved changes* until it does not.
+The *Final exam* is unpublished, so `STU-000001` cannot see their mark for it.
+Publish it and they can; the dialog says there is no way back.
 
 **Reviews** — as the owner there is one waiting for moderation. Approve it,
 then look at the same page as `PROF-000001`. The comment is there; the
@@ -73,7 +89,19 @@ the price that is about to be frozen onto the enrolment.
 at all. Queue a CSV export as the owner and download it.
 
 **Audit log** — owner only. The administrator gets bounced to the dashboard,
-because an admin cannot read the record of what they did.
+because an admin cannot read the record of what they did. Read as a timeline:
+the day sticks to the top as you scroll, and a change is drawn as the old
+value struck through beside the new one.
+
+**Notifications** — every role has them, and they are scoped to one recipient
+with no parameter that widens it. The unread count in the rail and the top bar
+is read on the server with the page, so it is right as of what you are looking
+at rather than polled.
+
+**Your account** — the avatar menu, or the panel at the foot of the rail. It
+lists what your role actually allows, which people otherwise work out by
+clicking around and being refused, and it is the one place a person changes
+their own password (the current one is required).
 
 ## Poking at the edges
 
