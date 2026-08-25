@@ -1,6 +1,7 @@
 """Course and assignment serializers."""
 
 from django.contrib.auth import get_user_model
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from apps.core.enums import RoleCode
@@ -54,6 +55,10 @@ class CourseSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ["id", "public_id", "created_at", "updated_at"]
 
+    # Annotated for the schema, not for Python. Without this the generated
+    # TypeScript types the field as unknown[], and the frontend loses the
+    # compile-time check that is the whole reason the types are generated.
+    @extend_schema_field(CourseProfessorSerializer(many=True))
     def get_professors(self, course) -> list:
         active = [a for a in course.assignments.all() if a.status == AssignmentStatus.ACTIVE]
         return CourseProfessorSerializer(active, many=True).data

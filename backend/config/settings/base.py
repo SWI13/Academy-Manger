@@ -126,16 +126,44 @@ DATABASES = {
 # Sessions live in Redis rather than in JWTs so that deactivating a user takes
 # effect on their next request. See architecture SS1, decision 3.
 # ---------------------------------------------------------------------------
+def _session_redis_url() -> str:
+    """
+    Default the session store to database 3 on the same Redis.
+
+    db0 is the general cache, db1 and db2 belong to Celery. Derived by
+    swapping the path rather than appending ?db=, which works but reads like
+    an accident to whoever finds it next.
+    """
+    base_url = env("REDIS_URL")
+    scheme, _, rest = base_url.partition("://")
+    host, _, _tail = rest.partition("/")
+    return f"{scheme}://{host}/3"
+
+
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
         "LOCATION": env("REDIS_URL"),
         "OPTIONS": {"CLIENT_CLASS": "django_redis.client.DefaultClient"},
-    }
+    },
+    # Sessions get their own Redis database, not the default cache.
+    #
+    # They were sharing one, and that makes `cache.clear()` a mass logout.
+    # The default cache is a scratch space - the RBAC permission sets live
+    # there and are meant to be discardable - so anything from a management
+    # command to a future "clear the cache" button would sign the whole
+    # institute out mid-transaction. Sessions are not scratch data; a
+    # receptionist halfway through taking a payment should not be returned to
+    # a login screen because someone invalidated a permission cache.
+    "sessions": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": env("REDIS_SESSION_URL", default=_session_redis_url()),
+        "OPTIONS": {"CLIENT_CLASS": "django_redis.client.DefaultClient"},
+    },
 }
 
 SESSION_ENGINE = "django.contrib.sessions.backends.cache"
-SESSION_CACHE_ALIAS = "default"
+SESSION_CACHE_ALIAS = "sessions"
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = "Lax"
 SESSION_COOKIE_AGE = 60 * 60 * 12  # a working day

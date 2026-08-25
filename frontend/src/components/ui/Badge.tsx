@@ -59,8 +59,16 @@ export function Badge({
   );
 }
 
-/** A status string, rendered with its own colour and in sentence case. */
-export function StatusBadge({ status }: { status: string }) {
+/**
+ * A status string, rendered with its own colour and in sentence case.
+ *
+ * Accepts undefined because several statuses are optional in the schema - the
+ * API always sends them, but a field with a model default is not required by
+ * the contract. Rendering nothing beats rendering a badge that says
+ * "Undefined".
+ */
+export function StatusBadge({ status }: { status?: string | null }) {
+  if (!status) return null;
   const label =
     status.charAt(0) + status.slice(1).toLowerCase().replace(/_/g, " ");
   return <Badge tone={toneFor(status)}>{label}</Badge>;

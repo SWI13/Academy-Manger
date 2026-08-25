@@ -74,6 +74,15 @@ class AssessmentWriteSerializer(serializers.ModelSerializer):
 class ScoreSerializer(serializers.ModelSerializer):
     student_public_id = serializers.CharField(source="enrollment.student.public_id", read_only=True)
     student_name = serializers.CharField(source="enrollment.student.get_full_name", read_only=True)
+    # A mark without the thing it is a mark for is a number. `my-marks`
+    # returns scores across every course a student has taken, so the row has
+    # to say what it belongs to or the screen is a column of digits.
+    assessment_id = serializers.IntegerField(source="assessment.id", read_only=True)
+    assessment_title = serializers.CharField(source="assessment.title", read_only=True)
+    assessment_kind = serializers.CharField(source="assessment.kind", read_only=True)
+    is_published = serializers.BooleanField(source="assessment.is_published", read_only=True)
+    course_public_id = serializers.CharField(source="assessment.course.public_id", read_only=True)
+    course_title = serializers.CharField(source="assessment.course.title", read_only=True)
     max_score = serializers.DecimalField(
         source="assessment.max_score", max_digits=6, decimal_places=2, read_only=True
     )
@@ -89,6 +98,12 @@ class ScoreSerializer(serializers.ModelSerializer):
             "id",
             "student_public_id",
             "student_name",
+            "assessment_id",
+            "assessment_title",
+            "assessment_kind",
+            "is_published",
+            "course_public_id",
+            "course_title",
             "score",
             "max_score",
             "percentage",

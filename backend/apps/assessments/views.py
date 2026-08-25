@@ -112,7 +112,10 @@ class AssessmentViewSet(ScopedModelViewSet):
         if request.method == "GET":
             existing = scope_scores(
                 AssessmentScore.objects.filter(assessment=assessment).select_related(
-                    "assessment", "enrollment__student", "last_changed_by"
+                    "assessment",
+                    "assessment__course",
+                    "enrollment__student",
+                    "last_changed_by",
                 ),
                 request.user,
             )
@@ -130,7 +133,7 @@ class AssessmentViewSet(ScopedModelViewSet):
         result = save_mark_sheet(assessment, serializer.validated_data["rows"], actor=request.user)
 
         written = AssessmentScore.objects.filter(assessment=assessment).select_related(
-            "assessment", "enrollment__student", "last_changed_by"
+            "assessment", "assessment__course", "enrollment__student", "last_changed_by"
         )
         return Response({**result, "scores": ScoreSerializer(written, many=True).data})
 

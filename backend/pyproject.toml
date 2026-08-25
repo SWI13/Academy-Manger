@@ -1,8 +1,15 @@
 [tool.pytest.ini_options]
+# --ds, not just the ini key. pytest-django resolves the settings module in
+# the order --ds > DJANGO_SETTINGS_MODULE env var > this ini key, and the
+# container exports DJANGO_SETTINGS_MODULE=config.settings.dev for runserver.
+# With only the ini key set, the environment silently won and the entire suite
+# ran against dev settings: Argon2 instead of the fast hasher, and the real
+# Redis instead of LocMemCache - so the autouse cache.clear() fixtures were
+# flushing the development cache and signing everybody out.
 DJANGO_SETTINGS_MODULE = "config.settings.test"
 python_files = ["test_*.py"]
 testpaths = ["apps"]
-addopts = "-ra --strict-markers"
+addopts = "-ra --strict-markers --ds=config.settings.test"
 
 [tool.ruff]
 line-length = 100
