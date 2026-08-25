@@ -16,11 +16,18 @@ DEBUG = False
 # deliberately slow. Production hashing is asserted in its own test.
 PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]  # noqa: S105
 
+# Two aliases, mirroring base. Keeping them separate here too is the point:
+# the autouse `clear_cache` fixture calls cache.clear() between tests, and if
+# sessions shared that alias every test would silently log its own client out.
 CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
         "LOCATION": "test",
-    }
+    },
+    "sessions": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "test-sessions",
+    },
 }
 SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 

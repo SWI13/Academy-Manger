@@ -1907,7 +1907,7 @@ export interface components {
             readonly created_at: string;
             /** Format: date-time */
             readonly updated_at: string;
-            readonly professors: unknown[];
+            readonly professors: components["schemas"]["CourseProfessor"][];
         };
         CourseProfessor: {
             readonly id: number;
@@ -1963,7 +1963,7 @@ export interface components {
             readonly created_at: string;
             /** Format: date-time */
             readonly updated_at: string;
-            readonly professors: unknown[];
+            readonly professors: components["schemas"]["CourseProfessor"][];
         };
         Enrollment: {
             readonly id: number;
@@ -2359,7 +2359,7 @@ export interface components {
             readonly created_at?: string;
             /** Format: date-time */
             readonly updated_at?: string;
-            readonly professors?: unknown[];
+            readonly professors?: components["schemas"]["CourseProfessor"][];
         };
         PatchedEnrollment: {
             readonly id?: number;
@@ -2711,6 +2711,12 @@ export interface components {
             readonly id: number;
             readonly student_public_id: string;
             readonly student_name: string;
+            readonly assessment_id: number;
+            readonly assessment_title: string;
+            readonly assessment_kind: string;
+            readonly is_published: boolean;
+            readonly course_public_id: string;
+            readonly course_title: string;
             /** Format: decimal */
             readonly score: string;
             /** Format: decimal */

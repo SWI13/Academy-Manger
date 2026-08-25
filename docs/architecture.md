@@ -81,7 +81,8 @@ All dates 2026. Every row marked **Done** was merged to `develop` with
 | 19-20 Deployment | Not started | Production compose, Nginx, backups. |
 | F1 Frontend foundation | **Done** 25 Aug | Next 16 App Router, the BFF proxy, session auth, permission-driven navigation, the dashboard. |
 | F2 Payments and enrolments | **Done** 25 Aug | List and detail for both, the approval panel, proof download, the balance card. The column factory. |
-| F3+ Frontend features | Not started | Courses, schedules, grades, people, reviews, reports, audit. |
+| F3 Courses, schedule, grades | **Done** 25 Aug | Catalogue and course detail, the week grid, the gradebook, the mark sheet, publishing, a student's own marks. |
+| F4+ Frontend features | Not started | People, reviews, reports, audit. |
 
 ### Verification gate
 
@@ -95,6 +96,7 @@ Run against the real stack on every merge, not asserted from reading the code.
 | Production posture | `check --deploy` (prod settings) | 0 issues |
 | OpenAPI | `manage.py spectacular` | 56 paths, no warnings |
 | Background jobs | `celery inspect registered` | 3 tasks, worker and beat both live |
+| Tests | `pytest` | 385 passed in ~20s |
 | Frontend build | `npm run build` | compiles, TypeScript clean |
 | Frontend lint | `npm run lint` | clean |
 | Permission drift | `export_permissions --check` | in sync (exits 1 on drift, verified) |
@@ -191,6 +193,57 @@ Not in component state. A receptionist who has narrowed the ledger to one
 student and one month needs to be able to send that view to a colleague, and to
 still have it after a refresh. Filter state in `useState` is state nobody can
 share.
+
+### Two defects the frontend work uncovered
+
+Neither was visible from the backend alone. Both were found by building a
+screen and watching it behave wrongly.
+
+**The test suite was never running under test settings.** `pyproject.toml` set
+`DJANGO_SETTINGS_MODULE` as an ini key, but the container exports
+`DJANGO_SETTINGS_MODULE=config.settings.dev` for `runserver`, and
+pytest-django resolves `--ds` > environment variable > ini key. The
+environment won silently. Every run to this point used Argon2 instead of the
+fast hasher, `DEBUG = True`, and **the real Redis instead of LocMemCache** — so
+the autouse `cache.clear()` fixtures were flushing the development cache on
+every test, which is what kept signing people out mid-session. Fixed by
+putting `--ds=config.settings.test` in `addopts`, where nothing can outrank
+it. The suite went from 77 seconds to 20, and all 385 tests still pass — so
+nothing had come to depend on dev settings.
+
+**Sessions shared a Redis database with the permission cache.** The default
+cache is scratch space by design: RBAC permission sets live there precisely so
+they can be discarded. With sessions in the same store, `cache.clear()` was a
+mass logout — a receptionist halfway through taking a payment returned to a
+login screen because someone changed a role. Sessions now have their own alias
+on db3, and four tests hold the two apart, including one that signs a
+receptionist in, flushes the permission cache, and checks they are still
+signed in.
+
+### The professor's two screens
+
+D-6 fixed the professor surface at exactly two jobs. Both are now built, and
+the constraint held — nothing was added for them beyond it.
+
+*Enter marks.* The whole class saves in one request, because the API replaces
+the sheet in one transaction: forty marks either all land or none do. A blank
+is not a zero and is left out of the payload entirely. Per D-7 there is no
+deadline anywhere in the UI, and a corrected mark carries `corrected ×n` with
+who changed it and when — on the professor's sheet *and* on the student's own
+list, because a mark that quietly changes between two visits is worse than one
+that says it changed.
+
+*Know what is next.* The week grid draws seven columns, Sunday first, because
+the schedule is a recurring weekly pattern and not a diary of dated sessions
+(D-3). A calendar of individual dates would imply per-session cancellation
+exists, and it does not.
+
+### Publishing gates the student view, and there is no unpublish
+
+Verified end to end: before publish a student's marks page says "No marks
+published yet"; after publish the mark appears. Hiding a mark a class has
+already seen does not unsee it, so the honest remedy for a wrong mark is to
+correct it — which the same screen supports at any time.
 
 ### Money is never arithmetic in the browser
 

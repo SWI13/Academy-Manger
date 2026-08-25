@@ -3545,7 +3545,8 @@ components:
           readOnly: true
         professors:
           type: array
-          items: {}
+          items:
+            $ref: '#/components/schemas/CourseProfessor'
           readOnly: true
       required:
       - created_at
@@ -3692,7 +3693,8 @@ components:
           readOnly: true
         professors:
           type: array
-          items: {}
+          items:
+            $ref: '#/components/schemas/CourseProfessor'
           readOnly: true
       required:
       - created_at
@@ -4441,7 +4443,8 @@ components:
           readOnly: true
         professors:
           type: array
-          items: {}
+          items:
+            $ref: '#/components/schemas/CourseProfessor'
           readOnly: true
     PatchedEnrollment:
       type: object
@@ -5261,6 +5264,24 @@ components:
         student_name:
           type: string
           readOnly: true
+        assessment_id:
+          type: integer
+          readOnly: true
+        assessment_title:
+          type: string
+          readOnly: true
+        assessment_kind:
+          type: string
+          readOnly: true
+        is_published:
+          type: boolean
+          readOnly: true
+        course_public_id:
+          type: string
+          readOnly: true
+        course_title:
+          type: string
+          readOnly: true
         score:
           type: string
           format: decimal
@@ -5298,10 +5319,16 @@ components:
           type: string
           readOnly: true
       required:
+      - assessment_id
+      - assessment_kind
+      - assessment_title
       - change_count
       - comment
+      - course_public_id
+      - course_title
       - entered_at
       - id
+      - is_published
       - last_changed_at
       - last_changed_by_public_id
       - max_score
