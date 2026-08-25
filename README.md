@@ -24,6 +24,17 @@ python -c "import secrets; print(secrets.token_urlsafe(64))"
 
 docker compose up -d
 docker compose exec backend python manage.py migrate
+docker compose exec backend python manage.py seed_demo
+```
+
+`seed_demo` fills the database with a term's worth of invented data and prints
+the accounts to sign in with. Then open **<http://localhost:3000>**.
+
+**`docs/testing.md`** is the walkthrough: what to open as which role, and the
+handful of `curl` checks that show the authorization rules are the backend's
+and not the screen's.
+
+```bash
 curl http://localhost:8000/api/v1/health/
 ```
 
