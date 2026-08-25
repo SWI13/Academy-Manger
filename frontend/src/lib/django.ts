@@ -72,6 +72,14 @@ export async function callDjango(
     headers.Cookie = init.cookie;
   }
 
+  // Tell Django which host the browser actually used. Without it every
+  // absolute URL Django builds - DRF's pagination `next` most visibly - comes
+  // back as http://backend:8000/..., which leaks the internal hostname into
+  // the browser and is a link it could not follow anyway.
+  const site = new URL(SITE_URL);
+  headers["X-Forwarded-Host"] = site.host;
+  headers["X-Forwarded-Proto"] = site.protocol.replace(":", "");
+
   if (!SAFE_METHODS.has(method)) {
     const csrf = readCookie(init.cookie ?? null, "csrftoken");
     if (csrf) headers["X-CSRFToken"] = csrf;

@@ -22,6 +22,19 @@ SECRET_KEY = env("DJANGO_SECRET_KEY")
 DEBUG = env.bool("DJANGO_DEBUG", default=False)
 ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=[])
 
+# Django is reached only through the Next.js BFF, which sets X-Forwarded-Host
+# to the public site. Without this, every absolute URL Django builds - most
+# visibly DRF's pagination `next` and `previous` - comes out as
+# http://backend:8000/..., which both leaks the internal hostname to the
+# browser and hands it a link it cannot follow.
+#
+# Trusting the header is safe precisely because of the topology: Django is not
+# publicly routed, so nothing but the proxy can set it. ALLOWED_HOSTS is still
+# checked against the forwarded value, so a spoofed host is refused rather
+# than reflected.
+USE_X_FORWARDED_HOST = True
+USE_X_FORWARDED_PORT = True
+
 ROOT_URLCONF = "config.urls"
 WSGI_APPLICATION = "config.wsgi.application"
 ASGI_APPLICATION = "config.asgi.application"
@@ -267,6 +280,16 @@ SPECTACULAR_SETTINGS = {
 # Object storage
 # ---------------------------------------------------------------------------
 S3_ENDPOINT_URL = env("S3_ENDPOINT_URL")
+
+# Where the *browser* reaches object storage, which is not where Django does.
+#
+# A presigned URL is signed over the host it names, so this cannot be a
+# rewrite after the fact - the signature would no longer match. Django talks
+# to http://minio:9000 on the internal network; the browser follows a link
+# signed for the public endpoint. In development those are the same MinIO on
+# two different names, and in production this is the CDN or public bucket
+# hostname.
+S3_PUBLIC_ENDPOINT_URL = env("S3_PUBLIC_ENDPOINT_URL", default=env("S3_ENDPOINT_URL"))
 S3_ACCESS_KEY = env("S3_ACCESS_KEY")
 S3_SECRET_KEY = env("S3_SECRET_KEY")
 S3_BUCKET_NAME = env("S3_BUCKET_NAME")

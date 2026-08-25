@@ -3,6 +3,8 @@
 from .base import *  # noqa: F403
 
 DEBUG = True
+# "localhost" covers the forwarded host the BFF sends (localhost:3000);
+# the port is not part of the ALLOWED_HOSTS comparison.
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", "backend", "0.0.0.0"]  # noqa: S104
 
 INSTALLED_APPS += ["django_extensions"]  # noqa: F405

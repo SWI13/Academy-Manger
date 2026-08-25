@@ -45,16 +45,33 @@ class ObjectInfo:
     etag: str
 
 
-def _client():
+def _build_client(endpoint_url: str):
     return boto3.client(
         "s3",
-        endpoint_url=settings.S3_ENDPOINT_URL,
+        endpoint_url=endpoint_url,
         aws_access_key_id=settings.S3_ACCESS_KEY,
         aws_secret_access_key=settings.S3_SECRET_KEY,
         region_name=settings.S3_REGION,
         # SigV4 so presigned URLs work against MinIO and real S3 alike.
         config=Config(signature_version="s3v4"),
     )
+
+
+def _client():
+    """For operations Django performs itself: head, put, delete."""
+    return _build_client(settings.S3_ENDPOINT_URL)
+
+
+def _signing_client():
+    """
+    For URLs the browser will follow.
+
+    Signed over the *public* endpoint, because SigV4 covers the host header.
+    Rewriting the host of an already-signed URL invalidates it, so the choice
+    has to be made before signing rather than after - which is why this is a
+    second client and not a string replacement.
+    """
+    return _build_client(settings.S3_PUBLIC_ENDPOINT_URL)
 
 
 def build_proof_key(payment_public_id: str, content_type: str) -> str:
@@ -78,7 +95,7 @@ def presign_upload(key: str, content_type: str, *, max_bytes: int = MAX_PROOF_BY
     refused by the storage service itself, before it reaches us.
     """
     try:
-        return _client().generate_presigned_post(
+        return _signing_client().generate_presigned_post(
             Bucket=settings.S3_BUCKET_NAME,
             Key=key,
             Fields={"Content-Type": content_type},
@@ -99,7 +116,7 @@ def presign_download(key: str, *, filename: str | None = None) -> str:
     if filename:
         params["ResponseContentDisposition"] = f'attachment; filename="{filename}"'
     try:
-        return _client().generate_presigned_url(
+        return _signing_client().generate_presigned_url(
             "get_object", Params=params, ExpiresIn=settings.S3_DOWNLOAD_URL_TTL
         )
     except ClientError as exc:

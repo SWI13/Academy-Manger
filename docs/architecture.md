@@ -77,13 +77,13 @@ All dates 2026. Every row marked **Done** was merged to `develop` with
 | 13-14 Notifications, dashboards | **Done** 24 Aug | Channel abstraction (in-app registered, SMS stubbed per D-8), two idempotent beat jobs, one permission-driven dashboard endpoint. |
 | 12 Reviews | **Done** 24 Aug | Attached to enrolment per D-2. Moderation workflow, author withheld from professors (D-9). |
 | 15 Reports | **Done** 24 Aug | Three reports, operational split from financial, CSV export as a Celery job writing to the private bucket. |
-| 17-18 Hardening, tests | Not started | |
 | 19-20 Deployment | Not started | Production compose, Nginx, backups. |
 | F1 Frontend foundation | **Done** 25 Aug | Next 16 App Router, the BFF proxy, session auth, permission-driven navigation, the dashboard. |
 | F2 Payments and enrolments | **Done** 25 Aug | List and detail for both, the approval panel, proof download, the balance card. The column factory. |
 | F3 Courses, schedule, grades | **Done** 25 Aug | Catalogue and course detail, the week grid, the gradebook, the mark sheet, publishing, a student's own marks. |
 | F4 People | **Done** 25 Aug | The list, the create form, roles, status and password reset — with the escalation boundaries stated on screen. |
-| F5+ Frontend features | Not started | Reviews, reports, audit. |
+| F5 Reviews, reports, audit | **Done** 25 Aug | Moderation queue, the three reports with CSV export, the append-only log. |
+| 17-18 Hardening, tests | Not started | |
 
 ### Verification gate
 
@@ -97,7 +97,7 @@ Run against the real stack on every merge, not asserted from reading the code.
 | Production posture | `check --deploy` (prod settings) | 0 issues |
 | OpenAPI | `manage.py spectacular` | 56 paths, no warnings |
 | Background jobs | `celery inspect registered` | 3 tasks, worker and beat both live |
-| Tests | `pytest` | 385 passed in ~20s |
+| Tests | `pytest` | 392 passed in ~21s |
 | Frontend build | `npm run build` | compiles, TypeScript clean |
 | Frontend lint | `npm run lint` | clean |
 | Permission drift | `export_permissions --check` | in sync (exits 1 on drift, verified) |
@@ -231,6 +231,40 @@ The type pipeline now reads `openapi.json` rather than `openapi.yaml`
 string. This is worth knowing beyond this project: any consumer of a
 drf-spectacular YAML schema with leading-zero string enums has the same
 problem.
+
+### Three more the frontend found, all of the same shape
+
+Each was invisible from inside the network and obvious the moment something
+outside it tried to follow a link.
+
+**Pagination links named the container.** DRF builds absolute URLs from
+`request.get_host()`, which behind the BFF is `backend:8000`. So `next` came
+back as `http://backend:8000/api/v1/payments/?page=2` — the internal hostname
+handed to the browser, and a link it could not follow, so paging broke on any
+list longer than one page. The BFF now sends `X-Forwarded-Host`/`-Proto` and
+Django honours them. `ALLOWED_HOSTS` still checks the forwarded value, and a
+test asserts an unrecognised one is refused with 400 — "nothing but the proxy
+can set this header" is a topology claim, and the host check is what makes the
+setting safe if that claim ever stops holding.
+
+**Signed storage URLs named the container too, and could not be rewritten.**
+`presign_download` signed against `http://minio:9000`, so proof downloads and
+report exports produced links that failed before leaving the machine. SigV4
+covers the host header, so this could not be patched after signing — a
+rewritten URL is an invalid signature. There are now two clients: `_client()`
+for what Django does itself (head, put, delete) and `_signing_client()` for
+URLs the browser follows, chosen by `S3_PUBLIC_ENDPOINT_URL`. **Proof download
+had been broken in a browser since it was built**, and no test caught it
+because the tests run inside the network, where `minio:9000` resolves.
+
+**Two schema gaps.** `AuditLog.old_values`/`new_values` generated as `unknown`
+(a bare `JSONField` carries no shape), so the frontend could not read a key off
+a diff without casting — the exact check generated types exist to give. Both
+are declared `DictField` now. And `Review.student_name` is *removed* for
+professors rather than blanked; drf-spectacular lists every read-only field as
+required, so the schema claims it is always present. That one is narrowed in
+`src/types/index.ts` with the reason written down, because `api.d.ts` is
+generated and must stay that way.
 
 ### Two defects the frontend work uncovered
 
