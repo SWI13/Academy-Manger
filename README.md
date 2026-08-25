@@ -97,13 +97,17 @@ Two files are written from the backend and committed. Both have a check that
 fails rather than letting them drift:
 
 ```bash
-# TypeScript types, from the OpenAPI schema
-docker compose exec -T backend sh -c   "python manage.py spectacular --file /tmp/schema.yml && cat /tmp/schema.yml"   > frontend/openapi.yaml
+# TypeScript types, from the OpenAPI schema.
+# JSON, not YAML: a YAML 1.2 parser reads the bare enum members 08 and 09 as
+# integers, which types two wilayas wrongly.
+docker compose exec -T backend sh -c   "python manage.py spectacular --format openapi-json --file /tmp/s.json && cat /tmp/s.json"   > frontend/openapi.json
 cd frontend && npm run types
 
-# The frontend's permission union, from apps/rbac/catalog.py
+# The frontend's permission union and choice lists
 cd backend && python manage.py export_permissions
+python manage.py export_choices
 python manage.py export_permissions --check   # exits 1 on drift, with a diff
+python manage.py export_choices --check
 ```
 
 ## Branches

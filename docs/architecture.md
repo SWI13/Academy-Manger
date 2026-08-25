@@ -82,7 +82,8 @@ All dates 2026. Every row marked **Done** was merged to `develop` with
 | F1 Frontend foundation | **Done** 25 Aug | Next 16 App Router, the BFF proxy, session auth, permission-driven navigation, the dashboard. |
 | F2 Payments and enrolments | **Done** 25 Aug | List and detail for both, the approval panel, proof download, the balance card. The column factory. |
 | F3 Courses, schedule, grades | **Done** 25 Aug | Catalogue and course detail, the week grid, the gradebook, the mark sheet, publishing, a student's own marks. |
-| F4+ Frontend features | Not started | People, reviews, reports, audit. |
+| F4 People | **Done** 25 Aug | The list, the create form, roles, status and password reset — with the escalation boundaries stated on screen. |
+| F5+ Frontend features | Not started | Reviews, reports, audit. |
 
 ### Verification gate
 
@@ -100,6 +101,7 @@ Run against the real stack on every merge, not asserted from reading the code.
 | Frontend build | `npm run build` | compiles, TypeScript clean |
 | Frontend lint | `npm run lint` | clean |
 | Permission drift | `export_permissions --check` | in sync (exits 1 on drift, verified) |
+| Choice drift | `export_choices --check` | in sync |
 
 ## Frontend
 
@@ -144,6 +146,7 @@ assumes it is one.
 | --- | --- | --- |
 | `src/types/api.d.ts` | Django's OpenAPI schema | `npm run types`; a serializer change the frontend has not caught up with fails `npm run typecheck` |
 | `src/lib/permissions.ts` | `apps/rbac/catalog.py` | `manage.py export_permissions --check` exits 1 on drift, with a diff |
+| `src/lib/choices.ts` | the Django `TextChoices` enums | `manage.py export_choices --check`, same contract |
 
 The permission union is the one that matters. `can("payment.aprove")` must be
 a compile error, not a button hidden forever - the worst kind of authorization
@@ -193,6 +196,41 @@ Not in component state. A receptionist who has narrowed the ledger to one
 student and one month needs to be able to send that view to a colleague, and to
 still have it after a refresh. Filter state in `useState` is state nobody can
 share.
+
+### The escalation boundaries are on screen, not just in the 403
+
+People is the one screen that creates accounts and hands out powers, so every
+limit is stated rather than left to be discovered by refusal. All of them are
+enforced by Django; the UI only says them out loud.
+
+| Rule | How the screen shows it |
+| --- | --- |
+| The roles you may hand out are bounded by your own | The create dropdown offers owner ▸ all five, admin ▸ reception/professor/student, reception ▸ professor/student. Verified against the API, which refuses the rest with "Your role cannot create a ADMIN account." |
+| Only the owner grants roles | An admin sees "an administrator manages people but cannot hand out powers, including to themselves" where the buttons would be. The API answers **403**. |
+| Nobody changes their own roles, the owner included | Your own record says so. The API answers **400**, "You cannot change your own roles." |
+| Nobody changes their own status | Your own record explains that the button would be a way to lock yourself out of the system you administer. |
+| Reception never sees an owner or admin account | `GET /users/OWN-000002` as reception is **404**, not 403 — a forbidden response would confirm the ID is real. |
+| A reset shows the temporary password once | Rendered in a warning block saying it is not shown again, with a note that existing sessions are already invalid. |
+
+`manageableRoles()` mirrors `can_manage_role` and says so. Mirroring is safe
+here because it only decides what a dropdown offers: the serializer refuses
+anything outside its own answer, so the worst a drift can do is offer a choice
+that comes back as a validation error — never grant one.
+
+### A schema bug the wilaya dropdown found
+
+Wilaya codes are strings `"01"`–`"58"`. In the YAML schema, `01`–`07` came out
+quoted and **`08` and `09` came out bare** — PyYAML quotes the first seven
+because they would otherwise resolve as octal, and leaves `08`/`09` alone
+because they are not valid octal. A YAML 1.2 parser then reads those two as
+the integers 8 and 9, so the generated TypeScript typed Béchar and Blida as
+numbers.
+
+The type pipeline now reads `openapi.json` rather than `openapi.yaml`
+(`spectacular --format openapi-json`), where `"08"` cannot be anything but a
+string. This is worth knowing beyond this project: any consumer of a
+drf-spectacular YAML schema with leading-zero string enums has the same
+problem.
 
 ### Two defects the frontend work uncovered
 
