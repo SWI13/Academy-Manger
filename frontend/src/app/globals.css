@@ -1,0 +1,99 @@
+@import "tailwindcss";
+
+/*
+ * Tokens, not colours, at the call site.
+ *
+ * Every surface, rule and text colour is named for its job rather than its
+ * hue, so the dark palette is a redefinition of eight variables instead of a
+ * sweep through every component. Statuses get their own pair (text + wash)
+ * because a payment badge and an enrolment badge must not drift apart.
+ */
+
+:root {
+  --paper: #fbfaf7;
+  --surface: #ffffff;
+  --surface-sunk: #f4f2ee;
+  --ink: #1a1a18;
+  --ink-soft: #5d5b55;
+  --ink-faint: #8a8780;
+  --rule: #e3e0d8;
+  --rule-strong: #c9c5ba;
+  --accent: #1f5c4f;
+  --accent-soft: #e6efec;
+  --accent-ink: #ffffff;
+
+  --ok: #1f6b45;
+  --ok-wash: #e5f2ea;
+  --warn: #8a5a12;
+  --warn-wash: #fbf0dc;
+  --bad: #9b2c2c;
+  --bad-wash: #fbe9e9;
+  --info: #1e4e7a;
+  --info-wash: #e5eef6;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #14140f;
+    --surface: #1c1c17;
+    --surface-sunk: #232320;
+    --ink: #f0eee8;
+    --ink-soft: #b3afa5;
+    --ink-faint: #85817a;
+    --rule: #33322c;
+    --rule-strong: #4a4842;
+    --accent: #5fb39c;
+    --accent-soft: #1d2f2b;
+    --accent-ink: #10231e;
+
+    --ok: #6fc294;
+    --ok-wash: #16281f;
+    --warn: #d8a45a;
+    --warn-wash: #2a2116;
+    --bad: #e08585;
+    --bad-wash: #2b1a1a;
+    --info: #7ab0dd;
+    --info-wash: #16232e;
+  }
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-surface: var(--surface);
+  --color-sunk: var(--surface-sunk);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-ink-faint: var(--ink-faint);
+  --color-rule: var(--rule);
+  --color-rule-strong: var(--rule-strong);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-ink: var(--accent-ink);
+
+  --color-ok: var(--ok);
+  --color-ok-wash: var(--ok-wash);
+  --color-warn: var(--warn);
+  --color-warn-wash: var(--warn-wash);
+  --color-bad: var(--bad);
+  --color-bad-wash: var(--bad-wash);
+  --color-info: var(--info);
+  --color-info-wash: var(--info-wash);
+
+  --font-sans: var(--font-body);
+  --font-mono: var(--font-mono-face);
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+}
+
+/* Identifiers, amounts and anything meant to be compared down a column. */
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+*:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}

@@ -79,7 +79,8 @@ All dates 2026. Every row marked **Done** was merged to `develop` with
 | 15 Reports | **Done** 24 Aug | Three reports, operational split from financial, CSV export as a Celery job writing to the private bucket. |
 | 17-18 Hardening, tests | Not started | |
 | 19-20 Deployment | Not started | Production compose, Nginx, backups. |
-| Frontend | Not started | Next.js + TypeScript. Comparable in size to everything above. |
+| F1 Frontend foundation | **Done** 25 Aug | Next 16 App Router, the BFF proxy, session auth, permission-driven navigation, the dashboard. |
+| F2+ Frontend features | Not started | Courses, enrolments, schedules, grades, payments, people, reviews, reports, audit. |
 
 ### Verification gate
 
@@ -93,6 +94,65 @@ Run against the real stack on every merge, not asserted from reading the code.
 | Production posture | `check --deploy` (prod settings) | 0 issues |
 | OpenAPI | `manage.py spectacular` | 56 paths, no warnings |
 | Background jobs | `celery inspect registered` | 3 tasks, worker and beat both live |
+| Frontend build | `npm run build` | compiles, TypeScript clean |
+| Frontend lint | `npm run lint` | clean |
+| Permission drift | `export_permissions --check` | in sync (exits 1 on drift, verified) |
+
+## Frontend
+
+Next.js 16 (App Router) + TypeScript. Five roles, one set of components: a
+payments table is a payments table, and what differs between reception and the
+owner is which columns and actions render, not which component.
+
+### Django is not routed publicly
+
+The browser talks only to Next. Next talks to Django over the internal
+network, through one catch-all route handler at `/api/v1/[...path]`.
+
+| Concern | How |
+| --- | --- |
+| Session | Django's session cookie, HttpOnly, re-emitted by the BFF onto the Next origin. The browser never holds a token, so no script that gets onto the page can read one. |
+| CSRF | The BFF echoes the `csrftoken` cookie into `X-CSRFToken` and sets `Origin`/`Referer` to the site URL, which is what `CSRF_TRUSTED_ORIGINS` expects. The settings anticipated this: `CSRF_COOKIE_HTTPONLY = False` with the comment "the BFF must read it to echo the header". |
+| Interpretation | None. The proxy forwards status and body unchanged. It does not reinterpret a 403 or retry a 409 - Django owns every authorization answer, and a proxy that second-guesses one is a proxy that can get it wrong. |
+| Trailing slashes | Django wants one, Next redirects one away. The client writes paths without, the BFF adds it back. A 308 on a POST is a silent no-op and a miserable thing to debug. |
+
+### Three mechanisms, not five directory trees
+
+1. **The session, read on the server, on every render.** `getSession()` asks
+   Django `/auth/me/` in the shell layout. Nothing about who you are is cached
+   or stored in the browser, so a revoked role takes effect on the next page
+   load rather than whenever something expires.
+2. **Navigation as data.** Each nav item names the permission it needs.
+   Granting reception `audit.view` tomorrow makes the Audit link appear with no
+   code change.
+3. **Tiles that are absent, not hidden.** The dashboard page has no permission
+   checks in it at all. It renders a tile when its number arrived, and the API
+   simply does not send figures the caller may not see - so there is nothing in
+   the DOM or the network tab to find.
+
+None of this is a security boundary. A hidden link is an invitation not
+extended, not a lock; `src/proxy.ts` says so in as many words, because a
+cookie-presence check that reads like authentication is how someone later
+assumes it is one.
+
+### Generated, never hand-written
+
+| File | From | Guard |
+| --- | --- | --- |
+| `src/types/api.d.ts` | Django's OpenAPI schema | `npm run types`; a serializer change the frontend has not caught up with fails `npm run typecheck` |
+| `src/lib/permissions.ts` | `apps/rbac/catalog.py` | `manage.py export_permissions --check` exits 1 on drift, with a diff |
+
+The permission union is the one that matters. `can("payment.aprove")` must be
+a compile error, not a button hidden forever - the worst kind of authorization
+bug, because the screen looks correct.
+
+### Money is never arithmetic in the browser
+
+Amounts arrive as integer minor units plus a currency code and are formatted at
+the edge with `Intl.NumberFormat`. Totals, balances and outstanding amounts are
+computed by Django and rendered as received. A browser that adds up payments
+will eventually disagree with the ledger, and the receptionist will believe the
+screen in front of them.
 
 ## Decisions settled while building reviews and reports (24 Aug 2026)
 
