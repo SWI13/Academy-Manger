@@ -118,6 +118,35 @@ services:
       redis:
         condition: service_healthy
 
+  frontend:
+    build:
+      context: ./frontend
+      target: dev
+    image: sm-academy-frontend:dev
+    command: npm run dev
+    environment:
+      # Inside the network Django is reachable by service name. This value is
+      # never sent to the browser - Next calls Django, the browser calls Next.
+      #
+      # Set here rather than left to frontend/.env.local, which the bind mount
+      # below would otherwise carry into the container pointing at localhost.
+      # A real environment variable wins over a .env file in Next, so this is
+      # the authoritative value whichever way the container is started.
+      DJANGO_INTERNAL_URL: http://backend:8000
+      NEXT_PUBLIC_SITE_URL: http://localhost:3000
+      WATCHPACK_POLLING: "true"
+    volumes:
+      - ./frontend:/app
+      # Anonymous volumes so the container keeps its own Linux-built
+      # node_modules and .next rather than having the host's shadow them.
+      - /app/node_modules
+      - /app/.next
+    ports:
+      - "3000:3000"
+    depends_on:
+      backend:
+        condition: service_started
+
 volumes:
   postgres_data:
   minio_data:

@@ -1,0 +1,5833 @@
+openapi: 3.0.3
+info:
+  title: SM Academy API
+  version: 1.0.0
+paths:
+  /api/v1/assessments/:
+    get:
+      operationId: v1_assessments_list
+      description: |-
+        The base every resource viewset should inherit.
+
+        Both gates are wired in by default:
+
+            class PaymentViewSet(ScopedModelViewSet):
+                queryset = Payment.objects.all()
+                required_permissions = {
+                    "list": "payment.view",
+                    "retrieve": "payment.view",
+                    "create": "payment.create",
+                }
+
+                def scope_queryset(self, queryset, user):
+                    if has_permission(user, "payment.view_all"):
+                        return queryset
+                    return queryset.filter(enrollment__student__user=user)
+      summary: List assessments
+      parameters:
+      - in: query
+        name: course
+        schema:
+          type: string
+        description: Course public ID.
+      - in: query
+        name: kind
+        schema:
+          type: string
+        description: QUIZ, MIDTERM, FINAL, ORAL, HOMEWORK.
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAssessmentList'
+          description: ''
+    post:
+      operationId: v1_assessments_create
+      description: |-
+        The base every resource viewset should inherit.
+
+        Both gates are wired in by default:
+
+            class PaymentViewSet(ScopedModelViewSet):
+                queryset = Payment.objects.all()
+                required_permissions = {
+                    "list": "payment.view",
+                    "retrieve": "payment.view",
+                    "create": "payment.create",
+                }
+
+                def scope_queryset(self, queryset, user):
+                    if has_permission(user, "payment.view_all"):
+                        return queryset
+                    return queryset.filter(enrollment__student__user=user)
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssessmentWrite'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AssessmentWrite'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AssessmentWrite'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssessmentWrite'
+          description: ''
+  /api/v1/assessments/{id}/:
+    get:
+      operationId: v1_assessments_retrieve
+      description: |-
+        The base every resource viewset should inherit.
+
+        Both gates are wired in by default:
+
+            class PaymentViewSet(ScopedModelViewSet):
+                queryset = Payment.objects.all()
+                required_permissions = {
+                    "list": "payment.view",
+                    "retrieve": "payment.view",
+                    "create": "payment.create",
+                }
+
+                def scope_queryset(self, queryset, user):
+                    if has_permission(user, "payment.view_all"):
+                        return queryset
+                    return queryset.filter(enrollment__student__user=user)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this assessment.
+        required: true
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Assessment'
+          description: ''
+    put:
+      operationId: v1_assessments_update
+      description: |-
+        The base every resource viewset should inherit.
+
+        Both gates are wired in by default:
+
+            class PaymentViewSet(ScopedModelViewSet):
+                queryset = Payment.objects.all()
+                required_permissions = {
+                    "list": "payment.view",
+                    "retrieve": "payment.view",
+                    "create": "payment.create",
+                }
+
+                def scope_queryset(self, queryset, user):
+                    if has_permission(user, "payment.view_all"):
+                        return queryset
+                    return queryset.filter(enrollment__student__user=user)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this assessment.
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssessmentWrite'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AssessmentWrite'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AssessmentWrite'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssessmentWrite'
+          description: ''
+    patch:
+      operationId: v1_assessments_partial_update
+      description: |-
+        The base every resource viewset should inherit.
+
+        Both gates are wired in by default:
+
+            class PaymentViewSet(ScopedModelViewSet):
+                queryset = Payment.objects.all()
+                required_permissions = {
+                    "list": "payment.view",
+                    "retrieve": "payment.view",
+                    "create": "payment.create",
+                }
+
+                def scope_queryset(self, queryset, user):
+                    if has_permission(user, "payment.view_all"):
+                        return queryset
+                    return queryset.filter(enrollment__student__user=user)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this assessment.
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedAssessmentWrite'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedAssessmentWrite'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedAssessmentWrite'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssessmentWrite'
+          description: ''
+    delete:
+      operationId: v1_assessments_destroy
+      description: |-
+        The base every resource viewset should inherit.
+
+        Both gates are wired in by default:
+
+            class PaymentViewSet(ScopedModelViewSet):
+                queryset = Payment.objects.all()
+                required_permissions = {
+                    "list": "payment.view",
+                    "retrieve": "payment.view",
+                    "create": "payment.create",
+                }
+
+                def scope_queryset(self, queryset, user):
+                    if has_permission(user, "payment.view_all"):
+                        return queryset
+                    return queryset.filter(enrollment__student__user=user)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this assessment.
+        required: true
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/assessments/{id}/publish/:
+    post:
+      operationId: v1_assessments_publish_create
+      description: Until an assessment is published, its marks are not visible to
+        students.
+      summary: Publish marks to students
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this assessment.
+        required: true
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Assessment'
+          description: ''
+  /api/v1/assessments/{id}/scores/:
+    get:
+      operationId: v1_assessments_scores_list
+      description: GET returns the class list with marks where they exist. PUT replaces
+        the whole sheet in one transaction - forty marks either all save or none do,
+        so a dropped connection cannot leave half a sheet written.
+      summary: Read or replace the mark sheet
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this assessment.
+        required: true
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedScoreList'
+          description: ''
+    put:
+      operationId: v1_assessments_scores_update
+      description: GET returns the class list with marks where they exist. PUT replaces
+        the whole sheet in one transaction - forty marks either all save or none do,
+        so a dropped connection cannot leave half a sheet written.
+      summary: Read or replace the mark sheet
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this assessment.
+        required: true
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MarkSheet'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/MarkSheet'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MarkSheet'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedScoreList'
+          description: ''
+  /api/v1/assessments/my-marks/:
+    get:
+      operationId: v1_assessments_my_marks_list
+      description: |-
+        The base every resource viewset should inherit.
+
+        Both gates are wired in by default:
+
+            class PaymentViewSet(ScopedModelViewSet):
+                queryset = Payment.objects.all()
+                required_permissions = {
+                    "list": "payment.view",
+                    "retrieve": "payment.view",
+                    "create": "payment.create",
+                }
+
+                def scope_queryset(self, queryset, user):
+                    if has_permission(user, "payment.view_all"):
+                        return queryset
+                    return queryset.filter(enrollment__student__user=user)
+      summary: The caller's own marks across every course
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedScoreList'
+          description: ''
+  /api/v1/audit/:
+    get:
+      operationId: v1_audit_list
+      description: |-
+        Not a ScopedModelViewSet: there is no per-user scope to apply. Either you
+        hold audit.view - which only the owner does - or you see nothing at all.
+      summary: Read the audit log
+      parameters:
+      - in: query
+        name: action
+        schema:
+          type: string
+        description: Filter by action.
+      - in: query
+        name: actor
+        schema:
+          type: string
+        description: Actor public ID.
+      - name: cursor
+        required: false
+        in: query
+        description: The pagination cursor value.
+        schema:
+          type: string
+      - in: query
+        name: from
+        schema:
+          type: string
+        description: On or after (ISO date).
+      - in: query
+        name: object_id
+        schema:
+          type: string
+        description: Identifier within that type.
+      - in: query
+        name: object_type
+        schema:
+          type: string
+        description: Payment, User, Course, ...
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - in: query
+        name: to
+        schema:
+          type: string
+        description: On or before (ISO date).
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAuditLogList'
+          description: ''
+  /api/v1/audit/{id}/:
+    get:
+      operationId: v1_audit_retrieve
+      description: |-
+        Not a ScopedModelViewSet: there is no per-user scope to apply. Either you
+        hold audit.view - which only the owner does - or you see nothing at all.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this audit log.
+        required: true
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuditLog'
+          description: ''
+  /api/v1/auth/login/:
+    post:
+      operationId: v1_auth_login_create
+      summary: Log in
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Login'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Login'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Login'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSummary'
+          description: ''
+        '400':
+          description: No response body
+        '429':
+          description: No response body
+  /api/v1/auth/logout/:
+    post:
+      operationId: v1_auth_logout_create
+      summary: Log out
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/auth/me/:
+    get:
+      operationId: v1_auth_me_retrieve
+      summary: The signed-in user
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSummary'
+          description: ''
+  /api/v1/auth/password/change/:
+    post:
+      operationId: v1_auth_password_change_create
+      summary: Change your own password
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordChange'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PasswordChange'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PasswordChange'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+        '400':
+          description: No response body
+  /api/v1/auth/password/reset/:
+    post:
+      operationId: v1_auth_password_reset_create
+      description: |-
+        Staff-initiated. Returns a temporary password once, in the response, for
+        the staff member to pass on. It is never stored in readable form and never
+        shown again.
+      summary: Reset another user's password
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordReset'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PasswordReset'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PasswordReset'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          description: No response body
+        '403':
+          description: No response body
+  /api/v1/courses/:
+    get:
+      operationId: v1_courses_list
+      description: |-
+        The base every resource viewset should inherit.
+
+        Both gates are wired in by default:
+
+            class PaymentViewSet(ScopedModelViewSet):
+                queryset = Payment.objects.all()
+                required_permissions = {
+                    "list": "payment.view",
+                    "retrieve": "payment.view",
+                    "create": "payment.create",
+                }
+
+                def scope_queryset(self, queryset, user):
+                    if has_permission(user, "payment.view_all"):
+                        return queryset
+                    return queryset.filter(enrollment__student__user=user)
+      summary: List courses
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: professor
+        schema:
+          type: string
+        description: Professor public ID.
+      - in: query
+        name: q
+        schema:
+          type: string
+        description: Search course ID or title.
+      - in: query
+        name: status
+        schema:
+          type: string
+        description: Filter by status.
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCourseList'
+          description: ''
+    post:
+      operationId: v1_courses_create
+      description: |-
+        The base every resource viewset should inherit.
+
+        Both gates are wired in by default:
+
+            class PaymentViewSet(ScopedModelViewSet):
+                queryset = Payment.objects.all()
+                required_permissions = {
+                    "list": "payment.view",
+                    "retrieve": "payment.view",
+                    "create": "payment.create",
+                }
+
+                def scope_queryset(self, queryset, user):
+                    if has_permission(user, "payment.view_all"):
+                        return queryset
+                    return queryset.filter(enrollment__student__user=user)
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CourseWrite'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CourseWrite'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CourseWrite'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CourseWrite'
+          description: ''
+  /api/v1/courses/{public_id}/:
+    get:
+      operationId: v1_courses_retrieve
+      description: |-
+        The base every resource viewset should inherit.
+
+        Both gates are wired in by default:
+
+            class PaymentViewSet(ScopedModelViewSet):
+                queryset = Payment.objects.all()
+                required_permissions = {
+                    "list": "payment.view",
+                    "retrieve": "payment.view",
+                    "create": "payment.create",
+                }
+
+                def scope_queryset(self, queryset, user):
+                    if has_permission(user, "payment.view_all"):
+                        return queryset
+                    return queryset.filter(enrollment__student__user=user)
+      parameters:
+      - in: path
+        name: public_id
+        schema:
+          type: string
+          pattern: ^C-[0-9]{4}-[0-9]+$
+        required: true
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Course'
+          description: ''
+    put:
+      operationId: v1_courses_update
+      description: |-
+        The base every resource viewset should inherit.
+
+        Both gates are wired in by default:
+
+            class PaymentViewSet(ScopedModelViewSet):
+                queryset = Payment.objects.all()
+                required_permissions = {
+                    "list": "payment.view",
+                    "retrieve": "payment.view",
+                    "create": "payment.create",
+                }
+
+                def scope_queryset(self, queryset, user):
+                    if has_permission(user, "payment.view_all"):
+                        return queryset
+                    return queryset.filter(enrollment__student__user=user)
+      parameters:
+      - in: path
+        name: public_id
+        schema:
+          type: string
+          pattern: ^C-[0-9]{4}-[0-9]+$
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CourseWrite'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CourseWrite'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CourseWrite'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CourseWrite'
+          description: ''
+    patch:
+      operationId: v1_courses_partial_update
+      description: |-
+        The base every resource viewset should inherit.
+
+        Both gates are wired in by default:
+
+            class PaymentViewSet(ScopedModelViewSet):
+                queryset = Payment.objects.all()
+                required_permissions = {
+                    "list": "payment.view",
+                    "retrieve": "payment.view",
+                    "create": "payment.create",
+                }
+
+                def scope_queryset(self, queryset, user):
+                    if has_permission(user, "payment.view_all"):
+                        return queryset
+                    return queryset.filter(enrollment__student__user=user)
+      parameters:
+      - in: path
+        name: public_id
+        schema:
+          type: string
+          pattern: ^C-[0-9]{4}-[0-9]+$
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedCourseWrite'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedCourseWrite'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedCourseWrite'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CourseWrite'
+          description: ''
+    delete:
+      operationId: v1_courses_destroy
+      description: |-
+        The base every resource viewset should inherit.
+
+        Both gates are wired in by default:
+
+            class PaymentViewSet(ScopedModelViewSet):
+                queryset = Payment.objects.all()
+                required_permissions = {
+                    "list": "payment.view",
+                    "retrieve": "payment.view",
+                    "create": "payment.create",
+                }
+
+                def scope_queryset(self, queryset, user):
+                    if has_permission(user, "payment.view_all"):
+                        return queryset
+                    return queryset.filter(enrollment__student__user=user)
+      parameters:
+      - in: path
+        name: public_id
+        schema:
+          type: string
+          pattern: ^C-[0-9]{4}-[0-9]+$
+        required: true
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/courses/{public_id}/professors/:
+    get:
+      operationId: v1_courses_professors_retrieve
+      description: |-
+        The base every resource viewset should inherit.
+
+        Both gates are wired in by default:
+
+            class PaymentViewSet(ScopedModelViewSet):
+                queryset = Payment.objects.all()
+                required_permissions = {
+                    "list": "payment.view",
+                    "retrieve": "payment.view",
+                    "create": "payment.create",
+                }
+
+                def scope_queryset(self, queryset, user):
+                    if has_permission(user, "payment.view_all"):
+                        return queryset
+                    return queryset.filter(enrollment__student__user=user)
+      summary: Assign or unassign a professor
+      parameters:
+      - in: path
+        name: public_id
+        schema:
+          type: string
+          pattern: ^C-[0-9]{4}-[0-9]+$
+        required: true
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CourseProfessor'
+          description: ''
+    post:
+      operationId: v1_courses_professors_create
+      description: |-
+        The base every resource viewset should inherit.
+
+        Both gates are wired in by default:
+
+            class PaymentViewSet(ScopedModelViewSet):
+                queryset = Payment.objects.all()
+                required_permissions = {
+                    "list": "payment.view",
+                    "retrieve": "payment.view",
+                    "create": "payment.create",
+                }
+
+                def scope_queryset(self, queryset, user):
+                    if has_permission(user, "payment.view_all"):
+                        return queryset
+                    return queryset.filter(enrollment__student__user=user)
+      summary: Assign or unassign a professor
+      parameters:
+      - in: path
+        name: public_id
+        schema:
+          type: string
+          pattern: ^C-[0-9]{4}-[0-9]+$
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssignProfessor'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AssignProfessor'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AssignProfessor'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CourseProfessor'
+          description: ''
+    delete:
+      operationId: v1_courses_professors_destroy
+      description: |-
+        The base every resource viewset should inherit.
+
+        Both gates are wired in by default:
+
+            class PaymentViewSet(ScopedModelViewSet):
+                queryset = Payment.objects.all()
+                required_permissions = {
+                    "list": "payment.view",
+                    "retrieve": "payment.view",
+                    "create": "payment.create",
+                }
+
+                def scope_queryset(self, queryset, user):
+                    if has_permission(user, "payment.view_all"):
+                        return queryset
+                    return queryset.filter(enrollment__student__user=user)
+      summary: Assign or unassign a professor
+      parameters:
+      - in: path
+        name: public_id
+        schema:
+          type: string
+          pattern: ^C-[0-9]{4}-[0-9]+$
+        required: true
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CourseProfessor'
+          description: ''
+  /api/v1/courses/{public_id}/status/:
+    post:
+      operationId: v1_courses_status_create
+      description: |-
+        The base every resource viewset should inherit.
+
+        Both gates are wired in by default:
+
+            class PaymentViewSet(ScopedModelViewSet):
+                queryset = Payment.objects.all()
+                required_permissions = {
+                    "list": "payment.view",
+                    "retrieve": "payment.view",
+                    "create": "payment.create",
+                }
+
+                def scope_queryset(self, queryset, user):
+                    if has_permission(user, "payment.view_all"):
+                        return queryset
+                    return queryset.filter(enrollment__student__user=user)
+      summary: Change course status
+      parameters:
+      - in: path
+        name: public_id
+        schema:
+          type: string
+          pattern: ^C-[0-9]{4}-[0-9]+$
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CourseStatus'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CourseStatus'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CourseStatus'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Course'
+          description: ''
+  /api/v1/enrollments/:
+    get:
+      operationId: v1_enrollments_list
+      description: |-
+        The base every resource viewset should inherit.
+
+        Both gates are wired in by default:
+
+            class PaymentViewSet(ScopedModelViewSet):
+                queryset = Payment.objects.all()
+                required_permissions = {
+                    "list": "payment.view",
+                    "retrieve": "payment.view",
+                    "create": "payment.create",
+                }
+
+                def scope_queryset(self, queryset, user):
+                    if has_permission(user, "payment.view_all"):
+                        return queryset
+                    return queryset.filter(enrollment__student__user=user)
+      summary: List enrolments
+      parameters:
+      - in: query
+        name: course
+        schema:
+          type: string
+        description: Course public ID.
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: status
+        schema:
+          type: string
+        description: Filter by status.
+      - in: query
+        name: student
+        schema:
+          type: string
+        description: Student public ID.
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedEnrollmentList'
+          description: ''
+    post:
+      operationId: v1_enrollments_create
+      description: |-
+        The base every resource viewset should inherit.
+
+        Both gates are wired in by default:
+
+            class PaymentViewSet(ScopedModelViewSet):
+                queryset = Payment.objects.all()
+                required_permissions = {
+                    "list": "payment.view",
+                    "retrieve": "payment.view",
+                    "create": "payment.create",
+                }
+
+                def scope_queryset(self, queryset, user):
+                    if has_permission(user, "payment.view_all"):
+                        return queryset
+                    return queryset.filter(enrollment__student__user=user)
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EnrollmentCreate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EnrollmentCreate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EnrollmentCreate'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnrollmentCreate'
+          description: ''
+  /api/v1/enrollments/{id}/:
+    get:
+      operationId: v1_enrollments_retrieve
+      description: |-
+        The base every resource viewset should inherit.
+
+        Both gates are wired in by default:
+
+            class PaymentViewSet(ScopedModelViewSet):
+                queryset = Payment.objects.all()
+                required_permissions = {
+                    "list": "payment.view",
+                    "retrieve": "payment.view",
+                    "create": "payment.create",
+                }
+
+                def scope_queryset(self, queryset, user):
+                    if has_permission(user, "payment.view_all"):
+                        return queryset
+                    return queryset.filter(enrollment__student__user=user)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this enrollment.
+        required: true
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Enrollment'
+          description: ''
+    put:
+      operationId: v1_enrollments_update
+      description: |-
+        The base every resource viewset should inherit.
+
+        Both gates are wired in by default:
+
+            class PaymentViewSet(ScopedModelViewSet):
+                queryset = Payment.objects.all()
+                required_permissions = {
+                    "list": "payment.view",
+                    "retrieve": "payment.view",
+                    "create": "payment.create",
+                }
+
+                def scope_queryset(self, queryset, user):
+                    if has_permission(user, "payment.view_all"):
+                        return queryset
+                    return queryset.filter(enrollment__student__user=user)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this enrollment.
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Enrollment'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Enrollment'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Enrollment'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Enrollment'
+          description: ''
+    patch:
+      operationId: v1_enrollments_partial_update
+      description: |-
+        The base every resource viewset should inherit.
+
+        Both gates are wired in by default:
+
+            class PaymentViewSet(ScopedModelViewSet):
+                queryset = Payment.objects.all()
+                required_permissions = {
+                    "list": "payment.view",
+                    "retrieve": "payment.view",
+                    "create": "payment.create",
+                }
+
+                def scope_queryset(self, queryset, user):
+                    if has_permission(user, "payment.view_all"):
+                        return queryset
+                    return queryset.filter(enrollment__student__user=user)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this enrollment.
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedEnrollment'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedEnrollment'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedEnrollment'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Enrollment'
+          description: ''
+    delete:
+      operationId: v1_enrollments_destroy
+      description: |-
+        The base every resource viewset should inherit.
+
+        Both gates are wired in by default:
+
+            class PaymentViewSet(ScopedModelViewSet):
+                queryset = Payment.objects.all()
+                required_permissions = {
+                    "list": "payment.view",
+                    "retrieve": "payment.view",
+                    "create": "payment.create",
+                }
+
+                def scope_queryset(self, queryset, user):
+                    if has_permission(user, "payment.view_all"):
+                        return queryset
+                    return queryset.filter(enrollment__student__user=user)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this enrollment.
+        required: true
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/enrollments/{id}/average/:
+    get:
+      operationId: v1_enrollments_average_retrieve
+      description: Computed on read from raw marks, never stored. A stored average
+        cannot be re-derived after the grading scheme changes, and marks never lock.
+      summary: Average for one enrolment
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Average'
+          description: ''
+  /api/v1/enrollments/{id}/balance/:
+    get:
+      operationId: v1_enrollments_balance_retrieve
+      description: |-
+        Total, paid, pending and remaining - computed from the payment rows every
+        time. Never a stored counter.
+      summary: Balance for one enrolment
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Balance'
+          description: ''
+  /api/v1/enrollments/{id}/status/:
+    post:
+      operationId: v1_enrollments_status_create
+      description: |-
+        The base every resource viewset should inherit.
+
+        Both gates are wired in by default:
+
+            class PaymentViewSet(ScopedModelViewSet):
+                queryset = Payment.objects.all()
+                required_permissions = {
+                    "list": "payment.view",
+                    "retrieve": "payment.view",
+                    "create": "payment.create",
+                }
+
+                def scope_queryset(self, queryset, user):
+                    if has_permission(user, "payment.view_all"):
+                        return queryset
+                    return queryset.filter(enrollment__student__user=user)
+      summary: Change enrolment status
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this enrollment.
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EnrollmentStatus'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EnrollmentStatus'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EnrollmentStatus'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Enrollment'
+          description: ''
+  /api/v1/exports/:
+    get:
+      operationId: v1_exports_list
+      description: |-
+        Your own exports, and nobody else's - including the owner's.
+
+        An export is a file somebody asked for, and who asked is part of what the
+        audit log is for. Sharing them across staff would turn one person's
+        permission to export into everyone's permission to read the result.
+      summary: Your export jobs
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedReportExportList'
+          description: ''
+  /api/v1/exports/{public_id}/:
+    get:
+      operationId: v1_exports_retrieve
+      description: |-
+        Your own exports, and nobody else's - including the owner's.
+
+        An export is a file somebody asked for, and who asked is part of what the
+        audit log is for. Sharing them across staff would turn one person's
+        permission to export into everyone's permission to read the result.
+      summary: One export job
+      parameters:
+      - in: path
+        name: public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportExport'
+          description: ''
+  /api/v1/exports/{public_id}/download/:
+    get:
+      operationId: v1_exports_download_retrieve
+      description: A short-lived signed URL. The bucket is private; this is the only
+        route.
+      summary: Download a finished export
+      parameters:
+      - in: path
+        name: public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/gradebook/:
+    get:
+      operationId: v1_gradebook_retrieve
+      description: Every live enrolment in a course with each student's average.
+      summary: Class roster with marks
+      parameters:
+      - in: query
+        name: course
+        schema:
+          type: string
+        description: Course public ID.
+        required: true
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Gradebook'
+          description: ''
+  /api/v1/health/:
+    get:
+      operationId: v1_health_retrieve
+      description: Reports whether the API can reach PostgreSQL and Redis. The only
+        unauthenticated route in the API, so it deliberately returns no version, hostname
+        or error detail.
+      summary: Liveness and dependency check
+      tags:
+      - v1
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum:
+                    - ok
+                    - degraded
+                  database:
+                    type: string
+                    enum:
+                    - ok
+                    - fail
+                  cache:
+                    type: string
+                    enum:
+                    - ok
+                    - fail
+                required:
+                - status
+                - database
+                - cache
+              examples:
+                Healthy:
+                  value:
+                    status: ok
+                    database: ok
+                    cache: ok
+          description: ''
+        '503':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum:
+                    - ok
+                    - degraded
+                  database:
+                    type: string
+                    enum:
+                    - ok
+                    - fail
+                  cache:
+                    type: string
+                    enum:
+                    - ok
+                    - fail
+                required:
+                - status
+                - database
+                - cache
+              examples:
+                DatabaseUnreachable:
+                  value:
+                    status: degraded
+                    database: fail
+                    cache: ok
+                  summary: Database unreachable
+          description: ''
+  /api/v1/notifications/:
+    get:
+      operationId: v1_notifications_list
+      summary: Your notifications
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedNotificationList'
+          description: ''
+  /api/v1/notifications/{id}/:
+    get:
+      operationId: v1_notifications_retrieve
+      summary: One notification
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this notification.
+        required: true
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+          description: ''
+  /api/v1/notifications/{id}/read/:
+    post:
+      operationId: v1_notifications_read_create
+      summary: Mark one as read
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this notification.
+        required: true
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+          description: ''
+  /api/v1/notifications/read-all/:
+    post:
+      operationId: v1_notifications_read_all_create
+      summary: Mark all as read
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/notifications/unread-count/:
+    get:
+      operationId: v1_notifications_unread_count_retrieve
+      summary: Unread count
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/payments/:
+    get:
+      operationId: v1_payments_list
+      description: |-
+        No PATCH and no DELETE.
+
+        A payment is not editable. It is created PENDING and moves by named
+        transition, each recording who acted and when. A mistake before approval
+        is cancelled; a mistake after approval is corrected with a new record
+        (architecture D-4).
+      summary: List payments
+      parameters:
+      - in: query
+        name: course
+        schema:
+          type: string
+        description: Course public ID.
+      - in: query
+        name: from
+        schema:
+          type: string
+        description: Paid on or after (YYYY-MM-DD).
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: status
+        schema:
+          type: string
+        description: PENDING, APPROVED, REJECTED, CANCELLED.
+      - in: query
+        name: student
+        schema:
+          type: string
+        description: Student public ID.
+      - in: query
+        name: to
+        schema:
+          type: string
+        description: Paid on or before (YYYY-MM-DD).
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPaymentList'
+          description: ''
+    post:
+      operationId: v1_payments_create
+      description: |-
+        No PATCH and no DELETE.
+
+        A payment is not editable. It is created PENDING and moves by named
+        transition, each recording who acted and when. A mistake before approval
+        is cancelled; a mistake after approval is corrected with a new record
+        (architecture D-4).
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentCreate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PaymentCreate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PaymentCreate'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentCreate'
+          description: ''
+  /api/v1/payments/{public_id}/:
+    get:
+      operationId: v1_payments_retrieve
+      description: |-
+        No PATCH and no DELETE.
+
+        A payment is not editable. It is created PENDING and moves by named
+        transition, each recording who acted and when. A mistake before approval
+        is cancelled; a mistake after approval is corrected with a new record
+        (architecture D-4).
+      parameters:
+      - in: path
+        name: public_id
+        schema:
+          type: string
+          pattern: ^PAY-[0-9]+$
+        required: true
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+          description: ''
+    patch:
+      operationId: v1_payments_partial_update
+      description: |-
+        No PATCH and no DELETE.
+
+        A payment is not editable. It is created PENDING and moves by named
+        transition, each recording who acted and when. A mistake before approval
+        is cancelled; a mistake after approval is corrected with a new record
+        (architecture D-4).
+      parameters:
+      - in: path
+        name: public_id
+        schema:
+          type: string
+          pattern: ^PAY-[0-9]+$
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPayment'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPayment'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPayment'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+          description: ''
+    delete:
+      operationId: v1_payments_destroy
+      description: |-
+        No PATCH and no DELETE.
+
+        A payment is not editable. It is created PENDING and moves by named
+        transition, each recording who acted and when. A mistake before approval
+        is cancelled; a mistake after approval is corrected with a new record
+        (architecture D-4).
+      parameters:
+      - in: path
+        name: public_id
+        schema:
+          type: string
+          pattern: ^PAY-[0-9]+$
+        required: true
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/payments/{public_id}/approve/:
+    post:
+      operationId: v1_payments_approve_create
+      description: |-
+        No PATCH and no DELETE.
+
+        A payment is not editable. It is created PENDING and moves by named
+        transition, each recording who acted and when. A mistake before approval
+        is cancelled; a mistake after approval is corrected with a new record
+        (architecture D-4).
+      summary: Approve a payment
+      parameters:
+      - in: path
+        name: public_id
+        schema:
+          type: string
+          pattern: ^PAY-[0-9]+$
+        required: true
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+          description: ''
+  /api/v1/payments/{public_id}/cancel/:
+    post:
+      operationId: v1_payments_cancel_create
+      description: |-
+        No PATCH and no DELETE.
+
+        A payment is not editable. It is created PENDING and moves by named
+        transition, each recording who acted and when. A mistake before approval
+        is cancelled; a mistake after approval is corrected with a new record
+        (architecture D-4).
+      summary: Cancel a pending payment
+      parameters:
+      - in: path
+        name: public_id
+        schema:
+          type: string
+          pattern: ^PAY-[0-9]+$
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Cancellation'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Cancellation'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Cancellation'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+          description: ''
+  /api/v1/payments/{public_id}/proofs/:
+    get:
+      operationId: v1_payments_proofs_list
+      description: |-
+        No PATCH and no DELETE.
+
+        A payment is not editable. It is created PENDING and moves by named
+        transition, each recording who acted and when. A mistake before approval
+        is cancelled; a mistake after approval is corrected with a new record
+        (architecture D-4).
+      summary: List proofs
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: path
+        name: public_id
+        schema:
+          type: string
+          pattern: ^PAY-[0-9]+$
+        required: true
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPaymentProofList'
+          description: ''
+  /api/v1/payments/{public_id}/proofs/confirm/:
+    post:
+      operationId: v1_payments_proofs_confirm_create
+      description: |-
+        No PATCH and no DELETE.
+
+        A payment is not editable. It is created PENDING and moves by named
+        transition, each recording who acted and when. A mistake before approval
+        is cancelled; a mistake after approval is corrected with a new record
+        (architecture D-4).
+      summary: Confirm an upload finished
+      parameters:
+      - in: path
+        name: public_id
+        schema:
+          type: string
+          pattern: ^PAY-[0-9]+$
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProofConfirm'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ProofConfirm'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ProofConfirm'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentProof'
+          description: ''
+  /api/v1/payments/{public_id}/proofs/upload-url/:
+    post:
+      operationId: v1_payments_proofs_upload_url_create
+      description: Returns a short-lived POST policy the browser uploads straight
+        to. Content type and a size ceiling are bound into the signature, so the bytes
+        never pass through this API.
+      summary: Get a signed upload URL
+      parameters:
+      - in: path
+        name: public_id
+        schema:
+          type: string
+          pattern: ^PAY-[0-9]+$
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProofUploadRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ProofUploadRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ProofUploadRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/payments/{public_id}/reject/:
+    post:
+      operationId: v1_payments_reject_create
+      description: |-
+        No PATCH and no DELETE.
+
+        A payment is not editable. It is created PENDING and moves by named
+        transition, each recording who acted and when. A mistake before approval
+        is cancelled; a mistake after approval is corrected with a new record
+        (architecture D-4).
+      summary: Reject a payment
+      parameters:
+      - in: path
+        name: public_id
+        schema:
+          type: string
+          pattern: ^PAY-[0-9]+$
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Rejection'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Rejection'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Rejection'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+          description: ''
+  /api/v1/proofs/{id}/download/:
+    get:
+      operationId: v1_proofs_download_retrieve
+      description: Returns a signed URL valid for seconds. The bucket is private;
+        this is the only route to the bytes.
+      summary: Download a proof
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/proofs/{id}/scanned/:
+    post:
+      operationId: v1_proofs_scanned_create
+      description: Placeholder for the virus-scanning task that lands with background
+        jobs.
+      summary: Mark a proof scanned
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentProof'
+          description: ''
+  /api/v1/reports/{name}/:
+    get:
+      operationId: v1_reports_retrieve
+      description: revenue and outstanding need report.view_financial; enrollments
+        needs report.view_operational. Every row is scoped to the caller by the same
+        helpers the rest of the API uses, so a professor's enrolment report covers
+        their own courses and nobody else's.
+      summary: Run a report
+      parameters:
+      - in: query
+        name: course
+        schema:
+          type: string
+        description: Course public ID.
+      - in: query
+        name: from
+        schema:
+          type: string
+        description: Period start (YYYY-MM-DD).
+      - in: path
+        name: name
+        schema:
+          type: string
+          pattern: ^revenue|outstanding|enrollments$
+        required: true
+      - in: query
+        name: to
+        schema:
+          type: string
+        description: Period end (YYYY-MM-DD).
+      - in: query
+        name: unpaid_only
+        schema:
+          type: boolean
+        description: 'Outstanding report: hide settled rows.'
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportResult'
+          description: ''
+  /api/v1/reports/{name}/export/:
+    post:
+      operationId: v1_reports_export_create
+      description: Returns a job immediately; poll it, then fetch the signed download
+        URL. The worker re-checks the requester's permissions and re-runs the query
+        as them, so a role revoked while the job waits produces no file.
+      summary: Queue a CSV export
+      parameters:
+      - in: path
+        name: name
+        schema:
+          type: string
+          pattern: ^revenue|outstanding|enrollments$
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExportRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ExportRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ExportRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '202':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportExport'
+          description: ''
+  /api/v1/reports/dashboard/:
+    get:
+      operationId: v1_reports_dashboard_retrieve
+      description: Returns only the tiles the caller's permissions allow. A figure
+        this endpoint never sends cannot leak through a new screen or the browser's
+        network tab.
+      summary: Dashboard for the signed-in user
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/reviews/:
+    get:
+      operationId: v1_reviews_list
+      description: |-
+        A student writes one review per completed enrolment; a moderator rules on
+        it. There is no DELETE - hiding is the reversible act, deletion is not,
+        and a moderation decision nobody can inspect afterwards is not moderation.
+      summary: List reviews
+      parameters:
+      - in: query
+        name: course
+        schema:
+          type: string
+        description: Course public ID.
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: rating
+        schema:
+          type: integer
+        description: Exact star rating, 1-5.
+      - in: query
+        name: status
+        schema:
+          type: string
+        description: PENDING, APPROVED, HIDDEN, REJECTED.
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedReviewList'
+          description: ''
+    post:
+      operationId: v1_reviews_create
+      description: |-
+        A student writes one review per completed enrolment; a moderator rules on
+        it. There is no DELETE - hiding is the reversible act, deletion is not,
+        and a moderation decision nobody can inspect afterwards is not moderation.
+      summary: Write a review
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReviewCreate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ReviewCreate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ReviewCreate'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Review'
+          description: ''
+  /api/v1/reviews/{id}/:
+    get:
+      operationId: v1_reviews_retrieve
+      description: |-
+        A student writes one review per completed enrolment; a moderator rules on
+        it. There is no DELETE - hiding is the reversible act, deletion is not,
+        and a moderation decision nobody can inspect afterwards is not moderation.
+      summary: One review
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this review.
+        required: true
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Review'
+          description: ''
+    patch:
+      operationId: v1_reviews_partial_update
+      description: |-
+        A student writes one review per completed enrolment; a moderator rules on
+        it. There is no DELETE - hiding is the reversible act, deletion is not,
+        and a moderation decision nobody can inspect afterwards is not moderation.
+      summary: Correct your review
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this review.
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedReviewUpdate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedReviewUpdate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedReviewUpdate'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Review'
+          description: ''
+    delete:
+      operationId: v1_reviews_destroy
+      description: |-
+        A student writes one review per completed enrolment; a moderator rules on
+        it. There is no DELETE - hiding is the reversible act, deletion is not,
+        and a moderation decision nobody can inspect afterwards is not moderation.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this review.
+        required: true
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/reviews/{id}/moderate/:
+    post:
+      operationId: v1_reviews_moderate_create
+      description: |-
+        A student writes one review per completed enrolment; a moderator rules on
+        it. There is no DELETE - hiding is the reversible act, deletion is not,
+        and a moderation decision nobody can inspect afterwards is not moderation.
+      summary: Moderate a review
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this review.
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Moderation'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Moderation'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Moderation'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Review'
+          description: ''
+  /api/v1/reviews/summary/:
+    get:
+      operationId: v1_reviews_summary_list
+      description: Averages over approved reviews only, and only over reviews the
+        caller may read. Computed on read - a stored average cannot be re-derived
+        once a review is hidden.
+      summary: Rating summary per course
+      parameters:
+      - in: query
+        name: course
+        schema:
+          type: string
+        description: Course public ID.
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCourseRatingList'
+          description: ''
+  /api/v1/schedules/:
+    get:
+      operationId: v1_schedules_list
+      description: |-
+        The base every resource viewset should inherit.
+
+        Both gates are wired in by default:
+
+            class PaymentViewSet(ScopedModelViewSet):
+                queryset = Payment.objects.all()
+                required_permissions = {
+                    "list": "payment.view",
+                    "retrieve": "payment.view",
+                    "create": "payment.create",
+                }
+
+                def scope_queryset(self, queryset, user):
+                    if has_permission(user, "payment.view_all"):
+                        return queryset
+                    return queryset.filter(enrollment__student__user=user)
+      summary: List schedule slots
+      parameters:
+      - in: query
+        name: course
+        schema:
+          type: string
+        description: Course public ID.
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: weekday
+        schema:
+          type: integer
+        description: 0 = Monday.
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedScheduleList'
+          description: ''
+    post:
+      operationId: v1_schedules_create
+      description: |-
+        The base every resource viewset should inherit.
+
+        Both gates are wired in by default:
+
+            class PaymentViewSet(ScopedModelViewSet):
+                queryset = Payment.objects.all()
+                required_permissions = {
+                    "list": "payment.view",
+                    "retrieve": "payment.view",
+                    "create": "payment.create",
+                }
+
+                def scope_queryset(self, queryset, user):
+                    if has_permission(user, "payment.view_all"):
+                        return queryset
+                    return queryset.filter(enrollment__student__user=user)
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScheduleWrite'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ScheduleWrite'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ScheduleWrite'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScheduleWrite'
+          description: ''
+  /api/v1/schedules/{id}/:
+    get:
+      operationId: v1_schedules_retrieve
+      description: |-
+        The base every resource viewset should inherit.
+
+        Both gates are wired in by default:
+
+            class PaymentViewSet(ScopedModelViewSet):
+                queryset = Payment.objects.all()
+                required_permissions = {
+                    "list": "payment.view",
+                    "retrieve": "payment.view",
+                    "create": "payment.create",
+                }
+
+                def scope_queryset(self, queryset, user):
+                    if has_permission(user, "payment.view_all"):
+                        return queryset
+                    return queryset.filter(enrollment__student__user=user)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this schedule.
+        required: true
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Schedule'
+          description: ''
+    put:
+      operationId: v1_schedules_update
+      description: |-
+        The base every resource viewset should inherit.
+
+        Both gates are wired in by default:
+
+            class PaymentViewSet(ScopedModelViewSet):
+                queryset = Payment.objects.all()
+                required_permissions = {
+                    "list": "payment.view",
+                    "retrieve": "payment.view",
+                    "create": "payment.create",
+                }
+
+                def scope_queryset(self, queryset, user):
+                    if has_permission(user, "payment.view_all"):
+                        return queryset
+                    return queryset.filter(enrollment__student__user=user)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this schedule.
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScheduleWrite'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ScheduleWrite'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ScheduleWrite'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScheduleWrite'
+          description: ''
+    patch:
+      operationId: v1_schedules_partial_update
+      description: |-
+        The base every resource viewset should inherit.
+
+        Both gates are wired in by default:
+
+            class PaymentViewSet(ScopedModelViewSet):
+                queryset = Payment.objects.all()
+                required_permissions = {
+                    "list": "payment.view",
+                    "retrieve": "payment.view",
+                    "create": "payment.create",
+                }
+
+                def scope_queryset(self, queryset, user):
+                    if has_permission(user, "payment.view_all"):
+                        return queryset
+                    return queryset.filter(enrollment__student__user=user)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this schedule.
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedScheduleWrite'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedScheduleWrite'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedScheduleWrite'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScheduleWrite'
+          description: ''
+    delete:
+      operationId: v1_schedules_destroy
+      description: |-
+        The base every resource viewset should inherit.
+
+        Both gates are wired in by default:
+
+            class PaymentViewSet(ScopedModelViewSet):
+                queryset = Payment.objects.all()
+                required_permissions = {
+                    "list": "payment.view",
+                    "retrieve": "payment.view",
+                    "create": "payment.create",
+                }
+
+                def scope_queryset(self, queryset, user):
+                    if has_permission(user, "payment.view_all"):
+                        return queryset
+                    return queryset.filter(enrollment__student__user=user)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this schedule.
+        required: true
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/schedules/my-week/:
+    get:
+      operationId: v1_schedules_my_week_list
+      description: |-
+        The base every resource viewset should inherit.
+
+        Both gates are wired in by default:
+
+            class PaymentViewSet(ScopedModelViewSet):
+                queryset = Payment.objects.all()
+                required_permissions = {
+                    "list": "payment.view",
+                    "retrieve": "payment.view",
+                    "create": "payment.create",
+                }
+
+                def scope_queryset(self, queryset, user):
+                    if has_permission(user, "payment.view_all"):
+                        return queryset
+                    return queryset.filter(enrollment__student__user=user)
+      summary: The caller's next seven days
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedNextSessionList'
+          description: ''
+  /api/v1/schedules/next-session/:
+    get:
+      operationId: v1_schedules_next_session_retrieve
+      description: Resolves the recurring pattern into the next concrete date and
+        time, with the room and how many students are enrolled. Returns 204 when there
+        is nothing upcoming.
+      summary: The caller's next session
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NextSession'
+          description: ''
+  /api/v1/users/:
+    get:
+      operationId: v1_users_list
+      description: |-
+        No destroy(). A user is deactivated, never deleted - their enrolments,
+        payments and marks have to remain attributable.
+      summary: List users
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: q
+        schema:
+          type: string
+        description: Search User ID, phone, first or last name.
+      - in: query
+        name: role
+        schema:
+          type: string
+        description: Filter by primary role.
+      - in: query
+        name: status
+        schema:
+          type: string
+        description: ACTIVE, INACTIVE or SUSPENDED.
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedUserList'
+          description: ''
+    post:
+      operationId: v1_users_create
+      description: |-
+        No destroy(). A user is deactivated, never deleted - their enrolments,
+        payments and marks have to remain attributable.
+      summary: Create a user
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserCreate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserCreate'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserCreate'
+          description: ''
+  /api/v1/users/{public_id}/:
+    get:
+      operationId: v1_users_retrieve
+      description: |-
+        No destroy(). A user is deactivated, never deleted - their enrolments,
+        payments and marks have to remain attributable.
+      summary: Get one user
+      parameters:
+      - in: path
+        name: public_id
+        schema:
+          type: string
+          pattern: ^[A-Za-z]+-[0-9]+$
+        required: true
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    patch:
+      operationId: v1_users_partial_update
+      description: |-
+        No destroy(). A user is deactivated, never deleted - their enrolments,
+        payments and marks have to remain attributable.
+      summary: Edit a user
+      parameters:
+      - in: path
+        name: public_id
+        schema:
+          type: string
+          pattern: ^[A-Za-z]+-[0-9]+$
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUserUpdate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUserUpdate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUserUpdate'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserUpdate'
+          description: ''
+    delete:
+      operationId: v1_users_destroy
+      description: |-
+        No destroy(). A user is deactivated, never deleted - their enrolments,
+        payments and marks have to remain attributable.
+      parameters:
+      - in: path
+        name: public_id
+        schema:
+          type: string
+          pattern: ^[A-Za-z]+-[0-9]+$
+        required: true
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/users/{public_id}/roles/:
+    post:
+      operationId: v1_users_roles_create
+      description: |-
+        No destroy(). A user is deactivated, never deleted - their enrolments,
+        payments and marks have to remain attributable.
+      summary: Grant or revoke a role
+      parameters:
+      - in: path
+        name: public_id
+        schema:
+          type: string
+          pattern: ^[A-Za-z]+-[0-9]+$
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoleAssignment'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RoleAssignment'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RoleAssignment'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    delete:
+      operationId: v1_users_roles_destroy
+      description: |-
+        No destroy(). A user is deactivated, never deleted - their enrolments,
+        payments and marks have to remain attributable.
+      summary: Grant or revoke a role
+      parameters:
+      - in: path
+        name: public_id
+        schema:
+          type: string
+          pattern: ^[A-Za-z]+-[0-9]+$
+        required: true
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+  /api/v1/users/{public_id}/status/:
+    post:
+      operationId: v1_users_status_create
+      description: |-
+        No destroy(). A user is deactivated, never deleted - their enrolments,
+        payments and marks have to remain attributable.
+      summary: Activate, deactivate or suspend a user
+      parameters:
+      - in: path
+        name: public_id
+        schema:
+          type: string
+          pattern: ^[A-Za-z]+-[0-9]+$
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StatusChange'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/StatusChange'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/StatusChange'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+components:
+  schemas:
+    Assessment:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        course_public_id:
+          type: string
+          readOnly: true
+        course_title:
+          type: string
+          readOnly: true
+        title:
+          type: string
+          maxLength: 200
+        kind:
+          $ref: '#/components/schemas/AssessmentKindEnum'
+        max_score:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+        weight:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+        held_on:
+          type: string
+          format: date
+          nullable: true
+        is_published:
+          type: boolean
+          readOnly: true
+        published_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        marked_count:
+          type: integer
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - course_public_id
+      - course_title
+      - created_at
+      - id
+      - is_published
+      - marked_count
+      - published_at
+      - title
+    AssessmentComponent:
+      type: object
+      properties:
+        assessment_id:
+          type: integer
+        title:
+          type: string
+        kind:
+          $ref: '#/components/schemas/AssessmentKindEnum'
+        score:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+        max_score:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+        weight:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+        percentage:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+        is_published:
+          type: boolean
+      required:
+      - assessment_id
+      - is_published
+      - kind
+      - max_score
+      - percentage
+      - score
+      - title
+      - weight
+    AssessmentKindEnum:
+      enum:
+      - QUIZ
+      - MIDTERM
+      - FINAL
+      - ORAL
+      - HOMEWORK
+      - PARTICIPATION
+      type: string
+      description: |-
+        * `QUIZ` - Quiz
+        * `MIDTERM` - Midterm
+        * `FINAL` - Final
+        * `ORAL` - Oral
+        * `HOMEWORK` - Homework
+        * `PARTICIPATION` - Participation
+    AssessmentWrite:
+      type: object
+      properties:
+        course_public_id:
+          type: string
+          writeOnly: true
+        title:
+          type: string
+          maxLength: 200
+        kind:
+          $ref: '#/components/schemas/AssessmentKindEnum'
+        max_score:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+        weight:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+        held_on:
+          type: string
+          format: date
+          nullable: true
+      required:
+      - course_public_id
+      - title
+    AssignProfessor:
+      type: object
+      properties:
+        professor_public_id:
+          type: string
+        assignment_role:
+          allOf:
+          - $ref: '#/components/schemas/AssignmentRoleEnum'
+          default: LEAD
+      required:
+      - professor_public_id
+    AssignmentRoleEnum:
+      enum:
+      - LEAD
+      - ASSISTANT
+      type: string
+      description: |-
+        * `LEAD` - Lead
+        * `ASSISTANT` - Assistant
+    AssignmentStatusEnum:
+      enum:
+      - ACTIVE
+      - ENDED
+      type: string
+      description: |-
+        * `ACTIVE` - Active
+        * `ENDED` - Ended
+    AuditActionEnum:
+      enum:
+      - USER_CREATED
+      - USER_UPDATED
+      - USER_STATUS_CHANGED
+      - PASSWORD_RESET
+      - PASSWORD_CHANGED
+      - ROLE_GRANTED
+      - ROLE_REVOKED
+      - LOGIN_FAILED
+      - COURSE_CREATED
+      - COURSE_UPDATED
+      - COURSE_STATUS_CHANGED
+      - PROFESSOR_ASSIGNED
+      - PROFESSOR_UNASSIGNED
+      - SCHEDULE_CHANGED
+      - ENROLLMENT_CREATED
+      - ENROLLMENT_STATUS_CHANGED
+      - MARK_ENTERED
+      - MARK_CHANGED
+      - MARKS_PUBLISHED
+      - PAYMENT_CREATED
+      - PAYMENT_APPROVED
+      - PAYMENT_REJECTED
+      - PAYMENT_CANCELLED
+      - PROOF_UPLOADED
+      - PROOF_DOWNLOADED
+      - REVIEW_CREATED
+      - REVIEW_UPDATED
+      - REVIEW_MODERATED
+      - REPORT_EXPORTED
+      - EXPORT_DOWNLOADED
+      type: string
+      description: |-
+        * `USER_CREATED` - User created
+        * `USER_UPDATED` - User updated
+        * `USER_STATUS_CHANGED` - User status changed
+        * `PASSWORD_RESET` - Password reset
+        * `PASSWORD_CHANGED` - Password changed
+        * `ROLE_GRANTED` - Role granted
+        * `ROLE_REVOKED` - Role revoked
+        * `LOGIN_FAILED` - Login failed
+        * `COURSE_CREATED` - Course created
+        * `COURSE_UPDATED` - Course updated
+        * `COURSE_STATUS_CHANGED` - Course status changed
+        * `PROFESSOR_ASSIGNED` - Professor assigned
+        * `PROFESSOR_UNASSIGNED` - Professor unassigned
+        * `SCHEDULE_CHANGED` - Schedule changed
+        * `ENROLLMENT_CREATED` - Student enrolled
+        * `ENROLLMENT_STATUS_CHANGED` - Enrolment status changed
+        * `MARK_ENTERED` - Mark entered
+        * `MARK_CHANGED` - Mark changed
+        * `MARKS_PUBLISHED` - Marks published
+        * `PAYMENT_CREATED` - Payment recorded
+        * `PAYMENT_APPROVED` - Payment approved
+        * `PAYMENT_REJECTED` - Payment rejected
+        * `PAYMENT_CANCELLED` - Payment cancelled
+        * `PROOF_UPLOADED` - Payment proof uploaded
+        * `PROOF_DOWNLOADED` - Payment proof downloaded
+        * `REVIEW_CREATED` - Review written
+        * `REVIEW_UPDATED` - Review edited
+        * `REVIEW_MODERATED` - Review moderated
+        * `REPORT_EXPORTED` - Report exported
+        * `EXPORT_DOWNLOADED` - Export downloaded
+    AuditLog:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        actor_public_id:
+          type: string
+          readOnly: true
+        actor_name:
+          type: string
+          readOnly: true
+        action:
+          allOf:
+          - $ref: '#/components/schemas/AuditActionEnum'
+          readOnly: true
+        action_display:
+          type: string
+          readOnly: true
+        object_type:
+          type: string
+          readOnly: true
+        object_id:
+          type: string
+          readOnly: true
+        object_label:
+          type: string
+          readOnly: true
+          description: Human-readable at the time of the action.
+        old_values:
+          readOnly: true
+        new_values:
+          readOnly: true
+        ip_address:
+          type: string
+          readOnly: true
+          nullable: true
+      required:
+      - action
+      - action_display
+      - actor_name
+      - actor_public_id
+      - created_at
+      - id
+      - ip_address
+      - new_values
+      - object_id
+      - object_label
+      - object_type
+      - old_values
+    Average:
+      type: object
+      properties:
+        weighted_percentage:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+          nullable: true
+        marked_count:
+          type: integer
+        assessment_count:
+          type: integer
+        components:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssessmentComponent'
+      required:
+      - assessment_count
+      - components
+      - marked_count
+      - weighted_percentage
+    Balance:
+      type: object
+      properties:
+        currency:
+          type: string
+        total_minor:
+          type: integer
+        paid_minor:
+          type: integer
+        pending_minor:
+          type: integer
+        remaining_minor:
+          type: integer
+        is_settled:
+          type: boolean
+      required:
+      - currency
+      - is_settled
+      - paid_minor
+      - pending_minor
+      - remaining_minor
+      - total_minor
+    BlankEnum:
+      enum:
+      - ''
+    Cancellation:
+      type: object
+      properties:
+        reason:
+          type: string
+          maxLength: 1000
+    ContentTypeEnum:
+      enum:
+      - application/pdf
+      - image/jpeg
+      - image/png
+      type: string
+      description: |-
+        * `application/pdf` - application/pdf
+        * `image/jpeg` - image/jpeg
+        * `image/png` - image/png
+    Course:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        public_id:
+          type: string
+          readOnly: true
+        title:
+          type: string
+          maxLength: 200
+        description:
+          type: string
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+        price_minor:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        currency:
+          type: string
+          maxLength: 3
+        capacity:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+          description: Maximum enrolments. Blank means uncapped.
+        seats_taken:
+          type: integer
+          readOnly: true
+        seats_remaining:
+          type: integer
+          readOnly: true
+          nullable: true
+        status:
+          $ref: '#/components/schemas/CourseStatusEnum'
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        professors:
+          type: array
+          items: {}
+          readOnly: true
+      required:
+      - created_at
+      - end_date
+      - id
+      - professors
+      - public_id
+      - seats_remaining
+      - seats_taken
+      - start_date
+      - title
+      - updated_at
+    CourseProfessor:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        professor:
+          allOf:
+          - $ref: '#/components/schemas/ProfessorBrief'
+          readOnly: true
+        assignment_role:
+          allOf:
+          - $ref: '#/components/schemas/AssignmentRoleEnum'
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/AssignmentStatusEnum'
+          readOnly: true
+        assigned_at:
+          type: string
+          format: date-time
+          readOnly: true
+        ended_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+      required:
+      - assigned_at
+      - assignment_role
+      - ended_at
+      - id
+      - professor
+      - status
+    CourseRating:
+      type: object
+      description: The public summary for one course. Approved reviews only.
+      properties:
+        course_public_id:
+          type: string
+        course_title:
+          type: string
+        review_count:
+          type: integer
+        average_rating:
+          type: number
+          format: double
+          nullable: true
+        distribution:
+          type: object
+          additionalProperties:
+            type: integer
+      required:
+      - average_rating
+      - course_public_id
+      - course_title
+      - distribution
+      - review_count
+    CourseStatus:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/CourseStatusEnum'
+      required:
+      - status
+    CourseStatusEnum:
+      enum:
+      - DRAFT
+      - ACTIVE
+      - COMPLETED
+      - CANCELLED
+      - ARCHIVED
+      type: string
+      description: |-
+        * `DRAFT` - Draft
+        * `ACTIVE` - Active
+        * `COMPLETED` - Completed
+        * `CANCELLED` - Cancelled
+        * `ARCHIVED` - Archived
+    CourseWrite:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        public_id:
+          type: string
+          readOnly: true
+        title:
+          type: string
+          maxLength: 200
+        description:
+          type: string
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+        price_minor:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        currency:
+          type: string
+          maxLength: 3
+        capacity:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+          description: Maximum enrolments. Blank means uncapped.
+        seats_taken:
+          type: integer
+          readOnly: true
+        seats_remaining:
+          type: integer
+          readOnly: true
+          nullable: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/CourseStatusEnum'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        professors:
+          type: array
+          items: {}
+          readOnly: true
+      required:
+      - created_at
+      - end_date
+      - id
+      - professors
+      - public_id
+      - seats_remaining
+      - seats_taken
+      - start_date
+      - status
+      - title
+      - updated_at
+    Enrollment:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        student:
+          allOf:
+          - $ref: '#/components/schemas/StudentBrief'
+          readOnly: true
+        course_public_id:
+          type: string
+          readOnly: true
+        course_title:
+          type: string
+          readOnly: true
+        enrolled_at:
+          type: string
+          format: date-time
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/EnrollmentStatusEnum'
+          readOnly: true
+        price_at_enrollment_minor:
+          type: integer
+          readOnly: true
+        currency:
+          type: string
+          readOnly: true
+        notes:
+          type: string
+          readOnly: true
+      required:
+      - course_public_id
+      - course_title
+      - currency
+      - enrolled_at
+      - id
+      - notes
+      - price_at_enrollment_minor
+      - status
+      - student
+    EnrollmentCreate:
+      type: object
+      properties:
+        student_public_id:
+          type: string
+        course_public_id:
+          type: string
+        notes:
+          type: string
+      required:
+      - course_public_id
+      - student_public_id
+    EnrollmentStatus:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/EnrollmentStatusEnum'
+        reason:
+          type: string
+      required:
+      - status
+    EnrollmentStatusEnum:
+      enum:
+      - ACTIVE
+      - COMPLETED
+      - CANCELLED
+      - SUSPENDED
+      - DROPPED
+      type: string
+      description: |-
+        * `ACTIVE` - Active
+        * `COMPLETED` - Completed
+        * `CANCELLED` - Cancelled
+        * `SUSPENDED` - Suspended
+        * `DROPPED` - Dropped
+    ExportRequest:
+      type: object
+      description: |-
+        Filters for the export, passed through to the same query the JSON
+        endpoint runs. Free-form because each report takes different ones; the
+        query module ignores what it does not recognise.
+      properties:
+        filters:
+          type: object
+          additionalProperties: {}
+    ExportStatusEnum:
+      enum:
+      - PENDING
+      - RUNNING
+      - READY
+      - FAILED
+      type: string
+      description: |-
+        * `PENDING` - Queued
+        * `RUNNING` - Running
+        * `READY` - Ready
+        * `FAILED` - Failed
+    Gradebook:
+      type: object
+      properties:
+        course_public_id:
+          type: string
+        course_title:
+          type: string
+        students:
+          type: array
+          items:
+            $ref: '#/components/schemas/GradebookRow'
+      required:
+      - course_public_id
+      - course_title
+      - students
+    GradebookRow:
+      type: object
+      properties:
+        enrollment_id:
+          type: integer
+        student_public_id:
+          type: string
+        student_name:
+          type: string
+        age:
+          type: integer
+          nullable: true
+        wilaya:
+          type: string
+        prior_level:
+          type: string
+        weighted_percentage:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+          nullable: true
+        marked_count:
+          type: integer
+        assessment_count:
+          type: integer
+      required:
+      - age
+      - assessment_count
+      - enrollment_id
+      - marked_count
+      - prior_level
+      - student_name
+      - student_public_id
+      - weighted_percentage
+      - wilaya
+    Login:
+      type: object
+      properties:
+        identifier:
+          type: string
+          description: User ID (STU-000123) or phone number.
+        password:
+          type: string
+      required:
+      - identifier
+      - password
+    MarkSheet:
+      type: object
+      description: |-
+        The whole sheet, in one request.
+
+        Validated as a unit: if one row names a student who is not in the class,
+        or a score above the maximum, nothing is written. A partially accepted
+        mark sheet is worse than a rejected one, because nobody knows which half
+        landed.
+      properties:
+        rows:
+          type: array
+          items:
+            $ref: '#/components/schemas/MarkSheetRow'
+      required:
+      - rows
+    MarkSheetRow:
+      type: object
+      properties:
+        student_public_id:
+          type: string
+        score:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+        comment:
+          type: string
+          maxLength: 500
+      required:
+      - score
+      - student_public_id
+    Moderation:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/ModerationStatusEnum'
+        admin_response:
+          type: string
+          maxLength: 2000
+      required:
+      - status
+    ModerationStatusEnum:
+      enum:
+      - APPROVED
+      - HIDDEN
+      - REJECTED
+      type: string
+      description: |-
+        * `APPROVED` - APPROVED
+        * `HIDDEN` - HIDDEN
+        * `REJECTED` - REJECTED
+    NextSession:
+      type: object
+      description: What a professor's "what is next" screen needs, and nothing else.
+      properties:
+        course_public_id:
+          type: string
+        course_title:
+          type: string
+        starts_at:
+          type: string
+          format: date-time
+        ends_at:
+          type: string
+          format: date-time
+        room:
+          type: string
+        weekday_name:
+          type: string
+        enrolled_count:
+          type: integer
+      required:
+      - course_public_id
+      - course_title
+      - ends_at
+      - enrolled_count
+      - room
+      - starts_at
+      - weekday_name
+    Notification:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          readOnly: true
+        message:
+          type: string
+          readOnly: true
+        kind:
+          allOf:
+          - $ref: '#/components/schemas/NotificationKindEnum'
+          readOnly: true
+        kind_display:
+          type: string
+          readOnly: true
+        is_read:
+          type: boolean
+          readOnly: true
+        read_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        target_type:
+          type: string
+          readOnly: true
+        target_id:
+          type: string
+          readOnly: true
+        link_path:
+          type: string
+          readOnly: true
+          description: Frontend route this notification points at.
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - is_read
+      - kind
+      - kind_display
+      - link_path
+      - message
+      - read_at
+      - target_id
+      - target_type
+      - title
+    NotificationKindEnum:
+      enum:
+      - COURSE_ASSIGNED
+      - SESSION_REMINDER
+      - ROSTER_CHANGED
+      - SCHEDULE_CHANGED
+      - ENROLLED
+      - MARKS_PUBLISHED
+      - PAYMENT_APPROVED
+      - PAYMENT_REJECTED
+      - PROOF_REVIEW_NEEDED
+      type: string
+      description: |-
+        * `COURSE_ASSIGNED` - Assigned to a course
+        * `SESSION_REMINDER` - Next session reminder
+        * `ROSTER_CHANGED` - Class list changed
+        * `SCHEDULE_CHANGED` - Schedule changed
+        * `ENROLLED` - Enrolled in a course
+        * `MARKS_PUBLISHED` - Marks published
+        * `PAYMENT_APPROVED` - Payment approved
+        * `PAYMENT_REJECTED` - Payment rejected
+        * `PROOF_REVIEW_NEEDED` - Payment awaiting review
+    PaginatedAssessmentList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Assessment'
+    PaginatedAuditLogList:
+      type: object
+      required:
+      - results
+      properties:
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cD00ODY%3D"
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/AuditLog'
+    PaginatedCourseList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Course'
+    PaginatedCourseRatingList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/CourseRating'
+    PaginatedEnrollmentList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Enrollment'
+    PaginatedNextSessionList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/NextSession'
+    PaginatedNotificationList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Notification'
+    PaginatedPaymentList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Payment'
+    PaginatedPaymentProofList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentProof'
+    PaginatedReportExportList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReportExport'
+    PaginatedReviewList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Review'
+    PaginatedScheduleList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Schedule'
+    PaginatedScoreList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Score'
+    PaginatedUserList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+    PasswordChange:
+      type: object
+      properties:
+        current_password:
+          type: string
+        new_password:
+          type: string
+      required:
+      - current_password
+      - new_password
+    PasswordReset:
+      type: object
+      description: |-
+        Staff-initiated reset.
+
+        There is no self-service reset. Accounts are created by staff, students
+        frequently have no email address, and SMS is not in the MVP - so a
+        self-service flow would have no delivery channel it could trust. A
+        receptionist resets the password and reads the temporary one out.
+      properties:
+        public_id:
+          type: string
+      required:
+      - public_id
+    PatchedAssessmentWrite:
+      type: object
+      properties:
+        course_public_id:
+          type: string
+          writeOnly: true
+        title:
+          type: string
+          maxLength: 200
+        kind:
+          $ref: '#/components/schemas/AssessmentKindEnum'
+        max_score:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+        weight:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+        held_on:
+          type: string
+          format: date
+          nullable: true
+    PatchedCourseWrite:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        public_id:
+          type: string
+          readOnly: true
+        title:
+          type: string
+          maxLength: 200
+        description:
+          type: string
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+        price_minor:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        currency:
+          type: string
+          maxLength: 3
+        capacity:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+          description: Maximum enrolments. Blank means uncapped.
+        seats_taken:
+          type: integer
+          readOnly: true
+        seats_remaining:
+          type: integer
+          readOnly: true
+          nullable: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/CourseStatusEnum'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        professors:
+          type: array
+          items: {}
+          readOnly: true
+    PatchedEnrollment:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        student:
+          allOf:
+          - $ref: '#/components/schemas/StudentBrief'
+          readOnly: true
+        course_public_id:
+          type: string
+          readOnly: true
+        course_title:
+          type: string
+          readOnly: true
+        enrolled_at:
+          type: string
+          format: date-time
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/EnrollmentStatusEnum'
+          readOnly: true
+        price_at_enrollment_minor:
+          type: integer
+          readOnly: true
+        currency:
+          type: string
+          readOnly: true
+        notes:
+          type: string
+          readOnly: true
+    PatchedPayment:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        public_id:
+          type: string
+          readOnly: true
+        enrollment:
+          type: integer
+          readOnly: true
+        student_public_id:
+          type: string
+          readOnly: true
+        student_name:
+          type: string
+          readOnly: true
+        course_public_id:
+          type: string
+          readOnly: true
+        course_title:
+          type: string
+          readOnly: true
+        amount_minor:
+          type: integer
+          readOnly: true
+          description: Integer minor units. Never a float.
+        currency:
+          type: string
+          readOnly: true
+        paid_on:
+          type: string
+          format: date
+          readOnly: true
+          description: When the money changed hands, not when it was typed in.
+        method:
+          allOf:
+          - $ref: '#/components/schemas/PaymentMethodEnum'
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/PaymentStatusEnum'
+          readOnly: true
+        notes:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        created_by_public_id:
+          type: string
+          readOnly: true
+        approved_by_public_id:
+          type: string
+          readOnly: true
+        approved_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        rejected_by_public_id:
+          type: string
+          readOnly: true
+        rejected_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        rejection_reason:
+          type: string
+          readOnly: true
+        proofs:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentProof'
+          readOnly: true
+    PatchedReviewUpdate:
+      type: object
+      description: Correcting your own words, before anyone has ruled on them.
+      properties:
+        rating:
+          type: integer
+          maximum: 5
+          minimum: 1
+        comment:
+          type: string
+          maxLength: 4000
+    PatchedScheduleWrite:
+      type: object
+      properties:
+        course_public_id:
+          type: string
+          writeOnly: true
+        weekday:
+          allOf:
+          - $ref: '#/components/schemas/WeekdayEnum'
+          minimum: -2147483648
+          maximum: 2147483647
+        start_time:
+          type: string
+          format: time
+        end_time:
+          type: string
+          format: time
+        room:
+          type: string
+          maxLength: 50
+        effective_from:
+          type: string
+          format: date
+          nullable: true
+        effective_to:
+          type: string
+          format: date
+          nullable: true
+        notes:
+          type: string
+        allow_clash:
+          type: boolean
+          writeOnly: true
+          default: false
+    PatchedUserUpdate:
+      type: object
+      description: |-
+        Editing an existing user.
+
+        public_id, primary_role and status are absent on purpose. The ID is
+        immutable, the role changes through the role endpoint so it is auditable,
+        and status changes through deactivate/reactivate so the trail is recorded.
+      properties:
+        first_name:
+          type: string
+          maxLength: 100
+        last_name:
+          type: string
+          maxLength: 100
+        phone:
+          type: string
+          nullable: true
+          description: Stored in E.164 (+213555123456). Optional second login identifier.
+          maxLength: 16
+        email:
+          type: string
+          format: email
+          nullable: true
+          maxLength: 254
+        student_profile:
+          $ref: '#/components/schemas/StudentProfile'
+        professor_profile:
+          $ref: '#/components/schemas/ProfessorProfile'
+    Payment:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        public_id:
+          type: string
+          readOnly: true
+        enrollment:
+          type: integer
+          readOnly: true
+        student_public_id:
+          type: string
+          readOnly: true
+        student_name:
+          type: string
+          readOnly: true
+        course_public_id:
+          type: string
+          readOnly: true
+        course_title:
+          type: string
+          readOnly: true
+        amount_minor:
+          type: integer
+          readOnly: true
+          description: Integer minor units. Never a float.
+        currency:
+          type: string
+          readOnly: true
+        paid_on:
+          type: string
+          format: date
+          readOnly: true
+          description: When the money changed hands, not when it was typed in.
+        method:
+          allOf:
+          - $ref: '#/components/schemas/PaymentMethodEnum'
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/PaymentStatusEnum'
+          readOnly: true
+        notes:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        created_by_public_id:
+          type: string
+          readOnly: true
+        approved_by_public_id:
+          type: string
+          readOnly: true
+        approved_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        rejected_by_public_id:
+          type: string
+          readOnly: true
+        rejected_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        rejection_reason:
+          type: string
+          readOnly: true
+        proofs:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentProof'
+          readOnly: true
+      required:
+      - amount_minor
+      - approved_at
+      - approved_by_public_id
+      - course_public_id
+      - course_title
+      - created_at
+      - created_by_public_id
+      - currency
+      - enrollment
+      - id
+      - method
+      - notes
+      - paid_on
+      - proofs
+      - public_id
+      - rejected_at
+      - rejected_by_public_id
+      - rejection_reason
+      - status
+      - student_name
+      - student_public_id
+    PaymentCreate:
+      type: object
+      description: |-
+        Recording money that arrived.
+
+        Status is absent: everything is created PENDING and moves by named
+        transition, so nobody can post a payment straight to APPROVED and skip the
+        review that makes the record trustworthy.
+      properties:
+        enrollment_id:
+          type: integer
+        amount_minor:
+          type: integer
+          minimum: 1
+        paid_on:
+          type: string
+          format: date
+        method:
+          $ref: '#/components/schemas/PaymentMethodEnum'
+        notes:
+          type: string
+      required:
+      - amount_minor
+      - enrollment_id
+      - method
+      - paid_on
+    PaymentMethodEnum:
+      enum:
+      - CASH
+      - BANK_TRANSFER
+      - CCP
+      - CARD
+      - CHEQUE
+      - OTHER
+      type: string
+      description: |-
+        * `CASH` - Cash
+        * `BANK_TRANSFER` - Bank transfer
+        * `CCP` - CCP
+        * `CARD` - Card
+        * `CHEQUE` - Cheque
+        * `OTHER` - Other
+    PaymentProof:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        original_filename:
+          type: string
+          readOnly: true
+        mime_type:
+          type: string
+          readOnly: true
+        size_bytes:
+          type: integer
+          readOnly: true
+        uploaded_at:
+          type: string
+          format: date-time
+          readOnly: true
+        uploaded_by_public_id:
+          type: string
+          readOnly: true
+        scan_status:
+          allOf:
+          - $ref: '#/components/schemas/ScanStatusEnum'
+          readOnly: true
+        is_viewable:
+          type: boolean
+          readOnly: true
+      required:
+      - id
+      - is_viewable
+      - mime_type
+      - original_filename
+      - scan_status
+      - size_bytes
+      - uploaded_at
+      - uploaded_by_public_id
+    PaymentStatusEnum:
+      enum:
+      - PENDING
+      - APPROVED
+      - REJECTED
+      - CANCELLED
+      type: string
+      description: |-
+        * `PENDING` - Pending
+        * `APPROVED` - Approved
+        * `REJECTED` - Rejected
+        * `CANCELLED` - Cancelled
+    PriorLevelEnum:
+      enum:
+      - BEGINNER
+      - ELEMENTARY
+      - INTERMEDIATE
+      - UPPER_INTERMEDIATE
+      - ADVANCED
+      type: string
+      description: |-
+        * `BEGINNER` - Beginner
+        * `ELEMENTARY` - Elementary
+        * `INTERMEDIATE` - Intermediate
+        * `UPPER_INTERMEDIATE` - Upper intermediate
+        * `ADVANCED` - Advanced
+    ProfessorBrief:
+      type: object
+      properties:
+        public_id:
+          type: string
+          readOnly: true
+        full_name:
+          type: string
+          readOnly: true
+      required:
+      - full_name
+      - public_id
+    ProfessorProfile:
+      type: object
+      properties:
+        specialisation:
+          type: string
+          maxLength: 150
+        qualifications:
+          type: string
+        bio:
+          type: string
+        wilaya:
+          oneOf:
+          - $ref: '#/components/schemas/WilayaEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        wilaya_name:
+          type: string
+          readOnly: true
+        hired_at:
+          type: string
+          format: date
+          nullable: true
+        hourly_rate_minor:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          nullable: true
+        currency:
+          type: string
+          maxLength: 3
+      required:
+      - wilaya_name
+    ProofConfirm:
+      type: object
+      description: |-
+        Told that an upload finished.
+
+        The client saying so is not evidence. The view HEADs the object and
+        compares what is actually there against what was claimed before writing a
+        row - otherwise a caller can register a proof pointing at nothing.
+      properties:
+        storage_key:
+          type: string
+          maxLength: 500
+        filename:
+          type: string
+          maxLength: 255
+      required:
+      - filename
+      - storage_key
+    ProofUploadRequest:
+      type: object
+      description: |-
+        Asks for permission to upload, not for the upload itself.
+
+        Content type and size are declared up front so they can be bound into the
+        signature - the storage service then refuses anything that does not match,
+        without a byte reaching Django.
+      properties:
+        filename:
+          type: string
+          maxLength: 255
+        content_type:
+          $ref: '#/components/schemas/ContentTypeEnum'
+        size_bytes:
+          type: integer
+          maximum: 10485760
+          minimum: 1
+      required:
+      - content_type
+      - filename
+      - size_bytes
+    Rejection:
+      type: object
+      properties:
+        reason:
+          type: string
+          maxLength: 1000
+      required:
+      - reason
+    ReportExport:
+      type: object
+      properties:
+        public_id:
+          type: string
+          format: uuid
+          readOnly: true
+        report_name:
+          type: string
+          readOnly: true
+        fmt:
+          type: string
+          readOnly: true
+        filters:
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/ExportStatusEnum'
+          readOnly: true
+        row_count:
+          type: integer
+          readOnly: true
+          nullable: true
+        size_bytes:
+          type: integer
+          readOnly: true
+          nullable: true
+        error:
+          type: string
+          readOnly: true
+        requested_by_public_id:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        started_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        finished_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        is_ready:
+          type: boolean
+          readOnly: true
+      required:
+      - created_at
+      - error
+      - filters
+      - finished_at
+      - fmt
+      - is_ready
+      - public_id
+      - report_name
+      - requested_by_public_id
+      - row_count
+      - size_bytes
+      - started_at
+      - status
+    ReportResult:
+      type: object
+      description: |-
+        The shape every report answers in.
+
+        `rows` is deliberately untyped here: the three reports have different
+        columns, and inventing a union type would make the schema less honest
+        rather than more. Each report's columns are documented on its endpoint.
+      properties:
+        report:
+          type: string
+        filters:
+          type: object
+          additionalProperties: {}
+        rows:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+        totals:
+          type: object
+          additionalProperties: {}
+      required:
+      - filters
+      - report
+      - rows
+      - totals
+    Review:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        enrollment:
+          type: integer
+          readOnly: true
+        course_public_id:
+          type: string
+          readOnly: true
+        course_title:
+          type: string
+          readOnly: true
+        student_public_id:
+          type: string
+          readOnly: true
+        student_name:
+          type: string
+          readOnly: true
+        rating:
+          type: integer
+          readOnly: true
+          description: 1 to 5.
+        comment:
+          type: string
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/ReviewStatusEnum'
+          readOnly: true
+        admin_response:
+          type: string
+          readOnly: true
+          description: Published alongside an approved review.
+        moderated_by_public_id:
+          type: string
+          readOnly: true
+        moderated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - admin_response
+      - comment
+      - course_public_id
+      - course_title
+      - created_at
+      - enrollment
+      - id
+      - moderated_at
+      - moderated_by_public_id
+      - rating
+      - status
+      - student_name
+      - student_public_id
+      - updated_at
+    ReviewCreate:
+      type: object
+      description: |-
+        Writing one.
+
+        `status` is absent by design. A review is created PENDING and only a
+        moderator moves it, so nobody publishes straight past moderation.
+      properties:
+        enrollment_id:
+          type: integer
+        rating:
+          type: integer
+          maximum: 5
+          minimum: 1
+        comment:
+          type: string
+          maxLength: 4000
+      required:
+      - enrollment_id
+      - rating
+    ReviewStatusEnum:
+      enum:
+      - PENDING
+      - APPROVED
+      - HIDDEN
+      - REJECTED
+      type: string
+      description: |-
+        * `PENDING` - Awaiting moderation
+        * `APPROVED` - Approved
+        * `HIDDEN` - Hidden
+        * `REJECTED` - Rejected
+    RoleAssignment:
+      type: object
+      properties:
+        role:
+          $ref: '#/components/schemas/RoleCodeEnum'
+      required:
+      - role
+    RoleCodeEnum:
+      enum:
+      - OWNER
+      - ADMIN
+      - RECEPTION
+      - PROFESSOR
+      - STUDENT
+      type: string
+      description: |-
+        * `OWNER` - Owner
+        * `ADMIN` - Administrator
+        * `RECEPTION` - Reception
+        * `PROFESSOR` - Professor
+        * `STUDENT` - Student
+    ScanStatusEnum:
+      enum:
+      - PENDING
+      - CLEAN
+      - INFECTED
+      type: string
+      description: |-
+        * `PENDING` - Pending
+        * `CLEAN` - Clean
+        * `INFECTED` - Infected
+    Schedule:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        course_public_id:
+          type: string
+          readOnly: true
+        course_title:
+          type: string
+          readOnly: true
+        professor_public_id:
+          type: string
+          readOnly: true
+        weekday:
+          allOf:
+          - $ref: '#/components/schemas/WeekdayEnum'
+          minimum: -2147483648
+          maximum: 2147483647
+        weekday_name:
+          type: string
+          readOnly: true
+        start_time:
+          type: string
+          format: time
+        end_time:
+          type: string
+          format: time
+        room:
+          type: string
+          maxLength: 50
+        effective_from:
+          type: string
+          format: date
+          nullable: true
+        effective_to:
+          type: string
+          format: date
+          nullable: true
+        status:
+          $ref: '#/components/schemas/ScheduleStatusEnum'
+        notes:
+          type: string
+      required:
+      - course_public_id
+      - course_title
+      - end_time
+      - id
+      - professor_public_id
+      - start_time
+      - weekday
+      - weekday_name
+    ScheduleStatusEnum:
+      enum:
+      - ACTIVE
+      - SUSPENDED
+      - ENDED
+      type: string
+      description: |-
+        * `ACTIVE` - Active
+        * `SUSPENDED` - Suspended
+        * `ENDED` - Ended
+    ScheduleWrite:
+      type: object
+      properties:
+        course_public_id:
+          type: string
+          writeOnly: true
+        weekday:
+          allOf:
+          - $ref: '#/components/schemas/WeekdayEnum'
+          minimum: -2147483648
+          maximum: 2147483647
+        start_time:
+          type: string
+          format: time
+        end_time:
+          type: string
+          format: time
+        room:
+          type: string
+          maxLength: 50
+        effective_from:
+          type: string
+          format: date
+          nullable: true
+        effective_to:
+          type: string
+          format: date
+          nullable: true
+        notes:
+          type: string
+        allow_clash:
+          type: boolean
+          writeOnly: true
+          default: false
+      required:
+      - course_public_id
+      - end_time
+      - start_time
+      - weekday
+    Score:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        student_public_id:
+          type: string
+          readOnly: true
+        student_name:
+          type: string
+          readOnly: true
+        score:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+          readOnly: true
+        max_score:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+          readOnly: true
+        percentage:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+          readOnly: true
+        comment:
+          type: string
+          readOnly: true
+        entered_at:
+          type: string
+          format: date-time
+          readOnly: true
+        was_edited:
+          type: boolean
+          readOnly: true
+        change_count:
+          type: integer
+          readOnly: true
+        last_changed_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        last_changed_by_public_id:
+          type: string
+          readOnly: true
+      required:
+      - change_count
+      - comment
+      - entered_at
+      - id
+      - last_changed_at
+      - last_changed_by_public_id
+      - max_score
+      - percentage
+      - score
+      - student_name
+      - student_public_id
+      - was_edited
+    StatusChange:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/UserStatusEnum'
+        reason:
+          type: string
+      required:
+      - status
+    StudentBrief:
+      type: object
+      description: |-
+        The roster row a professor sees: who is in the room, and what they need
+        to know about them. Nothing financial.
+      properties:
+        public_id:
+          type: string
+          readOnly: true
+        full_name:
+          type: string
+          readOnly: true
+        phone:
+          type: string
+          nullable: true
+          description: Stored in E.164 (+213555123456). Optional second login identifier.
+          maxLength: 16
+        age:
+          type: integer
+          nullable: true
+          readOnly: true
+        wilaya:
+          type: string
+          readOnly: true
+        prior_level:
+          type: string
+          readOnly: true
+      required:
+      - age
+      - full_name
+      - prior_level
+      - public_id
+      - wilaya
+    StudentProfile:
+      type: object
+      properties:
+        date_of_birth:
+          type: string
+          format: date
+          nullable: true
+        age:
+          type: integer
+          readOnly: true
+        wilaya:
+          description: |-
+            Official two-digit wilaya code.
+
+            * `01` - Adrar
+            * `02` - Chlef
+            * `03` - Laghouat
+            * `04` - Oum El Bouaghi
+            * `05` - Batna
+            * `06` - Béjaïa
+            * `07` - Biskra
+            * `08` - Béchar
+            * `09` - Blida
+            * `10` - Bouira
+            * `11` - Tamanrasset
+            * `12` - Tébessa
+            * `13` - Tlemcen
+            * `14` - Tiaret
+            * `15` - Tizi Ouzou
+            * `16` - Alger
+            * `17` - Djelfa
+            * `18` - Jijel
+            * `19` - Sétif
+            * `20` - Saïda
+            * `21` - Skikda
+            * `22` - Sidi Bel Abbès
+            * `23` - Annaba
+            * `24` - Guelma
+            * `25` - Constantine
+            * `26` - Médéa
+            * `27` - Mostaganem
+            * `28` - M'Sila
+            * `29` - Mascara
+            * `30` - Ouargla
+            * `31` - Oran
+            * `32` - El Bayadh
+            * `33` - Illizi
+            * `34` - Bordj Bou Arréridj
+            * `35` - Boumerdès
+            * `36` - El Tarf
+            * `37` - Tindouf
+            * `38` - Tissemsilt
+            * `39` - El Oued
+            * `40` - Khenchela
+            * `41` - Souk Ahras
+            * `42` - Tipaza
+            * `43` - Mila
+            * `44` - Aïn Defla
+            * `45` - Naâma
+            * `46` - Aïn Témouchent
+            * `47` - Ghardaïa
+            * `48` - Relizane
+            * `49` - Timimoun
+            * `50` - Bordj Badji Mokhtar
+            * `51` - Ouled Djellal
+            * `52` - Béni Abbès
+            * `53` - In Salah
+            * `54` - In Guezzam
+            * `55` - Touggourt
+            * `56` - Djanet
+            * `57` - El M'Ghair
+            * `58` - El Meniaa
+          oneOf:
+          - $ref: '#/components/schemas/WilayaEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        wilaya_name:
+          type: string
+          readOnly: true
+        prior_level:
+          description: |-
+            Level on arrival, for placement.
+
+            * `BEGINNER` - Beginner
+            * `ELEMENTARY` - Elementary
+            * `INTERMEDIATE` - Intermediate
+            * `UPPER_INTERMEDIATE` - Upper intermediate
+            * `ADVANCED` - Advanced
+          oneOf:
+          - $ref: '#/components/schemas/PriorLevelEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        address:
+          type: string
+        emergency_contact_name:
+          type: string
+          maxLength: 150
+        emergency_contact_phone:
+          type: string
+          maxLength: 16
+        notes:
+          type: string
+          description: Administrative notes. Not visible to the student.
+      required:
+      - age
+      - wilaya_name
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        public_id:
+          type: string
+          readOnly: true
+        first_name:
+          type: string
+          maxLength: 100
+        last_name:
+          type: string
+          maxLength: 100
+        full_name:
+          type: string
+          readOnly: true
+        phone:
+          type: string
+          nullable: true
+          description: Stored in E.164 (+213555123456). Optional second login identifier.
+          maxLength: 16
+        email:
+          type: string
+          format: email
+          nullable: true
+          maxLength: 254
+        primary_role:
+          allOf:
+          - $ref: '#/components/schemas/RoleCodeEnum'
+          readOnly: true
+        status:
+          $ref: '#/components/schemas/UserStatusEnum'
+        last_login:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        roles:
+          type: array
+          items:
+            type: string
+          readOnly: true
+        student_profile:
+          allOf:
+          - $ref: '#/components/schemas/StudentProfile'
+          readOnly: true
+        professor_profile:
+          allOf:
+          - $ref: '#/components/schemas/ProfessorProfile'
+          readOnly: true
+      required:
+      - created_at
+      - first_name
+      - full_name
+      - id
+      - last_login
+      - last_name
+      - primary_role
+      - professor_profile
+      - public_id
+      - roles
+      - student_profile
+    UserCreate:
+      type: object
+      description: |-
+        Staff create accounts; there is no public registration.
+
+        The profile is created in the same transaction as the user, so a student
+        can never exist without the record that makes them a student.
+      properties:
+        first_name:
+          type: string
+          maxLength: 100
+        last_name:
+          type: string
+          maxLength: 100
+        primary_role:
+          $ref: '#/components/schemas/RoleCodeEnum'
+        phone:
+          type: string
+          nullable: true
+        email:
+          type: string
+          format: email
+          nullable: true
+        password:
+          type: string
+          writeOnly: true
+        date_of_birth:
+          type: string
+          format: date
+          nullable: true
+        wilaya:
+          oneOf:
+          - $ref: '#/components/schemas/WilayaEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        prior_level:
+          oneOf:
+          - $ref: '#/components/schemas/PriorLevelEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        address:
+          type: string
+        emergency_contact_name:
+          type: string
+        emergency_contact_phone:
+          type: string
+        specialisation:
+          type: string
+        qualifications:
+          type: string
+        hired_at:
+          type: string
+          format: date
+          nullable: true
+      required:
+      - first_name
+      - last_name
+      - primary_role
+    UserStatusEnum:
+      enum:
+      - ACTIVE
+      - INACTIVE
+      - SUSPENDED
+      type: string
+      description: |-
+        * `ACTIVE` - Active
+        * `INACTIVE` - Inactive
+        * `SUSPENDED` - Suspended
+    UserSummary:
+      type: object
+      properties:
+        public_id:
+          type: string
+          readOnly: true
+        first_name:
+          type: string
+          readOnly: true
+        last_name:
+          type: string
+          readOnly: true
+        full_name:
+          type: string
+          readOnly: true
+        phone:
+          type: string
+          readOnly: true
+          nullable: true
+          description: Stored in E.164 (+213555123456). Optional second login identifier.
+        email:
+          type: string
+          format: email
+          readOnly: true
+          nullable: true
+        primary_role:
+          allOf:
+          - $ref: '#/components/schemas/RoleCodeEnum'
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/UserStatusEnum'
+          readOnly: true
+        last_login:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        roles:
+          type: array
+          items:
+            type: string
+          readOnly: true
+        permissions:
+          type: array
+          items:
+            type: string
+          description: |-
+            The caller's permission codenames.
+
+            The frontend uses these to decide which controls to render. They are a
+            convenience, never an authorization decision - the backend re-checks
+            every request, because anything the client sends can be edited.
+          readOnly: true
+      required:
+      - email
+      - first_name
+      - full_name
+      - last_login
+      - last_name
+      - permissions
+      - phone
+      - primary_role
+      - public_id
+      - roles
+      - status
+    UserUpdate:
+      type: object
+      description: |-
+        Editing an existing user.
+
+        public_id, primary_role and status are absent on purpose. The ID is
+        immutable, the role changes through the role endpoint so it is auditable,
+        and status changes through deactivate/reactivate so the trail is recorded.
+      properties:
+        first_name:
+          type: string
+          maxLength: 100
+        last_name:
+          type: string
+          maxLength: 100
+        phone:
+          type: string
+          nullable: true
+          description: Stored in E.164 (+213555123456). Optional second login identifier.
+          maxLength: 16
+        email:
+          type: string
+          format: email
+          nullable: true
+          maxLength: 254
+        student_profile:
+          $ref: '#/components/schemas/StudentProfile'
+        professor_profile:
+          $ref: '#/components/schemas/ProfessorProfile'
+      required:
+      - first_name
+      - last_name
+    WeekdayEnum:
+      enum:
+      - 0
+      - 1
+      - 2
+      - 3
+      - 4
+      - 5
+      - 6
+      type: integer
+      description: |-
+        * `0` - Monday
+        * `1` - Tuesday
+        * `2` - Wednesday
+        * `3` - Thursday
+        * `4` - Friday
+        * `5` - Saturday
+        * `6` - Sunday
+    WilayaEnum:
+      enum:
+      - '01'
+      - '02'
+      - '03'
+      - '04'
+      - '05'
+      - '06'
+      - '07'
+      - 08
+      - 09
+      - '10'
+      - '11'
+      - '12'
+      - '13'
+      - '14'
+      - '15'
+      - '16'
+      - '17'
+      - '18'
+      - '19'
+      - '20'
+      - '21'
+      - '22'
+      - '23'
+      - '24'
+      - '25'
+      - '26'
+      - '27'
+      - '28'
+      - '29'
+      - '30'
+      - '31'
+      - '32'
+      - '33'
+      - '34'
+      - '35'
+      - '36'
+      - '37'
+      - '38'
+      - '39'
+      - '40'
+      - '41'
+      - '42'
+      - '43'
+      - '44'
+      - '45'
+      - '46'
+      - '47'
+      - '48'
+      - '49'
+      - '50'
+      - '51'
+      - '52'
+      - '53'
+      - '54'
+      - '55'
+      - '56'
+      - '57'
+      - '58'
+      type: string
+      description: |-
+        * `01` - Adrar
+        * `02` - Chlef
+        * `03` - Laghouat
+        * `04` - Oum El Bouaghi
+        * `05` - Batna
+        * `06` - Béjaïa
+        * `07` - Biskra
+        * `08` - Béchar
+        * `09` - Blida
+        * `10` - Bouira
+        * `11` - Tamanrasset
+        * `12` - Tébessa
+        * `13` - Tlemcen
+        * `14` - Tiaret
+        * `15` - Tizi Ouzou
+        * `16` - Alger
+        * `17` - Djelfa
+        * `18` - Jijel
+        * `19` - Sétif
+        * `20` - Saïda
+        * `21` - Skikda
+        * `22` - Sidi Bel Abbès
+        * `23` - Annaba
+        * `24` - Guelma
+        * `25` - Constantine
+        * `26` - Médéa
+        * `27` - Mostaganem
+        * `28` - M'Sila
+        * `29` - Mascara
+        * `30` - Ouargla
+        * `31` - Oran
+        * `32` - El Bayadh
+        * `33` - Illizi
+        * `34` - Bordj Bou Arréridj
+        * `35` - Boumerdès
+        * `36` - El Tarf
+        * `37` - Tindouf
+        * `38` - Tissemsilt
+        * `39` - El Oued
+        * `40` - Khenchela
+        * `41` - Souk Ahras
+        * `42` - Tipaza
+        * `43` - Mila
+        * `44` - Aïn Defla
+        * `45` - Naâma
+        * `46` - Aïn Témouchent
+        * `47` - Ghardaïa
+        * `48` - Relizane
+        * `49` - Timimoun
+        * `50` - Bordj Badji Mokhtar
+        * `51` - Ouled Djellal
+        * `52` - Béni Abbès
+        * `53` - In Salah
+        * `54` - In Guezzam
+        * `55` - Touggourt
+        * `56` - Djanet
+        * `57` - El M'Ghair
+        * `58` - El Meniaa
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid

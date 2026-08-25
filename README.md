@@ -41,6 +41,7 @@ docker compose exec backend pytest       # run the test suite
 docker compose exec backend ruff check . # lint
 docker compose exec backend python manage.py makemigrations
 docker compose exec backend python manage.py migrate
+docker compose logs -f frontend          # follow the Next.js logs
 docker compose down                      # stop
 docker compose down -v                   # stop and wipe the database
 ```
@@ -49,9 +50,14 @@ Interfaces while the stack is up:
 
 | URL | What |
 | --- | --- |
+| `http://localhost:3000` | the application |
 | `http://localhost:8000/api/v1/health/` | health check |
 | `http://localhost:8000/api/docs/` | API documentation (dev only) |
 | `http://localhost:9001` | MinIO console — object storage browser |
+
+In production Django is not published at all. The browser reaches Next, Next
+reaches Django on the internal network. Port 8000 is exposed here because it is
+useful in development, not because anything depends on it.
 
 ## Layout
 
@@ -59,9 +65,16 @@ Interfaces while the stack is up:
 backend/
   config/          settings (base/dev/test/staging/prod), urls, celery
   apps/
-    core/          abstract models, identifier allocation, pagination, errors
-    accounts/      the user model
-frontend/          Next.js — arrives in a later phase
+    core/          abstract models, identifiers, storage, the scoped viewset
+    rbac/          roles, permissions, the catalogue, the two gates
+    accounts/      the user model and authentication
+    students/ professors/ courses/ enrollments/ schedules/
+    assessments/   marks and gradebook
+    payments/      payments and proofs
+    reviews/       reviews and moderation
+    reports/       dashboard, reports, CSV export
+    audit/ notifications/
+frontend/          Next.js — BFF, shell, dashboard (see frontend/README.md)
 docs/              architecture and runbooks
 ```
 
@@ -75,7 +88,23 @@ docs/              architecture and runbooks
 | Production | `config.settings.prod` | TLS-only cookies, HSTS, JSON renderer only |
 
 Secrets come from the environment in every case. `.env` is git-ignored and
-must never be committed; `.env.example` documents every variable.
+must never be committed; `.env.example` documents every variable. The frontend
+has its own pair, `frontend/.env.example` and `frontend/.env.local`.
+
+## Generated files
+
+Two files are written from the backend and committed. Both have a check that
+fails rather than letting them drift:
+
+```bash
+# TypeScript types, from the OpenAPI schema
+docker compose exec -T backend sh -c   "python manage.py spectacular --file /tmp/schema.yml && cat /tmp/schema.yml"   > frontend/openapi.yaml
+cd frontend && npm run types
+
+# The frontend's permission union, from apps/rbac/catalog.py
+cd backend && python manage.py export_permissions
+python manage.py export_permissions --check   # exits 1 on drift, with a diff
+```
 
 ## Branches
 
