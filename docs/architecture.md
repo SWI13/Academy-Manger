@@ -80,7 +80,8 @@ All dates 2026. Every row marked **Done** was merged to `develop` with
 | 17-18 Hardening, tests | Not started | |
 | 19-20 Deployment | Not started | Production compose, Nginx, backups. |
 | F1 Frontend foundation | **Done** 25 Aug | Next 16 App Router, the BFF proxy, session auth, permission-driven navigation, the dashboard. |
-| F2+ Frontend features | Not started | Courses, enrolments, schedules, grades, payments, people, reviews, reports, audit. |
+| F2 Payments and enrolments | **Done** 25 Aug | List and detail for both, the approval panel, proof download, the balance card. The column factory. |
+| F3+ Frontend features | Not started | Courses, schedules, grades, people, reviews, reports, audit. |
 
 ### Verification gate
 
@@ -145,6 +146,51 @@ assumes it is one.
 The permission union is the one that matters. `can("payment.aprove")` must be
 a compile error, not a button hidden forever - the worst kind of authorization
 bug, because the screen looks correct.
+
+### One table, many column sets
+
+`paymentColumns(can)` and `enrollmentColumns(can)` return different columns for
+different callers, and the same `DataTable` renders all of them. Five parallel
+tables is how a fix to one silently misses the other four.
+
+Verified against the running stack rather than reasoned about:
+
+| Caller | Payment columns |
+| --- | --- |
+| Owner | Reference, Student, Course, Amount, Paid on, Method, Status, **Recorded / approved** |
+| Student | Reference, Course, Amount, Paid on, Method, Status |
+
+| Caller | Enrolment columns |
+| --- | --- |
+| Professor | Student, Course, **Age, Level, Wilaya**, Enrolled, Status |
+| Reception | Student, Course, **Agreed price**, Enrolled, Status |
+
+The professor's set has no price and the student's has no payer, because
+neither is a column those roles have a permission for. Filters follow the same
+rule: a student gets no "Student" box, since it could only ever match
+themselves.
+
+Omitting a column is presentation, not protection. The API already declines to
+send rows outside the caller's scope, so there is no row on any of these
+screens the caller was not entitled to receive.
+
+### Separation of duty is explained, not just enforced
+
+`approve()` refuses when `created_by == actor`. The approval panel says so and
+disables the button, rather than letting someone press it and receive a 409.
+A rule people discover by being refused is one they learn to resent; one the
+screen explains is one they understand.
+
+Both layers were checked end to end: the owner's own payment renders a disabled
+Approve with the reason beside it, and `POST .../approve` on it returns **409**
+regardless of what the browser does.
+
+### Filters live in the URL
+
+Not in component state. A receptionist who has narrowed the ledger to one
+student and one month needs to be able to send that view to a colleague, and to
+still have it after a refresh. Filter state in `useState` is state nobody can
+share.
 
 ### Money is never arithmetic in the browser
 
