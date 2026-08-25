@@ -1,7 +1,9 @@
 # --- secrets ---
 .env
+.env.prod
 .env.*
 !.env.example
+!.env.prod.example
 
 # --- python ---
 __pycache__/

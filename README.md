@@ -110,6 +110,19 @@ python manage.py export_permissions --check   # exits 1 on drift, with a diff
 python manage.py export_choices --check
 ```
 
+## Deploying
+
+Production is a separate compose file with only Nginx published, TLS at the
+edge, and a rehearsed backup/restore pair. See **`docs/deployment.md`** — it
+also lists the four things that bit during the first real deploy, each of
+which is silent until it is not.
+
+```bash
+docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --build
+```
+
+The `--env-file` flag is not optional; the runbook explains why.
+
 ## Branches
 
 `main` is always deployable. `develop` integrates. Each phase is built on

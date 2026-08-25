@@ -77,13 +77,12 @@ All dates 2026. Every row marked **Done** was merged to `develop` with
 | 13-14 Notifications, dashboards | **Done** 24 Aug | Channel abstraction (in-app registered, SMS stubbed per D-8), two idempotent beat jobs, one permission-driven dashboard endpoint. |
 | 12 Reviews | **Done** 24 Aug | Attached to enrolment per D-2. Moderation workflow, author withheld from professors (D-9). |
 | 15 Reports | **Done** 24 Aug | Three reports, operational split from financial, CSV export as a Celery job writing to the private bucket. |
-| 19-20 Deployment | Not started | Production compose, Nginx, backups. |
 | F1 Frontend foundation | **Done** 25 Aug | Next 16 App Router, the BFF proxy, session auth, permission-driven navigation, the dashboard. |
 | F2 Payments and enrolments | **Done** 25 Aug | List and detail for both, the approval panel, proof download, the balance card. The column factory. |
 | F3 Courses, schedule, grades | **Done** 25 Aug | Catalogue and course detail, the week grid, the gradebook, the mark sheet, publishing, a student's own marks. |
 | F4 People | **Done** 25 Aug | The list, the create form, roles, status and password reset — with the escalation boundaries stated on screen. |
 | F5 Reviews, reports, audit | **Done** 25 Aug | Moderation queue, the three reports with CSV export, the append-only log. |
-| 17-18 Hardening, tests | Not started | |
+| 17-20 Hardening and deployment | **Done** 25 Aug | CI covering every gate, production compose, Nginx, backup and restore — all rehearsed against a running stack. See `docs/deployment.md`. |
 
 ### Verification gate
 

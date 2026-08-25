@@ -6,13 +6,22 @@ on:
   pull_request:
     branches: [main, develop]
 
+# A second push to the same branch cancels the first. A queue of superseded
+# runs tells you nothing and costs minutes.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   backend:
     runs-on: ubuntu-latest
 
-    # Real PostgreSQL, not SQLite: the row locks, partial unique constraints
-    # and JSONB columns this platform depends on do not exist on SQLite, and a
-    # suite that passes on a database we do not ship proves nothing.
+    # Real PostgreSQL, real Redis, real object storage - not SQLite and not
+    # mocks. The row locks, partial unique constraints and JSONB columns this
+    # platform depends on do not exist on SQLite, and the proof tests
+    # deliberately exercise the actual bucket: the whole design is that Django
+    # never sees the bytes, so a stubbed storage layer would test the opposite
+    # of what ships.
     services:
       postgres:
         image: postgres:16-alpine
@@ -34,6 +43,18 @@ jobs:
           --health-interval 5s
           --health-timeout 3s
           --health-retries 10
+      minio:
+        image: bitnami/minio:latest
+        env:
+          MINIO_ROOT_USER: ci-access-key
+          MINIO_ROOT_PASSWORD: ci-only-password
+          MINIO_DEFAULT_BUCKETS: sm-academy-test
+        ports: ["9000:9000"]
+        options: >-
+          --health-cmd "curl -f http://localhost:9000/minio/health/live"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
 
     env:
       DJANGO_SECRET_KEY: ci-only-not-a-real-secret
@@ -45,14 +66,17 @@ jobs:
       POSTGRES_HOST: localhost
       POSTGRES_PORT: "5432"
       REDIS_URL: redis://localhost:6379/0
+      REDIS_SESSION_URL: redis://localhost:6379/3
       CELERY_BROKER_URL: redis://localhost:6379/1
       CELERY_RESULT_BACKEND: redis://localhost:6379/2
       S3_ENDPOINT_URL: http://localhost:9000
-      S3_ACCESS_KEY: ci
+      S3_PUBLIC_ENDPOINT_URL: http://localhost:9000
+      S3_ACCESS_KEY: ci-access-key
       S3_SECRET_KEY: ci-only-password
       S3_BUCKET_NAME: sm-academy-test
       S3_REGION: us-east-1
       PUBLIC_SITE_URL: http://localhost:3000
+      DEFAULT_PHONE_REGION: DZ
 
     defaults:
       run:
@@ -73,6 +97,9 @@ jobs:
       - name: Lint
         run: ruff check .
 
+      - name: Format check
+        run: ruff format --check .
+
       - name: Check for missing migrations
         run: python manage.py makemigrations --check --dry-run
 
@@ -80,4 +107,76 @@ jobs:
         run: python manage.py migrate
 
       - name: Test
-        run: pytest --cov=apps --cov-report=term-missing
+        # --ds, not the env var: pytest-django resolves --ds > environment >
+        # ini, and a workflow that exports DJANGO_SETTINGS_MODULE for the
+        # other steps would otherwise decide which settings the suite runs on.
+        run: pytest --ds=config.settings.test --cov=apps --cov-report=term-missing
+
+      - name: Production posture
+        env:
+          DJANGO_SETTINGS_MODULE: config.settings.prod
+          DJANGO_ALLOWED_HOSTS: example.com
+        run: python manage.py check --deploy --fail-level WARNING
+
+      # The two generated frontend files must match their source of truth.
+      # A permission added to the catalogue but not to the union is a
+      # `can()` that is false forever, and the screen still looks right.
+      - name: Generated files are in sync
+        run: |
+          python manage.py export_permissions --check
+          python manage.py export_choices --check
+
+      - name: OpenAPI schema is in sync
+        run: |
+          python manage.py spectacular --format openapi-json --file ../frontend/openapi.json
+          git diff --exit-code -- ../frontend/openapi.json
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Types match the committed schema
+        # Regenerate from openapi.json and fail if anything moved. A serializer
+        # change that the frontend has not caught up with then fails here
+        # rather than as `undefined` on a screen in front of a receptionist.
+        run: |
+          npm run types
+          git diff --exit-code -- src/types/api.d.ts
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Build
+        env:
+          NEXT_TELEMETRY_DISABLED: "1"
+        run: npm run build
+
+  images:
+    # Both images must actually build. A Dockerfile that only works on the
+    # machine it was written on is found at deploy time otherwise.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build the backend image
+        run: docker build --target prod backend
+
+      - name: Build the frontend image
+        run: docker build --target runner frontend
