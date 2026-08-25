@@ -96,6 +96,4 @@ class Command(BaseCommand):
 
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(content, encoding="utf-8")
-        self.stdout.write(
-            self.style.SUCCESS(f"Wrote {len(PERMISSIONS)} permissions to {target}.")
-        )
+        self.stdout.write(self.style.SUCCESS(f"Wrote {len(PERMISSIONS)} permissions to {target}."))

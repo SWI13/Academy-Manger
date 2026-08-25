@@ -49,9 +49,7 @@ def two_payments(db, student, reception):
 
 @pytest.mark.django_db
 def test_pagination_links_use_the_forwarded_host(logged_in, owner, two_payments):
-    response = logged_in(owner).get(
-        "/api/v1/payments/?page_size=1", HTTP_X_FORWARDED_HOST=SITE
-    )
+    response = logged_in(owner).get("/api/v1/payments/?page_size=1", HTTP_X_FORWARDED_HOST=SITE)
 
     assert response.status_code == 200
     assert response.data["next"] is not None
