@@ -1855,8 +1855,12 @@ export interface components {
             readonly object_id: string;
             /** @description Human-readable at the time of the action. */
             readonly object_label: string;
-            readonly old_values: unknown;
-            readonly new_values: unknown;
+            readonly old_values: {
+                [key: string]: unknown;
+            };
+            readonly new_values: {
+                [key: string]: unknown;
+            };
             readonly ip_address: string | null;
         };
         Average: {

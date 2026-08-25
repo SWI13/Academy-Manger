@@ -22,6 +22,13 @@ from .models import AuditLog
 class AuditLogSerializer(serializers.ModelSerializer):
     action_display = serializers.CharField(source="get_action_display", read_only=True)
 
+    # Declared rather than inferred. A bare JSONField generates as `unknown`
+    # in the OpenAPI schema, so the frontend cannot read a key off the diff
+    # without casting - which is precisely the check the generated types are
+    # there to provide. Both columns default to {} and are never null.
+    old_values = serializers.DictField(read_only=True)
+    new_values = serializers.DictField(read_only=True)
+
     class Meta:
         model = AuditLog
         fields = [

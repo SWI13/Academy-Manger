@@ -4419,9 +4419,13 @@
                         "description": "Human-readable at the time of the action."
                     },
                     "old_values": {
+                        "type": "object",
+                        "additionalProperties": {},
                         "readOnly": true
                     },
                     "new_values": {
+                        "type": "object",
+                        "additionalProperties": {},
                         "readOnly": true
                     },
                     "ip_address": {
