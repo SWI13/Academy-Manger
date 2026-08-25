@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { Pagination } from "@/components/ui/Pagination";
 import { Toolbar } from "@/components/ui/Toolbar";
 import { PAGE_SIZE, fetchPage, pageFrom, type SearchParams } from "@/lib/list";
@@ -35,15 +37,25 @@ export default async function EnrollmentsPage({
 
   return (
     <div className="flex flex-col gap-5">
-      <header>
-        <h1 className="text-xl font-semibold tracking-tight text-ink">
-          Enrolments
-        </h1>
-        <p className="mt-1 text-sm text-ink-soft">
-          One row per student per course, with the price agreed at the time.
-          Payments and marks hang off these, which is why they are cancelled
-          rather than deleted.
-        </p>
+      <header className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="text-xl font-semibold tracking-tight text-ink">
+            Enrolments
+          </h1>
+          <p className="mt-1 text-sm text-ink-soft">
+            One row per student per course, with the price agreed at the time.
+            Payments and marks hang off these, which is why they are cancelled
+            rather than deleted.
+          </p>
+        </div>
+        {can(session, "enrollment.create") ? (
+          <Link
+            href="/enrollments/new"
+            className="rounded border border-accent bg-accent px-3 py-1.5 text-sm font-medium text-accent-ink hover:opacity-90"
+          >
+            Enrol a student
+          </Link>
+        ) : null}
       </header>
 
       <Toolbar
