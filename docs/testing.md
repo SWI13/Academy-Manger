@@ -64,6 +64,11 @@ then look at the same page as `PROF-000001`. The comment is there; the
 author's name is not — it is not in the payload at all, so there is nothing to
 find in the network tab.
 
+**Enrol somebody** — as reception, **Enrolments → Enrol a student**. The
+course list offers only what accepts enrolments *and* what you can see: an
+administrator is offered the draft course, reception is not. The panel shows
+the price that is about to be frozen onto the enrolment.
+
 **Reports** — the owner has three; reception has one, and it contains no money
 at all. Queue a CSV export as the owner and download it.
 
@@ -203,3 +208,7 @@ Worth saying plainly.
   hand, not by a test.
 - **SMS is a stub.** Deliberately, per D-8. The channel exists so adding it is
   a class rather than a schema change; it is not registered.
+- **Not every record can be created from the screens yet.** Enrolling a student
+  can. Creating a course, recording a payment, adding a schedule slot or
+  setting up an assessment are still API-only — the screens list and act on
+  those records but do not yet make new ones.
