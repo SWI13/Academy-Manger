@@ -91,7 +91,13 @@ export const api = {
     apiFetch<T>(path, { method: "PUT", body: JSON.stringify(body) }),
   patch: <T>(path: string, body: unknown) =>
     apiFetch<T>(path, { method: "PATCH", body: JSON.stringify(body) }),
-  delete: <T>(path: string) => apiFetch<T>(path, { method: "DELETE" }),
+  // DELETE carries a body here: revoking a role names the role in the
+  // payload, the same shape the grant uses.
+  delete: <T>(path: string, body?: unknown) =>
+    apiFetch<T>(path, {
+      method: "DELETE",
+      body: body === undefined ? undefined : JSON.stringify(body),
+    }),
 };
 
 export type Paginated<T> = {
