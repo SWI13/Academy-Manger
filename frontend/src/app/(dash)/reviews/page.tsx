@@ -13,7 +13,7 @@ import type { Enrollment, Review } from "@/types";
 import { ReviewCard } from "./ReviewCard";
 import { WriteReview } from "./WriteReview";
 
-export const metadata = { title: "Reviews · SM Academy" };
+export const metadata = { title: "Reviews" };
 
 const FILTERS = ["status", "course", "rating"];
 

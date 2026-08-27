@@ -3,17 +3,11 @@ import type { ButtonHTMLAttributes } from "react";
 
 import { Icon, Spinner, type IconName } from "./Icon";
 
-type Variant =
-  | "primary"
-  | "brand"
-  | "secondary"
-  | "quiet"
-  | "danger"
-  | "ghost";
+type Variant = "primary" | "secondary" | "quiet" | "danger" | "ghost";
 type Size = "sm" | "md" | "lg";
 
 /*
- * One button, six intents, three sizes.
+ * One button, five intents, three sizes.
  *
  * Every dimension is here rather than at the call site, so "Approve" on the
  * payment screen and "Save sheet" on the mark sheet are the same height to
@@ -24,25 +18,38 @@ type Size = "sm" | "md" | "lg";
  * rectangle softens its edges for the duration of the animation.
  */
 const VARIANTS: Record<Variant, string> = {
-  primary:
-    "border-transparent bg-accent text-accent-ink shadow-xs hover:bg-accent-hover active:translate-y-px disabled:bg-accent/45 disabled:shadow-none",
   /*
-   * The institute's own crimson, and the only control that wears it.
+   * The academy's red, and the only thing in the interface that is a solid
+   * field of it.
    *
-   * Kept apart from `danger` on purpose: `danger` is a wash with red text on
-   * it, this is solid crimson with white on it, and the two never appear in
-   * the same place - the sign-in screen has no destructive action and the
-   * workspace has no brand button. The `sheen` class gives it a light sweep
-   * on hover, which the reduced-motion block switches off entirely.
+   * `bg-accent-fill` rather than `bg-accent`: the logo's own #ed1c24 puts
+   * white at 4.38:1, which fails AA for a 14px label. This is a shade deeper,
+   * clears 5.2:1, and reads as the same red beside the mark. The hover
+   * brightens towards the logo red without crossing back under the line.
+   *
+   * The glow is a red bloom rather than a black drop shadow, because on a
+   * black page a drop shadow is invisible and the light is what gives the
+   * control its edge.
    */
-  brand:
-    "sheen border-transparent bg-brand text-brand-ink shadow-sm hover:bg-brand-hover hover:shadow-md active:translate-y-px disabled:bg-brand/45 disabled:shadow-none",
+  primary:
+    "sheen border-transparent bg-accent-fill text-accent-ink shadow-[0_2px_10px_-2px_rgb(237_28_36/0.5)] hover:bg-accent-fill-hover hover:shadow-[0_4px_18px_-2px_rgb(237_28_36/0.65)] active:translate-y-px disabled:bg-accent-fill/40 disabled:shadow-none",
+  /*
+   * Dark glass with a hairline. Its hover is where the red enters - the edge
+   * lights up rather than the field filling in, so a row of secondary buttons
+   * never competes with the one primary among them.
+   */
   secondary:
-    "border-rule-strong bg-surface text-ink shadow-xs hover:bg-sunk active:translate-y-px disabled:opacity-50 disabled:shadow-none",
+    "glass border-rule-strong text-ink hover:border-accent-line hover:text-white active:translate-y-px disabled:opacity-50",
   quiet:
-    "border-transparent bg-transparent text-ink-soft hover:bg-sunk hover:text-ink active:translate-y-px disabled:opacity-50",
+    "border-transparent bg-transparent text-ink-soft hover:bg-white/[0.06] hover:text-ink active:translate-y-px disabled:opacity-50",
+  /*
+   * Destructive, and deliberately not the brand red: a wash with orange-red
+   * text and, at every call site, an icon and a verb. On a screen where the
+   * primary action is also red, hue alone cannot be what separates "confirm"
+   * from "delete".
+   */
   danger:
-    "border-bad-line bg-bad-wash text-bad hover:bg-bad/15 active:translate-y-px disabled:opacity-50",
+    "border-bad-line bg-bad-wash text-bad hover:border-bad hover:bg-bad/20 active:translate-y-px disabled:opacity-50",
   ghost:
     "border-transparent bg-transparent text-accent hover:bg-accent-soft active:translate-y-px disabled:opacity-50",
 };

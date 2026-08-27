@@ -14,7 +14,7 @@ import type { Assessment, Course, Gradebook, Score } from "@/types";
 import { GradebookTable } from "./GradebookTable";
 import { MyMarks } from "./MyMarks";
 
-export const metadata = { title: "Grades · SM Academy" };
+export const metadata = { title: "Grades" };
 
 /**
  * One route, two audiences.

@@ -172,12 +172,12 @@ export function MarkSheet({
         }
       />
 
-      <div className="overflow-hidden rounded-xl border border-rule bg-surface shadow-xs">
+      <div className="overflow-hidden rounded-xl border border-rule bg-surface">
         <div className="scroll-slim overflow-x-auto">
           <table className="w-full border-collapse text-sm">
             <caption className="sr-only">Marks for {assessment.title}</caption>
             <thead>
-              <tr className="border-b border-rule bg-sunk/50">
+              <tr className="border-b border-rule bg-black/40">
                 {/*
                   The name column sticks. Scrolling right to reach the comment
                   box and losing sight of whose row it is is how a comment ends
@@ -185,7 +185,7 @@ export function MarkSheet({
                 */}
                 <th
                   scope="col"
-                  className="eyebrow sticky left-0 z-10 bg-sunk px-4 py-2.5 text-left"
+                  className="eyebrow sticky left-0 z-10 bg-black/40 px-4 py-2.5 text-left"
                 >
                   Student
                 </th>
@@ -211,11 +211,11 @@ export function MarkSheet({
                 return (
                   <tr
                     key={row.publicId}
-                    className="group border-b border-rule transition-colors last:border-b-0 hover:bg-sunk/40"
+                    className="group border-b border-rule transition-colors last:border-b-0 hover:bg-white/[0.06]"
                   >
                     <th
                       scope="row"
-                      className="sticky left-0 z-10 bg-surface px-4 py-2.5 text-left font-normal transition-colors group-hover:bg-sunk/40"
+                      className="sticky left-0 z-10 bg-surface px-4 py-2.5 text-left font-normal transition-colors group-hover:bg-white/[0.06]"
                     >
                       <span className="flex items-center gap-2.5">
                         <Avatar
@@ -311,7 +311,7 @@ export function MarkSheet({
 
         {/* --- the save bar, attached to the sheet it saves ----------- */}
         {mayEnter ? (
-          <div className="flex flex-wrap items-center gap-3 border-t border-rule bg-sunk/40 px-4 py-3">
+          <div className="flex flex-wrap items-center gap-3 border-t border-rule bg-white/[0.04] px-4 py-3">
             <Button
               variant="primary"
               icon="check"

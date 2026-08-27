@@ -86,7 +86,7 @@ export function Dropdown({
           aria-label={label}
           aria-labelledby={id}
           onClick={() => setOpen(false)}
-          className={`animate-pop absolute top-[calc(100%+6px)] z-50 min-w-56 overflow-hidden rounded-xl border border-rule bg-raised p-1 shadow-lg ${
+          className={`animate-pop absolute top-[calc(100%+6px)] z-50 min-w-56 overflow-hidden rounded-xl border border-rule glass-strong p-1 ${
             align === "end" ? "right-0" : "left-0"
           }`}
         >
@@ -121,7 +121,7 @@ export function MenuItem({
       className={`flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-sm transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
         tone === "danger"
           ? "text-bad hover:bg-bad-wash"
-          : "text-ink-soft hover:bg-sunk hover:text-ink"
+          : "text-ink-soft hover:bg-white/[0.06] hover:text-ink"
       }`}
     >
       {icon ? <Icon name={icon} size={16} /> : null}

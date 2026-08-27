@@ -15,7 +15,7 @@ export default function NotFound() {
     <div className="flex min-h-[50vh] flex-col items-center justify-center px-4 text-center">
       <span
         aria-hidden
-        className="mb-4 flex size-12 items-center justify-center rounded-full border border-rule bg-sunk text-ink-faint"
+        className="mb-4 flex size-12 items-center justify-center rounded-full border border-rule bg-white/[0.06] text-ink-faint"
       >
         <Icon name="search" size={22} />
       </span>

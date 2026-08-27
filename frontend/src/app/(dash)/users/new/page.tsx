@@ -5,7 +5,7 @@ import { can, getSession } from "@/lib/session";
 
 import { NewPersonForm } from "./NewPersonForm";
 
-export const metadata = { title: "New person · SM Academy" };
+export const metadata = { title: "New person" };
 
 export default async function NewPersonPage() {
   const session = await getSession();

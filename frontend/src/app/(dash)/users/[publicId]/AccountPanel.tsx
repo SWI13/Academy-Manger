@@ -269,7 +269,7 @@ export function AccountPanel({ user }: { user: User }) {
                 <Icon name="alert" size={16} />
                 Give this to them now. It is not shown again.
               </p>
-              <p className="tabular mt-3 select-all break-all rounded-md border border-warn-line bg-surface px-3 py-2.5 font-mono text-base text-ink">
+              <p className="tabular mt-3 select-all break-all rounded-md border border-warn-line bg-black/40 px-3 py-2.5 font-mono text-base text-ink">
                 {temporary}
               </p>
               <p className="mt-2.5 text-xs leading-relaxed text-ink-soft">

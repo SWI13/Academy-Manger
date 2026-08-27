@@ -78,7 +78,7 @@ export function ReviewCard({ review }: { review: Review }) {
   }
 
   return (
-    <article className="rounded-xl border border-rule bg-surface p-4 shadow-xs sm:p-5">
+    <article className="glass rounded-xl border border-rule p-4 sm:p-5">
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex min-w-0 items-start gap-3">
           {/*
@@ -94,7 +94,7 @@ export function ReviewCard({ review }: { review: Review }) {
           ) : (
             <span
               aria-hidden
-              className="flex size-9 shrink-0 items-center justify-center rounded-full bg-sunk text-ink-faint"
+              className="flex size-9 shrink-0 items-center justify-center rounded-full bg-white/[0.06] text-ink-faint"
             >
               <Icon name="user" size={16} />
             </span>
@@ -221,7 +221,7 @@ export function ReviewCard({ review }: { review: Review }) {
         confirmLabel="Reject review"
         description="It stays in the record with your decision against it, and never appears publicly."
       >
-        <blockquote className="rounded-lg border border-rule bg-sunk/60 p-3 text-sm leading-relaxed text-ink-soft">
+        <blockquote className="rounded-lg border border-rule bg-black/30 p-3 text-sm leading-relaxed text-ink-soft">
           {review.comment || "No comment left."}
         </blockquote>
       </ConfirmDialog>

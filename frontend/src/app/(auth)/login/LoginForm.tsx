@@ -88,7 +88,7 @@ export function LoginForm() {
           onClick={() => setReveal((current) => !current)}
           aria-label={reveal ? "Hide password" : "Show password"}
           aria-pressed={reveal}
-          className="absolute bottom-[2px] right-1 inline-flex size-8 items-center justify-center rounded-md text-ink-faint transition-colors hover:bg-sunk hover:text-ink"
+          className="absolute bottom-[2px] right-1 inline-flex size-8 items-center justify-center rounded-md text-ink-faint transition-colors hover:bg-white/[0.06] hover:text-ink"
         >
           <Icon name="eye" size={16} />
         </button>
@@ -113,7 +113,7 @@ export function LoginForm() {
 
       <Button
         type="submit"
-        variant="brand"
+        variant="primary"
         size="lg"
         block
         busy={busy}

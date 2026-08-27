@@ -160,7 +160,7 @@ export function ProofList({
             >
               <span
                 aria-hidden
-                className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-rule bg-sunk text-ink-faint"
+                className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-rule bg-white/[0.06] text-ink-faint"
               >
                 <Icon name={glyphFor(proof.mime_type)} size={16} />
               </span>

@@ -8,7 +8,7 @@ import type { Course } from "@/types";
 
 import { CoursesTable } from "./CoursesTable";
 
-export const metadata = { title: "Courses · SM Academy" };
+export const metadata = { title: "Courses" };
 
 const FILTERS = ["status", "q"];
 

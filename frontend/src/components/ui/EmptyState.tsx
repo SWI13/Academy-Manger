@@ -29,7 +29,7 @@ export function EmptyState({
 }) {
   return (
     <div
-      className={`flex flex-col items-center justify-center rounded-xl border border-dashed border-rule bg-surface px-6 py-12 text-center ${className}`}
+      className={`glass flex flex-col items-center justify-center rounded-xl border border-dashed border-rule px-6 py-12 text-center ${className}`}
     >
       <span
         aria-hidden
@@ -71,7 +71,7 @@ export function ErrorState({
   return (
     <div
       role="alert"
-      className="flex flex-col items-center justify-center rounded-xl border border-rule bg-surface px-6 py-12 text-center"
+      className="glass flex flex-col items-center justify-center rounded-xl border border-rule px-6 py-12 text-center"
     >
       <span
         aria-hidden
@@ -107,7 +107,7 @@ export function NoAccess({
   what?: string;
 }) {
   return (
-    <div className="flex flex-col items-center justify-center rounded-xl border border-rule bg-surface px-6 py-14 text-center">
+    <div className="glass flex flex-col items-center justify-center rounded-xl border border-rule px-6 py-14 text-center">
       <span
         aria-hidden
         className="mb-3 flex size-11 items-center justify-center rounded-full border border-rule bg-sunk text-ink-faint"

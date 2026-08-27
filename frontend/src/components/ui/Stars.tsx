@@ -86,10 +86,12 @@ export function Meter({
       aria-valuemin={0}
       aria-valuemax={max}
       aria-label={label}
-      className={`block h-1.5 w-full overflow-hidden rounded-full bg-sunk ${className}`}
+      className={`block h-1.5 w-full overflow-hidden rounded-full bg-white/[0.07] ${className}`}
     >
       <span
-        className={`block h-full rounded-full transition-[width] duration-[260ms] ${fills[tone]}`}
+        /* Fills once, on arrival, then animates its width on any later change.
+         A ratio that snaps into place is a ratio nobody notices arriving. */
+      className={`animate-meter block h-full rounded-full transition-[width] duration-[260ms] ${fills[tone]}`}
         style={{ width: `${share}%` }}
       />
     </span>

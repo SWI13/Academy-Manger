@@ -26,12 +26,12 @@ import { Icon, type IconName } from "./Icon";
  */
 
 const CONTROL =
-  "w-full rounded-md border bg-surface px-3 text-sm text-ink shadow-xs transition-[border-color,box-shadow] placeholder:text-ink-faint disabled:cursor-not-allowed disabled:bg-sunk disabled:text-ink-faint";
+  "w-full rounded-md border bg-black/40 px-3 text-sm text-ink transition-[border-color,box-shadow] placeholder:text-ink-faint disabled:cursor-not-allowed disabled:bg-black/20 disabled:text-ink-faint";
 
 function ring(error?: string) {
   return error
-    ? "border-bad focus:border-bad"
-    : "border-rule-strong hover:border-ink-faint focus:border-accent";
+    ? "border-bad focus:border-bad focus:shadow-[0_0_0_3px_rgb(255_133_88/0.14)]"
+    : "border-rule-strong hover:border-rule-strong hover:bg-black/50 focus:border-accent focus:shadow-[0_0_0_3px_rgb(237_28_36/0.16)]";
 }
 
 function Shell({

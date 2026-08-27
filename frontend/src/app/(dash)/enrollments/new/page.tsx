@@ -7,7 +7,7 @@ import type { Course, Enrollment, User } from "@/types";
 
 import { EnrolForm } from "./EnrolForm";
 
-export const metadata = { title: "Enrol a student · SM Academy" };
+export const metadata = { title: "Enrol a student" };
 
 export default async function NewEnrolmentPage() {
   const session = await getSession();

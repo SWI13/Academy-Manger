@@ -14,7 +14,7 @@ import { can, cookieHeader, getSession } from "@/lib/session";
 import { ExportPanel } from "./ExportPanel";
 import { ReportTable } from "./ReportTable";
 
-export const metadata = { title: "Reports · SM Academy" };
+export const metadata = { title: "Reports" };
 
 type ReportResult = {
   report: string;

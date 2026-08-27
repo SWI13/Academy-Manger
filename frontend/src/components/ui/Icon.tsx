@@ -42,6 +42,12 @@ export type IconName =
   | "file"
   | "filter"
   | "gauge"
+  | "bolt"
+  | "car"
+  | "chip"
+  | "code"
+  | "network"
+  | "wrench"
   | "graduation"
   | "info"
   | "key"
@@ -94,6 +100,22 @@ const PATHS: Record<IconName, string> = {
   file: "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zm0 0v6h6",
   filter: "M3 5h18l-7 8v6l-4 2v-8L3 5Z",
   gauge: "M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm2.1-2.9L18 8M4.2 17A9.5 9.5 0 0 1 12 2.5 9.5 9.5 0 0 1 19.8 17",
+
+  /*
+   * The trades the academy teaches.
+   *
+   * Drawn to the same 24 grid and the same 1.75 stroke as everything else, so
+   * a wrench beside a bell reads as one family. They label course categories
+   * and nothing else - a spanner is a category, never a settings menu.
+   */
+  wrench:
+    "M15.6 3.4a5.2 5.2 0 0 0-6.6 6.6l-5.4 5.4a2 2 0 0 0 0 2.8l1.8 1.8a2 2 0 0 0 2.8 0l5.4-5.4a5.2 5.2 0 0 0 6.6-6.6l-3.2 3.2-2.9-.7-.7-2.9 3.2-3.2Z",
+  bolt: "M13.5 2 5 13.5h5.6L9.9 22l8.6-11.5h-5.7l.7-8.5Z",
+  car: "M3.5 16.5v-4a2 2 0 0 1 .21-.9l1.9-3.8A2 2 0 0 1 7.4 6.7h9.2a2 2 0 0 1 1.79 1.1l1.9 3.8a2 2 0 0 1 .21.9v4M3.5 16.5h17M3.5 16.5v2.3M20.5 16.5v2.3M6.8 13h2M15.2 13h2",
+  chip: "M6.8 6.8h10.4v10.4H6.8zM9.6 3.4v3.4M14.4 3.4v3.4M9.6 17.2v3.4M14.4 17.2v3.4M3.4 9.6h3.4M3.4 14.4h3.4M17.2 9.6h3.4M17.2 14.4h3.4",
+  code: "m8.4 8-4.6 4 4.6 4M15.6 8l4.6 4-4.6 4M13.6 4.6 10.4 19.4",
+  network:
+    "M12 3.4a2.2 2.2 0 1 1 0 4.4 2.2 2.2 0 0 1 0-4.4ZM5 16.2a2.2 2.2 0 1 1 0 4.4 2.2 2.2 0 0 1 0-4.4ZM19 16.2a2.2 2.2 0 1 1 0 4.4 2.2 2.2 0 0 1 0-4.4ZM12 7.8v3.7M6.1 11.5h11.8a1 1 0 0 1 1 1v3.7M5 16.2v-3.7a1 1 0 0 1 1-1",
   graduation: "M22 9 12 5 2 9l10 4 10-4Zm-16 3v5c0 1.7 2.7 3 6 3s6-1.3 6-3v-5",
   info: "M12 16v-4m0-4h.01M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0Z",
   key: "m15.5 8.5 5 5M14 15l3-3M9.5 20a6.5 6.5 0 1 1 4.6-11.1L21 15.8 18.8 18l-2.2-2.2-2.2 2.2-2-2A6.5 6.5 0 0 1 9.5 20Z",

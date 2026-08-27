@@ -20,7 +20,7 @@ import { WeekGrid } from "../../schedules/WeekGrid";
 type Props = { params: Promise<{ publicId: string }> };
 
 export async function generateMetadata({ params }: Props) {
-  return { title: `${(await params).publicId} · SM Academy` };
+  return { title: `${(await params).publicId}` };
 }
 
 export default async function CoursePage({ params }: Props) {

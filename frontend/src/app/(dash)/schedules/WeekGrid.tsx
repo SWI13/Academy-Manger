@@ -38,7 +38,7 @@ const TINTS = [
   "border-info-line bg-info-wash text-info",
   "border-ok-line bg-ok-wash text-ok",
   "border-warn-line bg-warn-wash text-warn",
-  "border-rule-strong bg-sunk text-ink-soft",
+  "border-rule-strong bg-white/[0.06] text-ink-soft",
 ] as const;
 
 const ROW_HEIGHT = 56; // pixels per hour
@@ -98,10 +98,10 @@ export function WeekGrid({
   }
 
   return (
-    <div className="scroll-slim overflow-x-auto rounded-xl border border-rule bg-surface shadow-xs">
+    <div className="scroll-slim overflow-x-auto glass rounded-xl border border-rule">
       <div className="min-w-[46rem]">
         {/* --- the day headings ------------------------------------- */}
-        <div className="sticky top-0 z-10 grid grid-cols-[3.5rem_repeat(7,1fr)] border-b border-rule bg-sunk/60 backdrop-blur">
+        <div className="sticky top-0 z-10 grid grid-cols-[3.5rem_repeat(7,1fr)] border-b border-rule bg-black/60 backdrop-blur">
           <div />
           {DAYS.map((day) => (
             <div
@@ -253,7 +253,7 @@ export function WeekList({
               {dayslots.map((slot) => (
                 <li
                   key={slot.id}
-                  className={`flex items-center gap-3 rounded-xl border bg-surface p-3 shadow-xs ${
+                  className={`flex items-center gap-3 lift rounded-xl border glass p-3 ${
                     slot.status && slot.status !== "ACTIVE" ? "opacity-60" : ""
                   }`}
                 >

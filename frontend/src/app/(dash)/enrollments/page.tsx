@@ -9,7 +9,7 @@ import type { Enrollment } from "@/types";
 
 import { EnrollmentsTable } from "./EnrollmentsTable";
 
-export const metadata = { title: "Enrolments · SM Academy" };
+export const metadata = { title: "Enrolments" };
 
 const FILTERS = ["status", "student", "course"];
 

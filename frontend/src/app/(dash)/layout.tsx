@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { SessionProvider } from "@/components/SessionProvider";
+import { Vfx } from "@/components/ui/Vfx";
 import { Sidebar } from "@/components/navigation/Sidebar";
 import { TopBar } from "@/components/navigation/TopBar";
 import { getJson } from "@/lib/django";
@@ -34,7 +35,15 @@ export default async function DashboardLayout({
 
   return (
     <SessionProvider session={session}>
-      <div className="flex min-h-svh bg-paper">
+      <div className="relative isolate flex min-h-svh bg-paper">
+        {/*
+          Level 2 for the whole workspace: the grid, one pool of red light and
+          a trace of circuitry, pinned to the viewport so a long roster does
+          not scroll away from its own background. Level 3 is the sign-in
+          screen's alone.
+        */}
+        <Vfx level={2} fixed />
+
         <Sidebar
           permissions={session.permissions}
           role={session.primary_role}

@@ -117,7 +117,7 @@ export function Toolbar({
         <button
           type="button"
           onClick={() => startTransition(() => router.push(pathname))}
-          className="inline-flex h-9 items-center gap-1.5 self-start rounded-md px-2.5 text-sm text-ink-soft transition-colors hover:bg-sunk hover:text-ink"
+          className="inline-flex h-9 items-center gap-1.5 self-start rounded-md px-2.5 text-sm text-ink-soft transition-colors hover:bg-white/[0.06] hover:text-ink"
         >
           <Icon name="close" size={14} />
           Clear
@@ -138,12 +138,12 @@ export function Toolbar({
           type="button"
           onClick={() => setOpen((current) => !current)}
           aria-expanded={open}
-          className="inline-flex h-9 items-center gap-2 rounded-md border border-rule-strong bg-surface px-3 text-sm font-medium text-ink shadow-xs transition-colors hover:bg-sunk sm:hidden"
+          className="inline-flex h-9 items-center gap-2 rounded-md border border-rule-strong bg-surface px-3 text-sm font-medium text-ink shadow-xs transition-colors hover:bg-white/[0.06] sm:hidden"
         >
           <Icon name="filter" size={15} />
           Filters
           {activeCount ? (
-            <span className="tabular inline-flex size-5 items-center justify-center rounded-full bg-accent text-[11px] font-semibold text-accent-ink">
+            <span className="tabular inline-flex size-5 items-center justify-center rounded-full bg-accent-fill text-[11px] font-semibold text-accent-ink">
               {activeCount}
             </span>
           ) : null}

@@ -13,6 +13,14 @@ const VALUE_TONES: Record<Tone, string> = {
   accent: "text-accent",
 };
 
+const EDGE_TONES: Record<Tone, string> = {
+  plain: "before:bg-rule-strong",
+  ok: "before:bg-ok",
+  warn: "before:bg-warn",
+  bad: "before:bg-bad",
+  accent: "before:bg-sm-red",
+};
+
 const MARK_TONES: Record<Tone, string> = {
   plain: "border-rule bg-sunk text-ink-faint",
   ok: "border-ok-line bg-ok-wash text-ok",
@@ -56,14 +64,14 @@ export function StatTile({
         {icon ? (
           <span
             aria-hidden
-            className={`flex size-7 items-center justify-center rounded-lg border ${MARK_TONES[tone]}`}
+            className={`flex size-7 items-center justify-center rounded-md border ${MARK_TONES[tone]}`}
           >
             <Icon name={icon} size={15} />
           </span>
         ) : null}
       </div>
       <p
-        className={`tabular mt-2.5 text-[26px] font-semibold leading-none tracking-tight ${VALUE_TONES[tone]}`}
+        className={`tabular display mt-2.5 text-[28px] leading-none ${VALUE_TONES[tone]}`}
       >
         {value}
       </p>
@@ -73,14 +81,18 @@ export function StatTile({
     </>
   );
 
-  const shell =
-    "flex flex-col rounded-xl border border-rule bg-surface p-4 shadow-xs transition-[box-shadow,border-color]";
+  /*
+   * Glass, with a hairline of colour along the top edge in the tile's own
+   * tone. It is the cheapest way to make a row of figures scannable: the eye
+   * finds the red one before it has read a single label.
+   */
+  const shell = `relative flex flex-col overflow-hidden rounded-xl border border-rule glass p-4 before:absolute before:inset-x-0 before:top-0 before:h-px before:content-[""] ${EDGE_TONES[tone]}`;
 
   if (href) {
     return (
       <Link
         href={href}
-        className={`${shell} group hover:border-rule-strong hover:shadow-sm`}
+        className={`${shell} lift group`}
       >
         {body}
         <span className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-accent opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
@@ -115,7 +127,7 @@ export function Figure({
     <div className="min-w-0">
       <p className="eyebrow">{label}</p>
       <p
-        className={`tabular mt-1.5 text-xl font-semibold tracking-tight ${VALUE_TONES[tone]}`}
+        className={`tabular display mt-1.5 text-xl ${VALUE_TONES[tone]}`}
       >
         {value}
       </p>

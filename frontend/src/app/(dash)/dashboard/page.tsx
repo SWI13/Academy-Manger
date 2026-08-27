@@ -9,10 +9,10 @@ import { Meter } from "@/components/ui/Stars";
 import { Figure, StatTile } from "@/components/ui/StatTile";
 import { getJson } from "@/lib/django";
 import { formatDateTime, formatMoney, formatNumber } from "@/lib/format";
-import type { Permission, RoleCode } from "@/lib/permissions";
+import { ROLE_LABELS, type Permission, type RoleCode } from "@/lib/permissions";
 import { can, cookieHeader, getSession } from "@/lib/session";
 
-export const metadata = { title: "Dashboard · SM Academy" };
+export const metadata = { title: "Dashboard" };
 
 /**
  * Every field optional, and that is the design.
@@ -105,12 +105,30 @@ export default async function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-8">
-      <header>
-        <h1 className="text-2xl font-semibold text-ink sm:text-[28px]">
+      {/*
+        The one hero on the signed-in side of the application. Everything in
+        it is either the person's own name or a sentence about what they are
+        looking at - there is no figure here that the tiles below do not also
+        carry, because a hero that invents a number is a hero that can be
+        wrong in a place nobody thinks to check.
+      */}
+      <header className="glass relative isolate overflow-hidden rounded-xl border border-rule px-5 py-6 sm:px-7 sm:py-7">
+        <span aria-hidden className="fx-grid-fine absolute inset-0 -z-10 opacity-70" />
+        <span
+          aria-hidden
+          className="fx-glow fx-soft absolute -right-24 -top-28 -z-10 size-72 rounded-full blur-3xl"
+        />
+        {/* Hazard hatching along the top edge - the workshop marking that
+            says "this is equipment", carried into the interface. */}
+        <span aria-hidden className="fx-hatch absolute inset-x-0 top-0 h-[3px]" />
+
+        <p className="eyebrow text-accent">{ROLE_LABELS[session.primary_role]}</p>
+        <h1 className="mt-2 text-2xl font-semibold text-white sm:text-[30px]">
           {greeting()}, {first}
-          {isStudent ? " 👋" : ""}
         </h1>
-        <p className="mt-1.5 text-[15px] text-ink-soft">{blurb(data)}</p>
+        <p className="mt-2 max-w-2xl text-[15px] leading-relaxed text-ink-soft">
+          {blurb(data)}
+        </p>
       </header>
 
       {/* --- the professor's one question: what is next ----------------- */}
@@ -306,7 +324,7 @@ function NextSession({
         </div>
         <Link
           href={`/courses/${session.course_public_id}`}
-          className="inline-flex h-9 items-center gap-2 rounded-md bg-accent px-4 text-sm font-medium text-accent-ink shadow-xs transition-colors hover:bg-accent-hover"
+          className="inline-flex h-9 items-center gap-2 rounded-md bg-accent-fill px-4 text-sm font-medium text-accent-ink shadow-xs transition-colors hover:bg-accent-fill-hover"
         >
           Open class
           <Icon name="arrow-right" size={15} />
@@ -357,7 +375,14 @@ function StudentBalance({
         <Meter
           value={data.paid_minor ?? 0}
           max={data.total_minor ?? 0}
-          tone={settled ? "ok" : "accent"}
+          /*
+           * Green whether or not the balance is settled. The bar measures
+           * money *received*, and the figure directly beneath it - "Paid" -
+           * is green too; a red fill under a green number reads as an alarm
+           * about the part that already went right. The "Outstanding" badge
+           * above carries the warning, which is where it belongs.
+           */
+          tone="ok"
           label={`${formatMoney(data.paid_minor, currency)} paid of ${formatMoney(
             data.total_minor,
             currency,

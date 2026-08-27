@@ -1,225 +1,172 @@
 "use client";
 
-import { useId } from "react";
+import { useState } from "react";
 
 /**
- * The crest.
+ * The official SM Academy logo.
  *
- * A shield in the institute's crimson with the monogram in white, a chief
- * band across the top and a gold hairline inset from the edge. Drawn rather
- * than photographed so it stays sharp at every size and inherits the page's
- * own typeface for the letters.
+ * This component *places* the official artwork. It does not draw it. There is
+ * no SVG reconstruction here and there must never be one: a redrawn logo is a
+ * different logo, however close, and it drifts a little further from the
+ * original every time somebody tidies a path.
  *
- * Two levels of detail, because a crest that works on a sign-in screen at
- * 96px is a smudge at 32px in a navigation rail. `detailed` adds the three
- * mullets on the chief and the gold inner line; without it the shield keeps
- * only the shapes that survive being small. The silhouette is identical
- * either way, which is the part people actually recognise.
+ * ---------------------------------------------------------------------------
+ * Why it is sized by height with the width left alone
+ * ---------------------------------------------------------------------------
+ * The one rule that matters most is that the mark is never stretched. Giving
+ * the image both a width and a height is how that happens by accident - the
+ * numbers stop matching the file the day somebody exports a new version with
+ * a little more padding. Here the height is set and the width is `auto`, so
+ * the browser derives the width from the file itself and the proportions are
+ * whatever the artwork says they are. It cannot be distorted, by anyone.
  *
- * Colour comes from the brand tokens, so it is one crimson in both themes -
- * a heraldic red that turns pink at night is not a brand.
+ * The cost is a plain <img> rather than next/image, which wants both
+ * dimensions up front. For a handful of small cached PNGs that is a trade
+ * worth making to remove a whole class of brand damage.
  *
- * A client component for one reason: `useId`. The sign-in screen draws three
- * crests, and three identical `id="crest-field"` gradients would be three
- * duplicate ids in one document. Every reference would resolve to the first
- * one and it would *look* right, which is the kind of invalid markup that
- * survives review and then breaks the day somebody changes one of them.
+ * ---------------------------------------------------------------------------
+ * If the artwork is missing
+ * ---------------------------------------------------------------------------
+ * The fallback is the name set in the display face - never a drawn substitute
+ * mark. A missing file should look like a missing file, not like a second
+ * logo that somebody might mistake for approved.
  */
 
+/** Where the official artwork lives. See `public/brand/README.md`. */
+const ARTWORK = {
+  /** The primary lockup: SM monogram, cap, book, ACADEMY. Transparent PNG. */
+  lockup: "/brand/sm-academy.png",
+  /** The extended lockup: disciplines strip and tagline beneath. */
+  extended: "/brand/sm-academy-full.png",
+  /** A square crop of the mark, for spaces too narrow for the wordmark. */
+  icon: "/brand/icon.png",
+} as const;
+
+type Variant = keyof typeof ARTWORK;
+
 type Props = {
-  /** Pixels, tall. The shield is 7:8, so width follows. */
-  size?: number;
-  detailed?: boolean;
+  /**
+   * Height in pixels. The only dimension given - width follows the artwork.
+   */
+  height?: number;
+  variant?: Variant;
+  /**
+   * The sign-in screen and the splash show the logo above the fold, so those
+   * two ask for it eagerly. Everywhere else it can wait its turn.
+   */
+  priority?: boolean;
   className?: string;
   /**
-   * The accessible name. Given only where the crest stands alone - beside the
-   * wordmark it is decoration, and announcing it twice is noise.
+   * The accessible name. Give it where the logo is the only thing naming the
+   * page or the product; leave it off where the name is written beside it,
+   * since announcing it twice is noise.
    */
   title?: string;
 };
 
-export function Crest({
-  size = 40,
-  detailed = false,
+export function Logo({
+  height = 40,
+  variant = "lockup",
+  priority = false,
   className = "",
   title,
 }: Props) {
-  const uid = useId();
-  const field = `crest-field-${uid}`;
-  const gloss = `crest-gloss-${uid}`;
-  const clip = `crest-clip-${uid}`;
+  const [missing, setMissing] = useState(false);
 
+  if (missing) return <LogoFallback height={height} className={className} />;
+
+  /*
+   * The <img> is deliberate; see the note at the top of the file. next/image
+   * requires an explicit width, and an explicit width is how a logo gets
+   * stretched. The rule is suppressed for that reason and no other.
+   */
   return (
-    <svg
-      viewBox="0 0 48 56"
-      height={size}
-      width={(size * 48) / 56}
-      role={title ? "img" : undefined}
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      ref={(node) => {
+        /*
+         * A <img> that 404s during server-rendered HTML has already failed by
+         * the time React attaches onError, so the handler alone leaves the
+         * browser's broken-image glyph on the page. `complete` with a zero
+         * natural width is what a failed decode looks like after the fact.
+         */
+        if (node?.complete && node.naturalWidth === 0) setMissing(true);
+      }}
+      src={ARTWORK[variant]}
+      alt={title ?? ""}
       aria-hidden={title ? undefined : true}
-      aria-label={title}
-      className={className}
-    >
-      {title ? <title>{title}</title> : null}
-
-      <defs>
-        <linearGradient id={field} x1="0" y1="0" x2="0.6" y2="1">
-          <stop offset="0%" stopColor="var(--brand)" />
-          <stop offset="55%" stopColor="var(--brand)" />
-          <stop offset="100%" stopColor="var(--brand-deep)" />
-        </linearGradient>
-        <linearGradient id={gloss} x1="0" y1="0" x2="0.35" y2="1">
-          <stop offset="0%" stopColor="#ffffff" stopOpacity="0.22" />
-          <stop offset="45%" stopColor="#ffffff" stopOpacity="0.05" />
-          <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
-        </linearGradient>
-        <clipPath id={clip}>
-          <path d="M8 3h32a4 4 0 0 1 4 4v21c0 12.6-8.6 21.7-20 26.2C12.6 49.7 4 40.6 4 28V7a4 4 0 0 1 4-4Z" />
-        </clipPath>
-      </defs>
-
-      {/* the field */}
-      <path
-        d="M8 3h32a4 4 0 0 1 4 4v21c0 12.6-8.6 21.7-20 26.2C12.6 49.7 4 40.6 4 28V7a4 4 0 0 1 4-4Z"
-        fill={`url(#${field})`}
-      />
-
-      {/* the chief: a white band across the top third, clipped to the shield */}
-      <g clipPath={`url(#${clip})`}>
-        <rect x="0" y="3" width="48" height="12.5" fill="#ffffff" />
-        {detailed ? (
-          <>
-            {/* three mullets on the chief, in the institute's gold */}
-            <g fill="var(--brand)">
-              <Mullet cx={14} cy={9.25} r={2.5} />
-              <Mullet cx={24} cy={9.25} r={2.5} />
-              <Mullet cx={34} cy={9.25} r={2.5} />
-            </g>
-            {/* the gold fillet under the chief */}
-            <rect
-              x="0"
-              y="15.5"
-              width="48"
-              height="1.1"
-              fill="var(--brand-gold)"
-            />
-          </>
-        ) : (
-          <rect
-            x="0"
-            y="15.5"
-            width="48"
-            height="1.1"
-            fill="var(--brand-gold)"
-          />
-        )}
-      </g>
-
-      {/* the monogram, on the field below the chief */}
-      <text
-        x="24"
-        y="35.5"
-        textAnchor="middle"
-        dominantBaseline="middle"
-        fill="#ffffff"
-        style={{
-          // The display serif when it has loaded, a serif stack until then -
-          // a monogram in the body sans is a different mark entirely.
-          fontFamily: "var(--font-display-face), Georgia, 'Times New Roman', serif",
-          fontSize: "19px",
-          letterSpacing: "0.02em",
-        }}
-      >
-        SM
-      </text>
-
-      {detailed ? (
-        <>
-          {/* the gold inner line, following the shield inset by 3 */}
-          <path
-            d="M9 6.5h30a2 2 0 0 1 2 2v19.2c0 10.8-7.4 18.7-17 22.6-9.6-3.9-17-11.8-17-22.6V8.5a2 2 0 0 1 2-2Z"
-            fill="none"
-            stroke="var(--brand-gold)"
-            strokeWidth="0.9"
-            strokeOpacity="0.85"
-          />
-          {/* the base point, a small gold pile */}
-          <path
-            d="M24 44.5 27.4 48 24 51.4 20.6 48Z"
-            fill="var(--brand-gold)"
-            fillOpacity="0.9"
-          />
-        </>
-      ) : null}
-
-      {/* the gloss: light falling from the upper left, over everything */}
-      <path
-        d="M8 3h32a4 4 0 0 1 4 4v21c0 12.6-8.6 21.7-20 26.2C12.6 49.7 4 40.6 4 28V7a4 4 0 0 1 4-4Z"
-        fill={`url(#${gloss})`}
-      />
-    </svg>
+      style={{ height }}
+      className={`w-auto max-w-full select-none ${className}`}
+      draggable={false}
+      decoding="async"
+      loading={priority ? "eager" : "lazy"}
+      fetchPriority={priority ? "high" : "auto"}
+      onError={() => setMissing(true)}
+    />
   );
 }
 
-/** A five-pointed mullet, the heraldic star. Drawn from its ten points. */
-function Mullet({ cx, cy, r }: { cx: number; cy: number; r: number }) {
-  const points: string[] = [];
-  for (let index = 0; index < 10; index += 1) {
-    const radius = index % 2 === 0 ? r : r * 0.42;
-    // Starting at -90deg puts a point at the top, which is what makes it read
-    // as a star rather than as a cog.
-    const angle = (Math.PI / 5) * index - Math.PI / 2;
-    points.push(
-      `${(cx + radius * Math.cos(angle)).toFixed(2)},${(
-        cy +
-        radius * Math.sin(angle)
-      ).toFixed(2)}`,
-    );
-  }
-  return <polygon points={points.join(" ")} />;
+/**
+ * The name, set in type, for when the artwork cannot be loaded.
+ *
+ * Deliberately plain. It is a placeholder that says "the logo is missing",
+ * which is exactly the message somebody needs in order to go and fix it.
+ */
+function LogoFallback({
+  height,
+  className = "",
+}: {
+  height: number;
+  className?: string;
+}) {
+  /*
+   * The caller's className goes on the outer span, which carries no display
+   * utility of its own, and the layout lives on an inner one.
+   *
+   * Because the caller's className is how the sign-in screen writes
+   * `hidden lg:block` to pick between two sizes - and `hidden` and
+   * `inline-flex` on the same element are two rules of equal specificity
+   * settled by their order in the stylesheet, not by their order in the
+   * attribute. Putting them on the same span rendered both logos at once on
+   * a phone.
+   */
+  return (
+    <span className={className}>
+      <span
+        style={{ fontSize: Math.round(height * 0.44), lineHeight: 1 }}
+        className="display inline-flex max-w-full select-none items-baseline gap-[0.3em] overflow-hidden whitespace-nowrap italic tracking-tight text-ink"
+      >
+        <span className="text-accent">SM</span>
+        <span>ACADEMY</span>
+      </span>
+    </span>
+  );
 }
 
 /**
- * The crest with the institute's name set beside it.
- *
- * The name is the display serif and the line under it is the sans, which is
- * the whole of the typographic idea: the mark is formal, the description is
- * plain.
+ * The logo with a line of context under it - a section name, a role, a portal
+ * name. The rule between them is the brand red, which is the one place the
+ * interface is allowed to put a red line directly beneath the mark.
  */
-export function Wordmark({
-  size = 44,
-  detailed = true,
-  subtitle,
-  invert = false,
+export function LogoLockup({
+  height = 44,
+  caption,
+  priority = false,
   className = "",
-}: {
-  size?: number;
-  detailed?: boolean;
-  subtitle?: string;
-  /** On the crimson panel, where the type is white rather than ink. */
-  invert?: boolean;
-  className?: string;
-}) {
+  title,
+}: Props & { caption?: string }) {
   return (
-    <span className={`flex items-center gap-3.5 ${className}`}>
-      <Crest size={size} detailed={detailed} />
-      <span className="min-w-0">
-        <span
-          className={`block font-display text-[21px] leading-none tracking-[-0.01em] ${
-            invert ? "text-white" : "text-ink"
-          }`}
-        >
-          SM Academy
-        </span>
-        {subtitle ? (
+    <span className={`inline-flex flex-col items-start ${className}`}>
+      <Logo height={height} priority={priority} title={title} />
+      {caption ? (
+        <>
           <span
-            className={`mt-1.5 block text-[10.5px] font-semibold uppercase leading-none tracking-[0.16em] ${
-              invert ? "text-brand-gold-soft" : "text-brand"
-            }`}
-          >
-            {subtitle}
-          </span>
-        ) : null}
-      </span>
+            aria-hidden
+            className="fx-rule mt-2.5 block h-px w-full min-w-24"
+          />
+          <span className="eyebrow mt-2 block text-ink-soft">{caption}</span>
+        </>
+      ) : null}
     </span>
   );
 }

@@ -11,7 +11,7 @@ import type { User } from "@/types";
 
 import { UsersTable } from "./UsersTable";
 
-export const metadata = { title: "People · SM Academy" };
+export const metadata = { title: "People" };
 
 const FILTERS = ["q", "role", "status"];
 

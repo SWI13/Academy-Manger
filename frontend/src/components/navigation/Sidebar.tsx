@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { Icon } from "@/components/ui/Icon";
-import { Crest } from "@/components/ui/Logo";
+import { Logo } from "@/components/ui/Logo";
 import { ROLE_LABELS, type Permission, type RoleCode } from "@/lib/permissions";
 
 import { NAV_GROUPS, visibleItems, type NavItem } from "./nav-items";
@@ -52,17 +52,20 @@ function Brand({ role }: { role: RoleCode }) {
     <div className="flex h-16 shrink-0 items-center gap-2.5 px-3 lg:px-4">
       <Link
         href="/dashboard"
-        className="flex min-w-0 items-center gap-2.5 rounded-lg py-1"
+        aria-label="SM Academy — dashboard"
+        className="flex min-w-0 items-center gap-2.5 rounded-md py-1"
       >
-        {/* The same crest as the sign-in screen, at rail size: plain rather
-            than detailed, because the mullets and the inner fillet are a
-            smudge below about 40px. */}
-        <Crest size={34} className="shrink-0" />
+        {/*
+          Two crops of the same official artwork, chosen by how much room the
+          rail has. The narrow rail gets the square icon, because the full
+          lockup at 44px wide would render ACADEMY as a grey smear; the wide
+          rail gets the lockup, which already contains the name and so is not
+          followed by the name written out again.
+        */}
+        <Logo variant="icon" height={32} className="shrink-0 lg:hidden" />
         <span className="hidden min-w-0 lg:block">
-          <span className="block truncate font-display text-[17px] leading-tight text-nav-ink">
-            SM Academy
-          </span>
-          <span className="block truncate text-[11px] font-medium leading-tight text-nav-ink-faint">
+          <Logo height={30} title="SM Academy" />
+          <span className="mt-1 block truncate text-[11px] font-medium leading-tight text-nav-ink-faint">
             {ROLE_LABELS[role]}
           </span>
         </span>
@@ -156,7 +159,7 @@ export function NavLink({
 
       {badge > 0 ? (
         <span
-          className={`tabular inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-accent px-1.5 text-[11px] font-semibold text-accent-ink ${
+          className={`tabular inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-accent-fill px-1.5 text-[11px] font-semibold text-accent-ink ${
             showLabel ? "" : "absolute right-1.5 top-1 lg:static lg:right-auto lg:top-auto"
           }`}
         >
@@ -252,7 +255,7 @@ export function MobileNav(props: Props) {
         onClick={() => setOpen(true)}
         aria-label="Open navigation"
         aria-expanded={open}
-        className="relative -ml-1 inline-flex size-9 items-center justify-center rounded-md text-ink-soft transition-colors hover:bg-sunk hover:text-ink md:hidden"
+        className="relative -ml-1 inline-flex size-9 items-center justify-center rounded-md text-ink-soft transition-colors hover:bg-white/[0.06] hover:text-ink md:hidden"
       >
         <Icon name="menu" size={20} />
         {props.unread > 0 ? (
@@ -276,13 +279,10 @@ export function MobileNav(props: Props) {
             className="animate-drawer relative flex h-full w-[min(19rem,85vw)] flex-col bg-nav shadow-xl"
           >
             <div className="flex h-16 shrink-0 items-center justify-between pl-3 pr-2">
-              <span className="flex items-center gap-2.5">
-                <Crest size={34} className="shrink-0" />
-                <span>
-                  <span className="block font-display text-[17px] leading-tight text-nav-ink">
-                    SM Academy
-                  </span>
-                  <span className="block text-[11px] font-medium leading-tight text-nav-ink-faint">
+              <span className="flex min-w-0 items-center">
+                <span className="min-w-0">
+                  <Logo height={30} title="SM Academy" />
+                  <span className="mt-1 block truncate text-[11px] font-medium leading-tight text-nav-ink-faint">
                     {ROLE_LABELS[props.role]}
                   </span>
                 </span>

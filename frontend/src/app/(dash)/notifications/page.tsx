@@ -7,7 +7,7 @@ import type { Notification } from "@/types";
 
 import { NotificationList } from "./NotificationList";
 
-export const metadata = { title: "Notifications · SM Academy" };
+export const metadata = { title: "Notifications" };
 
 /**
  * Everything addressed to this person, and nothing else.

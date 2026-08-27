@@ -62,7 +62,7 @@ export function Tabs({
             aria-selected={selected}
             className={`-mb-px inline-flex shrink-0 items-center gap-2 border-b-2 px-3 py-2.5 text-sm font-medium transition-colors ${
               selected
-                ? "border-accent text-accent"
+                ? "border-accent text-accent [text-shadow:0_0_18px_rgb(237_28_36/0.55)]"
                 : "border-transparent text-ink-soft hover:border-rule-strong hover:text-ink"
             }`}
           >
@@ -70,8 +70,8 @@ export function Tabs({
             {tab.label}
             {tab.count !== undefined ? (
               <span
-                className={`tabular rounded-full px-1.5 py-0.5 text-[11px] font-semibold ${
-                  selected ? "bg-accent-soft text-accent" : "bg-sunk text-ink-faint"
+                className={`tabular rounded-sm px-1.5 py-0.5 text-[11px] font-semibold ${
+                  selected ? "bg-accent-soft text-accent" : "bg-white/[0.06] text-ink-faint"
                 }`}
               >
                 {tab.count}

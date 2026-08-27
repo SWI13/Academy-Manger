@@ -63,7 +63,7 @@ export function Modal({
         // stops here before it reaches this handler.
         if (event.target === ref.current) onClose();
       }}
-      className={`m-auto w-[calc(100vw-2rem)] ${width} rounded-xl border border-rule bg-surface p-0 text-ink shadow-xl backdrop:bg-ink/40 backdrop:backdrop-blur-[2px] open:animate-pop`}
+      className={`m-auto w-[calc(100vw-2rem)] ${width} glass-strong rounded-xl border border-rule p-0 text-ink shadow-xl backdrop:bg-black/70 backdrop:backdrop-blur-[3px] open:animate-pop`}
     >
       <div className="flex items-start justify-between gap-4 p-5 pb-0">
         <div className="min-w-0">
@@ -82,7 +82,7 @@ export function Modal({
       {children ? <div className="p-5 pt-4">{children}</div> : <div className="h-1" />}
 
       {footer ? (
-        <div className="flex flex-wrap justify-end gap-2 border-t border-rule bg-sunk/40 p-4">
+        <div className="flex flex-wrap justify-end gap-2 border-t border-rule bg-black/30 p-4">
           {footer}
         </div>
       ) : null}
@@ -152,7 +152,7 @@ export function ConfirmDialog({
       {icon ? (
         <span
           aria-hidden
-          className={`mb-3 flex size-10 items-center justify-center rounded-full border ${
+          className={`mb-3 flex size-10 items-center justify-center rounded-md border ${
             tone === "danger"
               ? "border-bad-line bg-bad-wash text-bad"
               : "border-accent-line bg-accent-soft text-accent"

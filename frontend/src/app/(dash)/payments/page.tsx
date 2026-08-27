@@ -10,7 +10,7 @@ import type { Payment } from "@/types";
 
 import { PaymentsTable } from "./PaymentsTable";
 
-export const metadata = { title: "Payments · SM Academy" };
+export const metadata = { title: "Payments" };
 
 const FILTERS = ["status", "student", "course", "from", "to"];
 

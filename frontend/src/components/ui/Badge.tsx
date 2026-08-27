@@ -22,8 +22,8 @@ const DOTS: Record<Tone, string> = {
 };
 
 const SIZES: Record<Size, string> = {
-  sm: "h-5 gap-1.5 px-1.5 text-[11px]",
-  md: "h-6 gap-1.5 px-2 text-xs",
+  sm: "h-5 gap-1.5 px-1.5 text-[10.5px]",
+  md: "h-6 gap-1.5 px-2 text-[11.5px]",
 };
 
 /**
@@ -83,7 +83,7 @@ export function Badge({
 }) {
   return (
     <span
-      className={`inline-flex items-center whitespace-nowrap rounded-full border font-medium ${TONES[tone]} ${SIZES[size]} ${className}`}
+      className={`inline-flex items-center whitespace-nowrap rounded-sm border font-medium uppercase tracking-[0.04em] ${TONES[tone]} ${SIZES[size]} ${className}`}
     >
       {dot ? (
         <span aria-hidden className={`size-1.5 rounded-full ${DOTS[tone]}`} />

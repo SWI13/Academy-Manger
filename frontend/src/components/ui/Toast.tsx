@@ -91,7 +91,7 @@ function Item({ toast, onDismiss }: { toast: Toast; onDismiss: () => void }) {
 
   return (
     <div
-      className="animate-toast pointer-events-auto flex w-full max-w-sm items-start gap-3 rounded-xl border border-rule bg-raised p-3.5 shadow-lg"
+      className="animate-toast pointer-events-auto flex w-full max-w-sm items-start gap-3 glass-strong rounded-xl border border-rule p-3.5"
     >
       <Icon name={ICONS[toast.tone]} size={18} className={`mt-px ${TONES[toast.tone]}`} />
       <div className="min-w-0 flex-1">
@@ -104,7 +104,7 @@ function Item({ toast, onDismiss }: { toast: Toast; onDismiss: () => void }) {
         type="button"
         onClick={onDismiss}
         aria-label="Dismiss"
-        className="-m-1 rounded-md p-1 text-ink-faint transition-colors hover:bg-sunk hover:text-ink"
+        className="-m-1 rounded-md p-1 text-ink-faint transition-colors hover:bg-white/[0.06] hover:text-ink"
       >
         <Icon name="close" size={15} />
       </button>

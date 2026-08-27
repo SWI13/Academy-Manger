@@ -226,7 +226,7 @@ export function ApprovalPanel({ payment }: { payment: Payment }) {
 /** The amount and the name, once more, inside the dialog. */
 function Summary({ payment, amount }: { payment: Payment; amount: string }) {
   return (
-    <dl className="rounded-lg border border-rule bg-sunk/60 p-3.5">
+    <dl className="rounded-lg border border-rule bg-black/30 p-3.5">
       <div className="flex items-baseline justify-between gap-4">
         <dt className="text-xs text-ink-faint">Amount</dt>
         <dd className="tabular text-lg font-semibold text-ink">{amount}</dd>

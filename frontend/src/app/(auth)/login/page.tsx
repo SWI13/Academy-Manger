@@ -1,34 +1,44 @@
 import { redirect } from "next/navigation";
 
 import { Icon, type IconName } from "@/components/ui/Icon";
-import { Crest, Wordmark } from "@/components/ui/Logo";
+import { Logo } from "@/components/ui/Logo";
+import { Vfx } from "@/components/ui/Vfx";
 import { getSession } from "@/lib/session";
 
 import { LoginForm } from "./LoginForm";
 
-export const metadata = { title: "Sign in · SM Academy" };
+export const metadata = { title: "Sign in" };
 
 /**
- * The only page anyone reaches without a session, and the only one that wears
- * the institute's colours.
+ * The only page anyone reaches without a session, and the only one running
+ * the atmosphere at full strength.
  *
- * Two halves from `lg` up: the form on the left at a comfortable reading
- * width, and on the right a crimson field carrying the crest. Below that
- * width the field becomes a band above the form rather than disappearing —
- * the crest is the thing that says which building you have walked into, and
- * dropping it on a phone would leave a bare form with a heading.
+ * Two columns from `lg`: the academy on the left, the form on the right. Below
+ * that the identity panel collapses to the logo and the tagline above the
+ * form - not to nothing. The mark is what tells somebody which building they
+ * have walked into, and a bare form with a heading on it could belong to
+ * anyone.
  *
- * The three points on the field are not marketing. They are the rules staff
- * ask about most: who may approve money, what the screens actually hide, and
- * why nothing is ever deleted. A sign-in screen is the one moment everybody
- * reads something, so they are what it says.
+ * The disciplines and the tagline are the ones printed on the official
+ * artwork. Nothing on this page was invented for it: the three rules below
+ * are the actual rules the platform enforces, which is a better use of the
+ * one screen everybody reads than a slogan would be.
  */
+
+/** The trades, as they appear on the official extended lockup. */
+const DISCIPLINES: { icon: IconName; label: string }[] = [
+  { icon: "wrench", label: "Mechanics" },
+  { icon: "code", label: "IT & Coding" },
+  { icon: "bolt", label: "Electrical" },
+  { icon: "car", label: "Automotive" },
+  { icon: "network", label: "Networking" },
+];
 
 const PRINCIPLES: { icon: IconName; title: string; body: string }[] = [
   {
     icon: "shield",
     title: "Permissions, not hidden buttons",
-    body: "Five roles share one set of screens. What differs is which columns arrive — a professor's roster carries no price, because the price is never sent.",
+    body: "Five roles share one set of screens. What differs is which columns arrive — an instructor's roster carries no price, because the price is never sent.",
   },
   {
     icon: "wallet",
@@ -47,111 +57,108 @@ export default async function LoginPage() {
   if (await getSession()) redirect("/dashboard");
 
   return (
-    <main className="brand-scope flex min-h-svh flex-col lg:flex-row-reverse">
-      {/* ================= the crimson field ========================== */}
-      <aside className="brand-field brand-grain relative isolate overflow-hidden lg:w-[46%] lg:max-w-2xl">
-        <div className="brand-diaper absolute inset-0" aria-hidden />
+    <main className="relative isolate flex min-h-svh flex-col overflow-hidden lg:flex-row">
+      <Vfx level={3} />
 
-        {/* the two drifting pools of light */}
-        <span
-          aria-hidden
-          className="brand-drift pointer-events-none absolute -right-24 -top-32 size-[28rem] rounded-full bg-white/10 blur-3xl"
-        />
-        <span
-          aria-hidden
-          className="brand-drift-slow pointer-events-none absolute -bottom-40 -left-28 size-[26rem] rounded-full bg-brand-gold/10 blur-3xl"
-        />
+      {/* ================= the academy =============================== */}
+      <section className="relative flex flex-col justify-between gap-10 px-6 pb-8 pt-10 sm:px-10 lg:w-[54%] lg:px-16 lg:py-16">
+        {/* --- the mark ------------------------------------------------ */}
+        <div className="animate-mark">
+          {/* The extended lockup carries the disciplines and the tagline in
+              the artwork itself, so at lg the panel does not repeat them in
+              type. Below lg it is the compact lockup and the strip below
+              does the work. */}
+          <Logo
+            variant="extended"
+            height={132}
+            priority
+            title="SM Academy"
+            className="hidden lg:block"
+          />
+          <Logo
+            height={54}
+            priority
+            title="SM Academy"
+            className="lg:hidden"
+          />
+        </div>
 
-        {/* the crest, oversized and half off the edge, as a watermark */}
-        <span
-          aria-hidden
-          className="pointer-events-none absolute -right-16 bottom-8 hidden opacity-[0.06] lg:block"
-        >
-          <Crest size={420} detailed />
-        </span>
+        {/* --- the claim ----------------------------------------------- */}
+        <div className="hidden lg:block">
+          <h1 className="animate-step max-w-xl text-[38px] font-semibold leading-[1.15] text-white">
+            Every figure on your screen is one the server decided you may see.
+          </h1>
 
-        <div className="brand-scope-invert relative flex h-full flex-col justify-between gap-10 px-6 py-10 sm:px-10 lg:px-14 lg:py-14">
-          {/* --- the mark ---------------------------------------------- */}
-          <div className="animate-crest">
-            <Wordmark size={52} detailed subtitle="Institute portal" invert />
-          </div>
+          <span
+            aria-hidden
+            className="fx-rule animate-step mt-7 block h-px w-full max-w-xl"
+            style={{ "--step": 1 } as React.CSSProperties}
+          />
 
-          {/* --- the three rules --------------------------------------- */}
-          <div className="hidden lg:block">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-brand-gold-soft">
-              How this platform works
-            </p>
-            <h2 className="animate-step mt-4 max-w-md font-display text-[30px] leading-[1.25] text-white">
-              Every figure on your screen is one the server decided you may see.
-            </h2>
-
-            <span
-              aria-hidden
-              className="brand-rule animate-step mt-8 block h-px w-full max-w-md"
-              style={{ "--step": 1 } as React.CSSProperties}
-            />
-
-            <ul className="mt-8 flex max-w-md flex-col gap-6">
-              {PRINCIPLES.map((point, index) => (
-                <li
-                  key={point.title}
-                  className="animate-step flex gap-4"
-                  style={{ "--step": index + 2 } as React.CSSProperties}
+          <ul className="mt-8 flex max-w-xl flex-col gap-6">
+            {PRINCIPLES.map((point, index) => (
+              <li
+                key={point.title}
+                className="animate-step flex gap-4"
+                style={{ "--step": index + 2 } as React.CSSProperties}
+              >
+                <span
+                  aria-hidden
+                  className="glass flex size-10 shrink-0 items-center justify-center rounded-md border border-accent-line text-accent"
                 >
-                  <span
-                    aria-hidden
-                    className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-brand-gold/35 bg-white/[0.07] text-brand-gold-soft backdrop-blur-sm"
-                  >
-                    <Icon name={point.icon} size={17} />
-                  </span>
-                  <div>
-                    <p className="text-sm font-semibold text-white">
-                      {point.title}
-                    </p>
-                    <p className="mt-1 text-[13px] leading-relaxed text-white/65">
-                      {point.body}
-                    </p>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </div>
+                  <Icon name={point.icon} size={18} />
+                </span>
+                <div>
+                  <p className="text-sm font-semibold text-ink">{point.title}</p>
+                  <p className="mt-1 text-[13px] leading-relaxed text-ink-soft">
+                    {point.body}
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
 
-          {/* --- the footing ------------------------------------------- */}
-          <p className="hidden text-[11px] uppercase tracking-[0.16em] text-white/55 lg:block">
-            Course and institute management
+        {/* --- the trades ---------------------------------------------- */}
+        <div>
+          <span
+            aria-hidden
+            className="fx-hatch mb-5 hidden h-1 w-24 lg:block"
+          />
+          <ul className="flex flex-wrap items-center gap-x-5 gap-y-3 lg:gap-x-7">
+            {DISCIPLINES.map((trade, index) => (
+              <li
+                key={trade.label}
+                className="animate-step flex items-center gap-2 text-ink-faint"
+                style={{ "--step": index } as React.CSSProperties}
+              >
+                <Icon name={trade.icon} size={16} className="text-accent" />
+                <span className="eyebrow text-ink-soft">{trade.label}</span>
+              </li>
+            ))}
+          </ul>
+          <p className="eyebrow mt-5 text-ink-faint">
+            Skills today, success tomorrow
           </p>
         </div>
-      </aside>
+      </section>
 
       {/* ================= the form ================================== */}
-      <div className="relative flex flex-1 items-center justify-center px-5 py-12 sm:px-8 lg:py-16">
-        {/* a whisper of the crimson bleeding onto the paper side */}
-        <span
-          aria-hidden
-          className="pointer-events-none absolute -left-40 top-1/3 size-96 rounded-full bg-brand/[0.045] blur-3xl"
-        />
-
-        <div className="relative w-full max-w-sm">
-          <header className="mb-8">
-            {/* On a phone the field above is a band, so the crest is not
-                repeated here; from lg the form needs its own anchor. */}
-            <span className="mb-6 hidden lg:block">
-              <Crest size={46} detailed />
-            </span>
-
-            <h1 className="font-display text-[34px] leading-none text-ink">
+      <section className="relative flex flex-1 items-center justify-center px-5 pb-12 pt-4 sm:px-8 lg:py-16">
+        <div className="glass-strong fx-brackets relative w-full max-w-[26rem] rounded-xl border border-rule p-6 sm:p-8">
+          <header className="mb-7">
+            <h2 className="text-[30px] font-semibold leading-none text-white">
               Sign in
-            </h1>
-            <p className="mt-3 text-[15px] leading-relaxed text-ink-soft">
+            </h2>
+            <p className="mt-3 text-[14.5px] leading-relaxed text-ink-soft">
               Your identifier is the one printed on your card. Accounts are
-              issued by the institute — there is no public registration.
+              issued by the academy — there is no public registration.
             </p>
           </header>
 
           <LoginForm />
 
-          <div className="mt-8 border-t border-rule pt-6">
+          <div className="mt-7 border-t border-rule pt-5">
             <p className="flex items-start gap-2.5 text-[13px] leading-relaxed text-ink-faint">
               <Icon name="key" size={15} className="mt-0.5 shrink-0" />
               Lost your password? Ask reception to reset it — they can issue a
@@ -159,7 +166,7 @@ export default async function LoginPage() {
             </p>
           </div>
         </div>
-      </div>
+      </section>
     </main>
   );
 }

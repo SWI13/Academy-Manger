@@ -84,7 +84,7 @@ export function DataTable<T>({
     <>
       {/* --- the table, from md up ------------------------------------ */}
       <div
-        className="scroll-slim hidden overflow-x-auto rounded-xl border border-rule bg-surface shadow-xs md:block"
+        className="scroll-slim glass hidden overflow-x-auto rounded-xl border border-rule md:block"
       >
         <table className="w-full border-collapse text-sm">
           {caption ? <caption className="sr-only">{caption}</caption> : null}
@@ -96,7 +96,7 @@ export function DataTable<T>({
             no promise than one the layout cannot keep.
           */}
           <thead>
-            <tr className="border-b border-rule bg-sunk/50">
+            <tr className="border-b border-rule bg-black/40">
               {columns.map((column) => (
                 <th
                   key={column.key}
@@ -116,8 +116,10 @@ export function DataTable<T>({
               <tr
                 key={rowKey(row)}
                 onClick={rowHref ? () => open(row) : undefined}
-                className={`border-b border-rule transition-colors last:border-b-0 hover:bg-sunk/60 ${
-                  rowHref ? "cursor-pointer" : ""
+                className={`border-b border-rule transition-colors last:border-b-0 last:[&>td]:pb-3.5 ${
+                  rowHref
+                    ? "cursor-pointer hover:bg-accent-soft"
+                    : "hover:bg-white/[0.04]"
                 }`}
               >
                 {columns.map((column) => (
@@ -183,12 +185,12 @@ export function DataTable<T>({
                       open(row);
                     }
                   }}
-                  className="block rounded-xl border border-rule bg-surface p-4 shadow-xs transition-colors active:bg-sunk"
+                  className="glass block rounded-xl border border-rule p-4 transition-colors active:border-accent-line active:bg-accent-soft"
                 >
                   {Row}
                 </div>
               ) : (
-                <div className="rounded-xl border border-rule bg-surface p-4 shadow-xs">
+                <div className="glass rounded-xl border border-rule p-4">
                   {Row}
                 </div>
               )}

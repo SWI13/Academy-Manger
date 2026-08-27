@@ -88,7 +88,7 @@ export function AuditFeed({
         {rows.map(({ entry, day, opensDay }) => (
           <li key={entry.id}>
             {opensDay ? (
-              <p className="eyebrow sticky top-16 z-10 -mx-1 bg-paper/90 px-1 py-2 backdrop-blur">
+              <p className="eyebrow sticky top-16 z-10 -mx-1 bg-paper/85 px-1 py-2 backdrop-blur">
                 {day}
               </p>
             ) : null}
@@ -151,9 +151,9 @@ function markFor(action: string): { icon: IconName; tone: string } {
     return { icon: "download", tone: "border-info-line bg-info-wash text-info" };
   }
   if (action.startsWith("REVIEW")) {
-    return { icon: "star", tone: "border-rule bg-sunk text-ink-faint" };
+    return { icon: "star", tone: "border-rule bg-white/[0.06] text-ink-faint" };
   }
-  return { icon: "activity", tone: "border-rule bg-sunk text-ink-faint" };
+  return { icon: "activity", tone: "border-rule bg-white/[0.06] text-ink-faint" };
 }
 
 /** "14:32:18", the clock time in the reader's own zone. */
@@ -194,14 +194,14 @@ function Entry({ entry }: { entry: AuditLog }) {
         <Icon name={mark.icon} size={14} />
       </span>
 
-      <div className="min-w-0 flex-1 rounded-xl border border-rule bg-surface p-3.5 shadow-xs">
+      <div className="min-w-0 flex-1 glass rounded-xl border border-rule p-3.5">
         <header className="flex flex-wrap items-start justify-between gap-x-3 gap-y-1">
           <p className="text-sm font-medium text-ink">{entry.action_display}</p>
           <p className="tabular text-xs text-ink-faint sm:hidden">
             {clock(entry.created_at)}
           </p>
           {entry.object_label ? (
-            <p className="tabular rounded-md bg-sunk px-1.5 py-0.5 text-xs text-ink-soft">
+            <p className="tabular rounded-md bg-white/[0.06] px-1.5 py-0.5 text-xs text-ink-soft">
               {entry.object_label}
             </p>
           ) : null}

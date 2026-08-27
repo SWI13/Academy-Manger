@@ -49,7 +49,7 @@ export function UserMenu({ fullName, publicId, role }: Props) {
           onClick={onClick}
           aria-haspopup="menu"
           aria-expanded={open}
-          className="flex items-center gap-2 rounded-lg p-1 pr-1.5 transition-colors hover:bg-sunk"
+          className="flex items-center gap-2 rounded-lg p-1 pr-1.5 transition-colors hover:bg-white/[0.06]"
         >
           <Avatar name={fullName} seed={publicId} size="sm" />
           <span className="hidden min-w-0 text-left sm:block">
@@ -86,7 +86,7 @@ export function UserMenu({ fullName, publicId, role }: Props) {
         href="/account"
         role="menuitem"
         data-menu-item
-        className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-sm text-ink-soft transition-colors hover:bg-sunk hover:text-ink"
+        className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-sm text-ink-soft transition-colors hover:bg-white/[0.06] hover:text-ink"
       >
         <Icon name="user" size={16} />
         Your account
@@ -95,7 +95,7 @@ export function UserMenu({ fullName, publicId, role }: Props) {
         href="/notifications"
         role="menuitem"
         data-menu-item
-        className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-sm text-ink-soft transition-colors hover:bg-sunk hover:text-ink"
+        className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-sm text-ink-soft transition-colors hover:bg-white/[0.06] hover:text-ink"
       >
         <Icon name="bell" size={16} />
         Notifications

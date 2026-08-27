@@ -1,180 +1,126 @@
 @import "tailwindcss";
 
 /*
- * The design system, as tokens.
+ * SM ACADEMY - the design system, as tokens.
+ *
+ * Built from the official logo outwards: black is the ground, SM red is the
+ * energy, white is the information. There is one theme. A technical academy
+ * that turns into a white page for half its users is two brands, so the
+ * palette does not invert - it is dark, always, and `color-scheme` says so
+ * loudly enough that form controls and scrollbars follow.
  *
  * Every surface, rule, text colour, radius, shadow and duration is named for
- * its job rather than its value, so the dark palette is a redefinition of a
- * variable list instead of a sweep through every component, and "how round is
- * a card" is one decision rather than forty.
+ * its job rather than its value, so a change of mind is one line here rather
+ * than a sweep through seventy components.
  *
- * Statuses get their own trio (text + wash + line) because a payment badge
- * and an enrolment badge must not drift apart.
+ * ---------------------------------------------------------------------------
+ * The two reds, and why there are two
+ * ---------------------------------------------------------------------------
+ * The logo's red is a vivid #ed1c24. White text on it measures 4.38:1, which
+ * fails AA for a button label - so the identity red is kept for the logo, for
+ * glows, for borders and for light-on-dark accents, and filled controls use a
+ * marginally deeper --accent-fill where white clears 5.2:1. The eye reads the
+ * two as the same red; the contrast checker does not. That is the whole trick.
  *
- * The navigation has its own scale and keeps it in both themes. A deep navy
- * rail beside a light workspace is the one piece of chrome that says which
- * product this is, and chrome that inverts with the theme says nothing.
+ *   --sm-red       #ed1c24  the logo's own red. Light, glow, rims. Never a
+ *                           background for text.
+ *   --accent       #ff4d4d  red as *text* and as a 1px line on black.
+ *   --accent-fill  #d81119  red as a *field*, with white on it.
+ *
+ * ---------------------------------------------------------------------------
+ * Red means "act". Red does not mean "wrong".
+ * ---------------------------------------------------------------------------
+ * On a screen where money is approved, the brand cannot own the same colour as
+ * failure. So --bad leans orange, sits only as text on a wash, and never
+ * appears as a solid field - and every failure carries an icon and a word
+ * besides. Nobody has to tell brand from error by hue alone.
  */
 
 :root {
-  color-scheme: light;
+  color-scheme: dark;
 
-  /* --- surfaces ------------------------------------------------------ */
-  --paper: #f6f7f9;
-  --surface: #ffffff;
-  --surface-sunk: #f2f4f7;
-  --surface-raised: #ffffff;
+  /* --- the ground ---------------------------------------------------- */
+  --paper: #08090c;
+  --surface: #101319;
+  --surface-sunk: #0c0f14;
+  --surface-raised: #161a22;
 
-  /* --- text ---------------------------------------------------------- */
-  --ink: #101828;
-  --ink-soft: #475467;
-  --ink-faint: #8894a8;
+  /* --- text: three tiers, all clearing AA on every surface above ------ */
+  --ink: #f2f4f8;
+  --ink-soft: #aab2c0;
+  --ink-faint: #8d96a6;
 
-  /* --- lines --------------------------------------------------------- */
-  --rule: #e7eaee;
-  --rule-strong: #cfd5df;
+  /* --- lines: alpha rather than colour, so they sit correctly on glass */
+  --rule: rgb(255 255 255 / 0.08);
+  --rule-strong: rgb(255 255 255 / 0.16);
 
-  /* --- brand --------------------------------------------------------- */
-  --accent: #3a4ed8;
-  --accent-hover: #3141bc;
-  --accent-soft: #eef0fe;
-  --accent-line: #c7cdfa;
+  /* --- the accent ---------------------------------------------------- */
+  --sm-red: #ed1c24;
+  --accent: #ff4d4d;
+  --accent-fill: #d81119;
+  --accent-fill-hover: #e51c25;
+  --accent-hover: #ff6b6b;
+  --accent-soft: rgb(237 28 36 / 0.12);
+  --accent-line: rgb(237 28 36 / 0.34);
   --accent-ink: #ffffff;
 
-  /*
-   * --- the brand -----------------------------------------------------
-   *
-   * The crest and the sign-in button, and nothing else. Deliberately its own
-   * scale rather than a redefinition of --accent: the workspace stays indigo,
-   * because a red that means "the institute" and a red that means "this went
-   * wrong" cannot be the same red on a screen where money is approved.
-   *
-   * The crimson is deeper and bluer than --bad for exactly that reason, and
-   * white on it clears 7:1 - a sign-in button is the one control that must be
-   * legible on a bad monitor in a bright reception hall.
-   */
-  --brand: #a4161a;
-  --brand-deep: #6e0d12;
-  --brand-hover: #8b1216;
-  --brand-soft: #fdeeee;
-  --brand-line: #f3c9c9;
-  --brand-ink: #ffffff;
-  --brand-gold: #c9a227;
-  --brand-gold-soft: #e8cf8f;
+  /* --- the navigation rail ------------------------------------------- */
+  --nav: #070809;
+  --nav-raised: #101319;
+  --nav-ink: #f2f4f8;
+  --nav-ink-soft: #98a1b0;
+  --nav-ink-faint: #737d8c;
+  --nav-rule: rgb(255 255 255 / 0.07);
+  --nav-active: rgb(237 28 36 / 0.14);
+  --nav-accent: #ff4d4d;
 
-  /* --- the navigation rail, theme-independent ------------------------ */
-  --nav: #0d1224;
-  --nav-raised: #161c34;
-  --nav-ink: #eef1f8;
-  --nav-ink-soft: #98a2bd;
-  --nav-ink-faint: #6b7699;
-  --nav-rule: #242b45;
-  --nav-active: #232b4a;
-  --nav-accent: #8b9bff;
+  /* --- meaning -------------------------------------------------------- */
+  --ok: #3fd68b;
+  --ok-wash: rgb(63 214 139 / 0.11);
+  --ok-line: rgb(63 214 139 / 0.32);
+  --warn: #fbbf3c;
+  --warn-wash: rgb(251 191 60 / 0.11);
+  --warn-line: rgb(251 191 60 / 0.32);
+  --bad: #ff8558;
+  --bad-wash: rgb(255 133 88 / 0.12);
+  --bad-line: rgb(255 133 88 / 0.34);
+  --info: #63b3ff;
+  --info-wash: rgb(99 179 255 / 0.11);
+  --info-line: rgb(99 179 255 / 0.32);
 
-  /* --- meaning ------------------------------------------------------- */
-  --ok: #067647;
-  --ok-wash: #ecfdf3;
-  --ok-line: #a9efc5;
-  --warn: #b54708;
-  --warn-wash: #fffaeb;
-  --warn-line: #fedf89;
-  --bad: #b42318;
-  --bad-wash: #fef3f2;
-  --bad-line: #fecdc9;
-  --info: #175cd3;
-  --info-wash: #eff8ff;
-  --info-line: #b2ddff;
+  /* --- shape ---------------------------------------------------------
+     Angular. The logo has no soft corners, so neither has the interface:
+     every radius is a step tighter than a rounded dashboard would use. */
+  --r-xs: 2px;
+  --r-sm: 3px;
+  --r-md: 5px;
+  --r-lg: 8px;
+  --r-xl: 12px;
+  --r-2xl: 16px;
 
-  /* --- shape --------------------------------------------------------- */
-  --r-xs: 4px;
-  --r-sm: 6px;
-  --r-md: 8px;
-  --r-lg: 12px;
-  --r-xl: 16px;
-  --r-2xl: 20px;
+  /* --- depth ---------------------------------------------------------- */
+  --shade-xs: 0 1px 2px 0 rgb(0 0 0 / 0.5);
+  --shade-sm: 0 1px 3px 0 rgb(0 0 0 / 0.6), 0 1px 2px -1px rgb(0 0 0 / 0.45);
+  --shade-md: 0 6px 14px -4px rgb(0 0 0 / 0.65), 0 2px 5px -2px rgb(0 0 0 / 0.5);
+  --shade-lg: 0 16px 30px -8px rgb(0 0 0 / 0.72), 0 5px 10px -4px rgb(0 0 0 / 0.5);
+  --shade-xl: 0 28px 56px -12px rgb(0 0 0 / 0.8), 0 10px 20px -8px rgb(0 0 0 / 0.55);
 
-  /* --- depth: five steps, each barely there -------------------------- */
-  --shade-xs: 0 1px 2px 0 rgb(16 24 40 / 0.04);
-  --shade-sm: 0 1px 3px 0 rgb(16 24 40 / 0.07), 0 1px 2px -1px rgb(16 24 40 / 0.04);
-  --shade-md: 0 4px 8px -2px rgb(16 24 40 / 0.08), 0 2px 4px -2px rgb(16 24 40 / 0.04);
-  --shade-lg: 0 12px 16px -4px rgb(16 24 40 / 0.08), 0 4px 6px -2px rgb(16 24 40 / 0.03);
-  --shade-xl: 0 20px 24px -4px rgb(16 24 40 / 0.1), 0 8px 8px -4px rgb(16 24 40 / 0.04);
+  /* --- glow: three intensities, one hue -------------------------------- */
+  --glow-sm: 0 0 0 1px rgb(237 28 36 / 0.28), 0 0 14px -2px rgb(237 28 36 / 0.32);
+  --glow-md: 0 0 0 1px rgb(237 28 36 / 0.4), 0 0 26px -4px rgb(237 28 36 / 0.45);
+  --glow-lg: 0 0 0 1px rgb(237 28 36 / 0.5), 0 0 48px -6px rgb(237 28 36 / 0.55);
 
-  /* --- motion: fast enough to feel like the interface, not a film ---- */
+  /* --- glass ---------------------------------------------------------- */
+  --glass-tint: rgb(18 21 27 / 0.62);
+  --glass-tint-strong: rgb(12 14 19 / 0.9);
+  --glass-blur: 16px;
+  --glass-rim: rgb(255 255 255 / 0.07);
+
+  /* --- motion --------------------------------------------------------- */
   --dur-fast: 110ms;
   --dur: 170ms;
-  --dur-slow: 260ms;
+  --dur-slow: 280ms;
   --ease: cubic-bezier(0.32, 0.72, 0, 1);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    color-scheme: dark;
-
-    --paper: #0b0d14;
-    --surface: #13161f;
-    --surface-sunk: #1a1e29;
-    --surface-raised: #191d28;
-
-    --ink: #edeff4;
-    --ink-soft: #a3adc0;
-    --ink-faint: #77819a;
-
-    --rule: #232734;
-    --rule-strong: #343a4b;
-
-    --accent: #8b9bff;
-    --accent-hover: #a3b0ff;
-    --accent-soft: #1a1f3d;
-    --accent-line: #2f3767;
-    --accent-ink: #0b0d14;
-
-    /*
-     * The crest keeps its crimson in the dark - a heraldic red that turns
-     * pink at night is not a brand. It is lifted just far enough to clear
-     * 3:1 against the rail, and no further: white on the lighter red it
-     * wants to be measures 4.35:1, which fails AA for the button label.
-     * This measures 5.52:1, and the hover deepens rather than brightens for
-     * the same reason.
-     */
-    --brand: #c62b38;
-    --brand-deep: #4a0a0e;
-    --brand-hover: #a81f2b;
-    --brand-soft: #2a1013;
-    --brand-line: #5c1f25;
-    --brand-ink: #ffffff;
-    --brand-gold: #d9b96a;
-    --brand-gold-soft: #f0dcaa;
-
-    --nav: #080a11;
-    --nav-raised: #12161f;
-    --nav-ink: #edeff4;
-    --nav-ink-soft: #8b95ad;
-    --nav-ink-faint: #626c85;
-    --nav-rule: #1c2130;
-    --nav-active: #1b2033;
-    --nav-accent: #8b9bff;
-
-    --ok: #75e0a7;
-    --ok-wash: #0a2c1c;
-    --ok-line: #124f31;
-    --warn: #fec84b;
-    --warn-wash: #35240a;
-    --warn-line: #593d10;
-    --bad: #fda29b;
-    --bad-wash: #3a1614;
-    --bad-line: #63241f;
-    --info: #84caff;
-    --info-wash: #0d2544;
-    --info-line: #17427a;
-
-    --shade-xs: 0 1px 2px 0 rgb(0 0 0 / 0.32);
-    --shade-sm: 0 1px 3px 0 rgb(0 0 0 / 0.4), 0 1px 2px -1px rgb(0 0 0 / 0.3);
-    --shade-md: 0 4px 8px -2px rgb(0 0 0 / 0.44), 0 2px 4px -2px rgb(0 0 0 / 0.3);
-    --shade-lg: 0 12px 16px -4px rgb(0 0 0 / 0.5), 0 4px 6px -2px rgb(0 0 0 / 0.3);
-    --shade-xl: 0 20px 24px -4px rgb(0 0 0 / 0.56), 0 8px 8px -4px rgb(0 0 0 / 0.32);
-  }
 }
 
 @theme inline {
@@ -188,20 +134,14 @@
   --color-rule: var(--rule);
   --color-rule-strong: var(--rule-strong);
 
+  --color-sm-red: var(--sm-red);
   --color-accent: var(--accent);
+  --color-accent-fill: var(--accent-fill);
+  --color-accent-fill-hover: var(--accent-fill-hover);
   --color-accent-hover: var(--accent-hover);
   --color-accent-soft: var(--accent-soft);
   --color-accent-line: var(--accent-line);
   --color-accent-ink: var(--accent-ink);
-
-  --color-brand: var(--brand);
-  --color-brand-deep: var(--brand-deep);
-  --color-brand-hover: var(--brand-hover);
-  --color-brand-soft: var(--brand-soft);
-  --color-brand-line: var(--brand-line);
-  --color-brand-ink: var(--brand-ink);
-  --color-brand-gold: var(--brand-gold);
-  --color-brand-gold-soft: var(--brand-gold-soft);
 
   --color-nav: var(--nav);
   --color-nav-raised: var(--nav-raised);
@@ -237,6 +177,9 @@
   --shadow-md: var(--shade-md);
   --shadow-lg: var(--shade-lg);
   --shadow-xl: var(--shade-xl);
+  --shadow-glow: var(--glow-sm);
+  --shadow-glow-md: var(--glow-md);
+  --shadow-glow-lg: var(--glow-lg);
 
   --font-sans: var(--font-body);
   --font-mono: var(--font-mono-face);
@@ -250,12 +193,16 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-/* Inter leaves headings a touch loose at display sizes. Set once, here,
-   rather than as a tracking utility on every title in the application. */
+/*
+ * The display face carries the logo's voice into the interface: squarish,
+ * technical, tight. Headings and figures only - a whole screen set in a
+ * technical face is a poster, not a page anyone reads.
+ */
 h1,
 h2,
 h3 {
-  letter-spacing: -0.014em;
+  font-family: var(--font-display), var(--font-body), system-ui, sans-serif;
+  letter-spacing: -0.01em;
 }
 
 /* Identifiers, amounts and anything meant to be compared down a column. */
@@ -266,11 +213,19 @@ h3 {
 
 /* The small capitalised label above a group of tiles or a description list. */
 .eyebrow {
+  font-family: var(--font-display), var(--font-body), system-ui, sans-serif;
   font-size: 0.6875rem;
   font-weight: 600;
-  letter-spacing: 0.055em;
+  letter-spacing: 0.11em;
   text-transform: uppercase;
   color: var(--ink-faint);
+}
+
+/* A figure or a label in the logo's own register: heavy, tight, technical. */
+.display {
+  font-family: var(--font-display), var(--font-body), system-ui, sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.015em;
 }
 
 *:focus-visible {
@@ -280,8 +235,8 @@ h3 {
 }
 
 ::selection {
-  background: var(--accent-soft);
-  color: var(--accent);
+  background: rgb(237 28 36 / 0.3);
+  color: #ffffff;
 }
 
 /* Thin, and only over long lists - a scrollbar is furniture. */
@@ -299,11 +254,177 @@ h3 {
   border-radius: 999px;
 }
 .scroll-slim::-webkit-scrollbar-thumb:hover {
-  background: var(--ink-faint);
+  background: var(--accent-line);
   background-clip: content-box;
 }
 
-/* --- motion ---------------------------------------------------------- */
+/* ==========================================================================
+   GLASS
+   --------------------------------------------------------------------------
+   Dark technical glass, not the white Apple kind: a graphite tint over the
+   page, a blur, a hairline of light along the top edge where a real pane
+   would catch it, and nothing else. The rim is an inset shadow rather than a
+   border, so it survives whatever border the component wants for itself.
+
+   Not every surface is glass. Tables and forms sit on solid --surface,
+   because text over a moving background is a readability problem dressed up
+   as a design decision. Glass is for chrome and for cards.
+   ========================================================================== */
+
+.glass {
+  background-color: var(--glass-tint);
+  box-shadow:
+    inset 0 1px 0 0 var(--glass-rim),
+    var(--shade-md);
+}
+
+.glass-strong {
+  background-color: var(--glass-tint-strong);
+  box-shadow:
+    inset 0 1px 0 0 var(--glass-rim),
+    var(--shade-lg);
+}
+
+/*
+ * The blur is applied only where the browser supports it. Without
+ * backdrop-filter the tints above are already opaque enough to read against,
+ * so there is nothing else to write a fallback for.
+ */
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+  .glass,
+  .glass-strong {
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(150%);
+    backdrop-filter: blur(var(--glass-blur)) saturate(150%);
+  }
+}
+
+/*
+ * A card that answers when you point at it: it rises a little, its edge
+ * lights up in the brand red, and a faint red bloom appears beneath it.
+ * Transform and box-shadow only - both composited, neither reflows.
+ */
+.lift {
+  transition:
+    transform var(--dur) var(--ease),
+    border-color var(--dur) var(--ease),
+    box-shadow var(--dur) var(--ease);
+}
+.lift:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent-line);
+  box-shadow:
+    var(--shade-lg),
+    0 0 24px -6px rgb(237 28 36 / 0.35);
+}
+
+/* An edge lit in red without any movement at all - the selected row, the
+   active tab, the card you are already inside. */
+.rim-red {
+  border-color: var(--accent-line);
+  box-shadow: 0 0 20px -6px rgb(237 28 36 / 0.4);
+}
+
+/* ==========================================================================
+   VFX
+   --------------------------------------------------------------------------
+   Every class here paints on a layer that is `pointer-events: none` and
+   `aria-hidden`, sits behind its content, and could be deleted without
+   changing a single word on the screen. That is the test each one had to
+   pass.
+
+   Three intensities, per the house rule: minimal on data, moderate on
+   dashboards, strong on the sign-in screen only.
+   ========================================================================== */
+
+/* The technical grid. Two sets of hairlines, faded towards the edges by a
+   mask so it never reaches a border and turns into a table. */
+.fx-grid {
+  background-image:
+    linear-gradient(to right, rgb(255 255 255 / 0.045) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(255 255 255 / 0.045) 1px, transparent 1px);
+  background-size: 56px 56px;
+  -webkit-mask-image: radial-gradient(ellipse 75% 70% at 50% 0%, #000 20%, transparent 78%);
+  mask-image: radial-gradient(ellipse 75% 70% at 50% 0%, #000 20%, transparent 78%);
+}
+
+/* The same grid, finer, for a header strip. */
+.fx-grid-fine {
+  background-image:
+    linear-gradient(to right, rgb(255 255 255 / 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(255 255 255 / 0.05) 1px, transparent 1px);
+  background-size: 22px 22px;
+  -webkit-mask-image: linear-gradient(to bottom, #000, transparent);
+  mask-image: linear-gradient(to bottom, #000, transparent);
+}
+
+/* Diagonal hazard hatching, as found on workshop floors and machine guards. */
+.fx-hatch {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    rgb(237 28 36 / 0.14) 0 6px,
+    transparent 6px 14px
+  );
+}
+
+/* Circuit traces: one tile of a printed board, drawn as paths so it stays
+   crisp, at an opacity where you feel it rather than read it. */
+.fx-circuit {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' fill='none' stroke='%23ffffff' stroke-opacity='0.07' stroke-width='1'%3E%3Cpath d='M10 30h40l14 14h46M10 90h26l18-18h58M150 30v42l-16 16v46M90 10v30l16 16h64M30 150h44l16-16h60M60 180v-34l-14-14H10'/%3E%3Ccircle cx='50' cy='30' r='2.5'/%3E%3Ccircle cx='110' cy='44' r='2.5'/%3E%3Ccircle cx='36' cy='90' r='2.5'/%3E%3Ccircle cx='150' cy='72' r='2.5'/%3E%3Ccircle cx='106' cy='26' r='2.5'/%3E%3Ccircle cx='74' cy='150' r='2.5'/%3E%3C/svg%3E");
+}
+
+/* A pool of red light. Sized and placed by whatever element carries it. */
+.fx-glow {
+  background: radial-gradient(
+    closest-side,
+    rgb(237 28 36 / 0.42),
+    rgb(237 28 36 / 0.12) 55%,
+    transparent 100%
+  );
+}
+.fx-glow-white {
+  background: radial-gradient(
+    closest-side,
+    rgb(255 255 255 / 0.13),
+    transparent 100%
+  );
+}
+
+/* A thin red line with soft ends - the divider under a page title. */
+.fx-rule {
+  background: linear-gradient(
+    90deg,
+    rgb(237 28 36 / 0.75),
+    rgb(237 28 36 / 0.1) 55%,
+    transparent
+  );
+}
+
+/* The angular corner brackets that frame a technical readout. Two pseudo
+   elements, no extra markup and no extra request. */
+.fx-brackets::before,
+.fx-brackets::after {
+  content: "";
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  pointer-events: none;
+  border-color: var(--accent-line);
+  border-style: solid;
+}
+.fx-brackets::before {
+  top: -1px;
+  left: -1px;
+  border-width: 1px 0 0 1px;
+}
+.fx-brackets::after {
+  right: -1px;
+  bottom: -1px;
+  border-width: 0 1px 1px 0;
+}
+
+/* ==========================================================================
+   MOTION
+   ========================================================================== */
 
 @keyframes rise {
   from {
@@ -378,10 +499,33 @@ h3 {
   animation: toast-in var(--dur) var(--ease) both;
 }
 
-/* The page itself, on every navigation. Four pixels and a quarter of a
-   second: enough to say "this is new", not enough to wait for. */
 .page-enter {
   animation: rise var(--dur-slow) var(--ease) both;
+}
+
+/*
+ * A staggered entrance for a short list. Set `--step` on the element.
+ * Six is the most this is used for; beyond that the last item waits long
+ * enough to read as a page that is still loading.
+ */
+.animate-step {
+  animation: rise 480ms var(--ease) both;
+  animation-delay: calc(var(--step, 0) * 80ms);
+}
+
+/* The mark settling into place, once, on arrival. */
+@keyframes mark-set {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.animate-mark {
+  animation: mark-set 640ms var(--ease) both;
 }
 
 /* Skeletons sweep rather than pulse. A pulsing block reads as a warning; a
@@ -389,7 +533,7 @@ h3 {
 .skeleton {
   position: relative;
   overflow: hidden;
-  background: var(--surface-sunk);
+  background: var(--surface-raised);
   border-radius: var(--r-sm);
 }
 .skeleton::after {
@@ -400,102 +544,17 @@ h3 {
   background: linear-gradient(
     90deg,
     transparent,
-    color-mix(in srgb, var(--surface) 65%, transparent),
+    rgb(255 255 255 / 0.07),
     transparent
   );
   animation: shimmer 1.6s infinite;
 }
 
-/* ==========================================================================
-   The brand surface
-   --------------------------------------------------------------------------
-   Only the sign-in screen wears this. Everything here is decoration over a
-   layout that is already correct without it, which is what makes the whole
-   block safe to switch off under `prefers-reduced-motion` below.
-   ========================================================================== */
-
-/* The crimson field behind the crest panel: three stacked radial pools over a
-   diagonal base, so the colour moves across the panel instead of sitting flat
-   the way a single linear gradient does. */
-.brand-field {
-  background-color: var(--brand-deep);
-  background-image:
-    radial-gradient(
-      ellipse 80% 60% at 15% 0%,
-      color-mix(in srgb, var(--brand) 85%, transparent),
-      transparent 70%
-    ),
-    radial-gradient(
-      ellipse 70% 50% at 100% 100%,
-      color-mix(in srgb, var(--brand) 60%, transparent),
-      transparent 65%
-    ),
-    linear-gradient(150deg, var(--brand-deep), #45070b 55%, var(--brand-deep));
-}
-
-/* Heraldic diapering: the fine diagonal lattice found on the field of a coat
-   of arms. Two crossed sets of hairlines at 2% opacity - visible as texture,
-   never as stripes. */
-.brand-diaper {
-  background-image:
-    repeating-linear-gradient(
-      45deg,
-      rgb(255 255 255 / 0.028) 0 1px,
-      transparent 1px 14px
-    ),
-    repeating-linear-gradient(
-      -45deg,
-      rgb(255 255 255 / 0.028) 0 1px,
-      transparent 1px 14px
-    );
-}
-
-/* Paper grain. An SVG turbulence at very low opacity, which is what stops a
-   large flat colour field from banding on an 8-bit panel. */
-.brand-grain::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0.4;
-  mix-blend-mode: overlay;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.35'/%3E%3C/svg%3E");
-}
-
-/* A hairline in gold, for the rules that separate a crest from its motto. */
-.brand-rule {
-  background: linear-gradient(
-    90deg,
-    transparent,
-    color-mix(in srgb, var(--brand-gold) 70%, transparent),
-    transparent
-  );
-}
-
-/* --- movement ---------------------------------------------------------- */
-
-/* The two glows behind the panel, drifting slowly enough that you notice the
-   screen is alive without ever catching it moving. */
-@keyframes brand-drift {
-  0%,
-  100% {
-    transform: translate3d(0, 0, 0) scale(1);
-  }
-  50% {
-    transform: translate3d(3%, -4%, 0) scale(1.08);
-  }
-}
-
-.brand-drift {
-  animation: brand-drift 19s ease-in-out infinite;
-}
-.brand-drift-slow {
-  animation: brand-drift 27s ease-in-out infinite reverse;
-}
-
-/* A light sweeping across polished metal. Used on the crest and on the
-   sign-in button, on hover only - a sheen that runs on a loop is a casino. */
-@keyframes brand-sheen {
+/*
+ * Light across polished metal. On the primary button and on the logo panel,
+ * on hover only - a sheen that runs on a loop is a casino.
+ */
+@keyframes sheen-pass {
   0% {
     transform: translateX(-130%) skewX(-18deg);
   }
@@ -521,7 +580,7 @@ h3 {
   background: linear-gradient(
     90deg,
     transparent,
-    rgb(255 255 255 / 0.34),
+    rgb(255 255 255 / 0.32),
     transparent
   );
   transform: translateX(-130%) skewX(-18deg);
@@ -529,55 +588,118 @@ h3 {
 .sheen:hover::before,
 .sheen:focus-visible::before {
   opacity: 1;
-  animation: brand-sheen 850ms var(--ease);
+  animation: sheen-pass 850ms var(--ease);
 }
 
-/* The crest settling into place, once, on arrival. */
-@keyframes crest-set {
-  from {
+/* The ambient pools drifting behind a hero. Slow enough that you notice the
+   screen is alive without ever catching it moving. */
+@keyframes drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(3%, -4%, 0) scale(1.08);
+  }
+}
+.animate-drift {
+  animation: drift 22s ease-in-out infinite;
+}
+.animate-drift-slow {
+  animation: drift 31s ease-in-out infinite reverse;
+}
+
+/* One beam crossing the sign-in panel, every half minute or so. Level 3
+   only, and the only looping animation in the signed-in application. */
+@keyframes beam {
+  0% {
     opacity: 0;
-    transform: translateY(8px) scale(0.94);
+    transform: translateX(-30%) skewX(-14deg);
+  }
+  8%,
+  16% {
+    opacity: 0.45;
+  }
+  30%,
+  100% {
+    opacity: 0;
+    transform: translateX(130%) skewX(-14deg);
+  }
+}
+.animate-beam {
+  animation: beam 26s linear infinite;
+}
+
+/* A meter filling from nothing, once, when its figure arrives. */
+@keyframes meter {
+  from {
+    transform: scaleX(0);
   }
   to {
-    opacity: 1;
-    transform: none;
+    transform: scaleX(1);
   }
 }
-.animate-crest {
-  animation: crest-set 620ms var(--ease) both;
+.animate-meter {
+  transform-origin: left;
+  animation: meter 720ms var(--ease) both;
+}
+
+/* ==========================================================================
+   EFFECT TIERS
+   --------------------------------------------------------------------------
+   `data-fx="lite"` is set on <html> by a small script when the device says it
+   is modest - few cores, little memory, or a save-data preference. It is the
+   same idea as prefers-reduced-motion but about capability rather than taste,
+   so it removes the expensive things - blur, looping animation, large blurred
+   pools - and leaves every transition and every entrance in place. The
+   interface loses its atmosphere and keeps its manners.
+   ========================================================================== */
+
+html[data-fx="lite"] .glass,
+html[data-fx="lite"] .glass-strong {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  background-color: var(--surface);
+}
+
+html[data-fx="lite"] .animate-drift,
+html[data-fx="lite"] .animate-drift-slow,
+html[data-fx="lite"] .animate-beam {
+  animation: none;
+}
+
+/* The big blurred pools are the most expensive thing on the page: a 28rem
+   circle behind a 64px blur is a large offscreen buffer to composite. On a
+   modest device they become a plain low-opacity wash instead. */
+html[data-fx="lite"] .fx-soft {
+  filter: none;
+  opacity: 0.3;
 }
 
 /*
- * A staggered entrance for a short list.
- *
- * Set `--step` on the element. Six is the most this is used for; beyond that
- * the last item waits long enough to read as a page that is still loading.
+ * Phones get the same treatment as a matter of course. Blur is measured in
+ * device pixels, so the `blur-3xl` a laptop composites without noticing is
+ * several times the work on a dense small screen - and it is the effect
+ * least likely to be missed there.
  */
-.animate-step {
-  animation: rise 520ms var(--ease) both;
-  animation-delay: calc(var(--step, 0) * 90ms);
-}
-
-/*
- * Focus follows the brand inside the brand.
- *
- * The global ring is the indigo accent, which is right in the workspace and
- * wrong on a crimson sign-in screen. Scoped rather than global so exactly one
- * page is affected.
- */
-.brand-scope *:focus-visible {
-  outline-color: var(--brand);
-}
-.brand-scope-invert *:focus-visible {
-  outline-color: var(--brand-gold-soft);
+@media (max-width: 640px) {
+  :root {
+    --glass-blur: 10px;
+  }
+  .fx-grid,
+  .fx-circuit {
+    opacity: 0.6;
+  }
 }
 
 /*
  * Reduced motion is a preference, not a hint.
  *
  * Everything above communicates through position or opacity on top of a
- * layout that is already correct, so it can all be turned off rather than
- * merely shortened.
+ * layout that is already correct, so it can be turned off rather than merely
+ * shortened. The static atmosphere - glows, grid, glass - stays: the
+ * preference is about movement, and stripping the page bare is not what was
+ * asked for.
  */
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -593,5 +715,8 @@ h3 {
   }
   .sheen::before {
     display: none;
+  }
+  .lift:hover {
+    transform: none;
   }
 }

@@ -7,7 +7,7 @@ import type { Schedule } from "@/types";
 
 import { WeekGrid, WeekList } from "./WeekGrid";
 
-export const metadata = { title: "Schedule · SM Academy" };
+export const metadata = { title: "Schedule" };
 
 const FILTERS = ["course", "weekday"];
 

@@ -60,7 +60,7 @@ const MARKS: Record<string, { icon: IconName; tone: string }> = {
 };
 
 function markFor(kind: string) {
-  return MARKS[kind] ?? { icon: "bell" as IconName, tone: "border-rule bg-sunk text-ink-faint" };
+  return MARKS[kind] ?? { icon: "bell" as IconName, tone: "border-rule bg-white/[0.06] text-ink-faint" };
 }
 
 export function NotificationList({
@@ -115,13 +115,13 @@ export function NotificationList({
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         {/* Two views, in the URL, so a filtered inbox can be linked to. */}
-        <div className="flex gap-1 rounded-lg border border-rule bg-surface p-1 shadow-xs">
+        <div className="flex gap-1 glass rounded-lg border border-rule p-1">
           <Link
             href={pathname}
             aria-current={!unreadOnly ? "page" : undefined}
             className={`rounded-md px-3 py-1.5 text-[13px] font-medium transition-colors ${
               !unreadOnly
-                ? "bg-sunk text-ink"
+                ? "bg-white/[0.08] text-ink"
                 : "text-ink-soft hover:text-ink"
             }`}
           >
@@ -131,12 +131,12 @@ export function NotificationList({
             href={`${pathname}?unread=true`}
             aria-current={unreadOnly ? "page" : undefined}
             className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-[13px] font-medium transition-colors ${
-              unreadOnly ? "bg-sunk text-ink" : "text-ink-soft hover:text-ink"
+              unreadOnly ? "bg-white/[0.08] text-ink" : "text-ink-soft hover:text-ink"
             }`}
           >
             Unread
             {unread ? (
-              <span className="tabular inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-[10px] font-bold text-accent-ink">
+              <span className="tabular inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-accent-fill px-1 text-[10px] font-bold text-accent-ink">
                 {unread}
               </span>
             ) : null}
@@ -163,7 +163,7 @@ export function NotificationList({
                   onClick={() => open(item)}
                   className={`flex w-full items-start gap-3.5 rounded-xl border p-4 text-left shadow-xs transition-[border-color,background-color,box-shadow] hover:shadow-sm ${
                     item.is_read
-                      ? "border-rule bg-surface hover:border-rule-strong"
+                      ? "glass border-rule hover:border-rule-strong"
                       : "border-accent-line bg-accent-soft/40 hover:border-accent"
                   }`}
                 >

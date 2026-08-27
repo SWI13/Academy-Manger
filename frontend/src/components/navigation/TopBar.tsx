@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { Icon } from "@/components/ui/Icon";
+import { Logo } from "@/components/ui/Logo";
 import type { Permission, RoleCode } from "@/lib/permissions";
 
 import { MobileNav } from "./Sidebar";
@@ -43,7 +44,7 @@ export function TopBar({
   const here = currentItem(pathname, permissions);
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center gap-3 border-b border-rule bg-paper/85 px-4 backdrop-blur-md sm:px-6">
+    <header className="glass-strong sticky top-0 z-30 flex h-16 shrink-0 items-center gap-3 border-b border-rule px-4 sm:px-6">
       <MobileNav
         permissions={permissions}
         role={role}
@@ -53,17 +54,29 @@ export function TopBar({
       />
 
       {/*
+        Below md the rail is a drawer, so this is the only place the mark
+        appears until somebody opens it. A phone is exactly where a person is
+        least sure which of several tabs they are looking at, so the logo
+        earns its 26 pixels here.
+      */}
+      <Link href="/dashboard" aria-label="SM Academy — dashboard" className="md:hidden">
+        <Logo variant="icon" height={26} />
+      </Link>
+
+      <span aria-hidden className="h-6 w-px bg-rule md:hidden" />
+
+      {/*
         The section name, not a full breadcrumb trail. Two levels of crumbs on
         a three-level application is furniture; the page's own header carries
         the record's name and its own way back.
       */}
-      <p className="flex min-w-0 items-center gap-2 text-sm font-medium text-ink">
+      <p className="eyebrow flex min-w-0 items-center gap-2 text-ink">
         {here ? (
           <>
             <Icon
               name={here.icon}
               size={16}
-              className="hidden text-ink-faint sm:block"
+              className="hidden text-accent sm:block"
             />
             <span className="truncate">{here.label}</span>
           </>
@@ -76,13 +89,13 @@ export function TopBar({
           aria-label={
             unread ? `Notifications, ${unread} unread` : "Notifications"
           }
-          className="relative inline-flex size-9 items-center justify-center rounded-md text-ink-soft transition-colors hover:bg-sunk hover:text-ink"
+          className="relative inline-flex size-9 items-center justify-center rounded-md text-ink-soft transition-colors hover:bg-white/[0.06] hover:text-ink"
         >
           <Icon name="bell" size={18} />
           {unread > 0 ? (
             <span
               aria-hidden
-              className="tabular absolute -right-0.5 -top-0.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-[10px] font-bold text-accent-ink ring-2 ring-paper"
+              className="tabular absolute -right-0.5 -top-0.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-accent-fill px-1 text-[10px] font-bold text-accent-ink ring-2 ring-paper/90"
             >
               {unread > 9 ? "9+" : unread}
             </span>

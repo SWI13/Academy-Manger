@@ -18,7 +18,7 @@ import { ProofList } from "./ProofList";
 type Props = { params: Promise<{ publicId: string }> };
 
 export async function generateMetadata({ params }: Props) {
-  return { title: `${(await params).publicId} · SM Academy` };
+  return { title: `${(await params).publicId}` };
 }
 
 export default async function PaymentPage({ params }: Props) {
@@ -81,7 +81,7 @@ export default async function PaymentPage({ params }: Props) {
 
               <Link
                 href={`/courses/${payment.course_public_id}`}
-                className="group min-w-0 rounded-lg border border-rule bg-sunk/50 px-3.5 py-2.5 transition-colors hover:border-rule-strong"
+                className="group min-w-0 rounded-lg border border-rule bg-black/30 px-3.5 py-2.5 transition-colors hover:border-rule-strong"
               >
                 <span className="eyebrow block">Course</span>
                 <span className="mt-1 block truncate text-sm font-medium text-ink group-hover:text-accent">

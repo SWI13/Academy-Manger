@@ -86,15 +86,45 @@ src/
 
 ## The design system
 
-`app/globals.css` holds every token — surface, ink, rule, accent, the four
-semantic pairs, radii, five shadows, three durations and one easing curve.
-Nothing in a component picks a hex value or a duration of its own, which is
-why the dark palette is a redefinition of that list rather than a sweep
-through every screen.
+Built outwards from the official logo: **black is the ground, SM red is the
+energy, white is the information.**
 
-The navigation rail keeps its deep navy in both themes. It is the one piece of
-chrome that says which product this is, and chrome that inverts with the theme
-says nothing.
+`app/globals.css` holds every token — surface, ink, rule, accent, the four
+semantic pairs, radii, five shadows, three glows, the glass tints, three
+durations and one easing curve. Nothing in a component picks a hex value or a
+duration of its own.
+
+**There is one theme, and it is dark.** No light palette, no
+`prefers-color-scheme` branch. A technical academy that turns into a white
+page for half its users is two brands.
+
+### The official artwork
+
+The logo is a **file**, never a drawing. `public/brand/` holds it and
+[`public/brand/README.md`](public/brand/README.md) says what belongs there;
+`components/ui/Logo.tsx` places it and contains no reconstruction of the mark.
+It is sized by **height only**, with the width left to the browser, so the
+proportions always come from the artwork and stretching it is not something a
+future edit can do by accident. If the files are absent, `Logo` renders the
+name in type as an obvious placeholder — never a substitute mark.
+
+### Glass and the effect tiers
+
+`.glass` and `.glass-strong` are a graphite tint, a blur and a hairline of
+light along the top edge. Chrome and cards get them; **tables and forms stay
+opaque**, because small text over a blurred moving background is a readability
+problem dressed up as a design decision.
+
+`Vfx` is the single component behind every background effect, at three
+intensities: **1** minimal on data-heavy screens, **2** on the workspace,
+**3** on the sign-in screen alone. Everything it draws is `aria-hidden`,
+`pointer-events-none`, and removable without changing a word on the page.
+
+Nine lines of blocking script in the root layout set `data-fx="lite"` on
+`<html>` when the device reports few cores, little memory or save-data. That
+tier drops blur, ambient movement and the large blurred pools, and keeps every
+transition, entrance and layout. `prefers-reduced-motion` is separate and
+stops movement while leaving the static atmosphere alone.
 
 `components/ui` is the vocabulary every screen is built from:
 
@@ -109,13 +139,34 @@ says nothing.
 | `EmptyState` `ErrorState` `NoAccess` `Skeleton*` | the four things a screen shows when it has no rows |
 | `Modal` `ConfirmDialog` | the platform's `<dialog>`, so the focus trap is not ours to get wrong |
 | `Toast` `Dropdown` `Tabs` `Timeline` `Avatar` `Icon` | |
+| `Logo` `LogoLockup` | places the official artwork; never draws it |
+| `Vfx` `BrandRule` | the atmosphere layer, at three intensities |
 
 `Icon` is one set of 24×24 outlines on a single stroke weight, as path data
 rather than a package: an icon library ships a thousand glyphs to render the
 thirty this application uses, and every one of them arrives before the first
-row of the table does.
+row of the table does. It includes the academy's trades — `wrench`, `bolt`,
+`car`, `chip`, `code`, `network` — drawn to the same grid.
 
 ## Things that are deliberate
+
+**There are two reds, and the difference is measured.** The logo's own
+`#ed1c24` puts white text at 4.38:1, which fails AA for a button label. So
+`--sm-red` stays the identity red — light, glow, rims, never a field behind
+text — and `--accent-fill` (`#d81119`, white at 5.23:1) is what a filled
+control wears. They read as the same red beside each other. Sample the exact
+red from the artwork when it lands and only `--sm-red` should change.
+
+**Red means "act". Red does not mean "wrong".** On a screen where money is
+approved, the brand cannot own the colour of failure. `--bad` leans orange,
+appears only as text on a wash, is never a solid field, and always arrives
+with an icon and a word. Look at the payments table: a red *Record a payment*
+button, green *Approved* badges and orange *Rejected* ones, all legible as
+three different things.
+
+**Avatar tints are red or grey and nothing else.** They used to borrow the
+status colours, which put a green disc beside a green *Approved* badge in the
+same row and made colour look like it meant something there. It does not.
 
 **Nothing here is a security boundary.** A hidden nav link is an invitation not
 extended, not a lock. Every real check is Django's: it refuses requests without
@@ -141,7 +192,9 @@ point and that is a centime missing from the ledger.
 
 **Pending money is never drawn as paid.** It is amber wherever it appears, it
 sits beside the remainder rather than being subtracted from it, and no progress
-bar fills on the strength of it.
+bar fills on the strength of it. The balance meter is green rather than the
+brand red, because it measures money *received* and sits directly under a
+green *Paid* figure.
 
 **No global search box.** There is no endpoint that searches across courses,
 people and payments at once, and a search field that works on some pages and

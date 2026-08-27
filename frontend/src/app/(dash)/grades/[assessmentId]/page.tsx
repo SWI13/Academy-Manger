@@ -15,7 +15,7 @@ import { PublishPanel } from "./PublishPanel";
 type Props = { params: Promise<{ assessmentId: string }> };
 
 export async function generateMetadata({ params }: Props) {
-  return { title: `Mark sheet ${(await params).assessmentId} · SM Academy` };
+  return { title: `Mark sheet ${(await params).assessmentId}` };
 }
 
 export default async function AssessmentPage({ params }: Props) {

@@ -8,15 +8,21 @@ import { ROLE_LABELS, type RoleCode } from "@/lib/permissions";
  * anchor for the eye. The tint is derived from the public ID, which means the
  * same person is the same colour on every screen and in every list.
  *
- * Five muted tints, chosen to sit under text at the contrast the palette
- * uses everywhere else. They carry no meaning; the status badge does that.
+ * Five tints, and every one of them is red or grey.
+ *
+ * They used to borrow the status colours - a green tint, an amber one - which
+ * put a green disc beside a green APPROVED badge in the same row and made
+ * colour look like it meant something here. It does not. An avatar is a place
+ * for the eye to land, so the set is now the brand red at two strengths and
+ * the neutral at three, and the status badge is left as the only thing on a
+ * row that carries a meaning in its colour.
  */
 const TINTS = [
-  "bg-accent-soft text-accent",
-  "bg-info-wash text-info",
-  "bg-ok-wash text-ok",
-  "bg-warn-wash text-warn",
-  "bg-sunk text-ink-soft",
+  "bg-accent-soft text-accent border border-accent-line",
+  "bg-white/[0.07] text-ink border border-rule-strong",
+  "bg-[rgb(237_28_36/0.05)] text-[#ff8a8a] border border-[rgb(237_28_36/0.18)]",
+  "bg-white/[0.03] text-ink-soft border border-rule",
+  "bg-black/50 text-ink-faint border border-rule",
 ] as const;
 
 const SIZES = {

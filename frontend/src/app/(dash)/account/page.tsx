@@ -13,7 +13,7 @@ import { getSession } from "@/lib/session";
 import { ChangePassword } from "./ChangePassword";
 import { PermissionList } from "./PermissionList";
 
-export const metadata = { title: "Your account · SM Academy" };
+export const metadata = { title: "Your account" };
 
 /**
  * Your own record, and the one thing you can change about it.

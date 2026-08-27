@@ -18,7 +18,7 @@ import { AccountPanel } from "./AccountPanel";
 type Props = { params: Promise<{ publicId: string }> };
 
 export async function generateMetadata({ params }: Props) {
-  return { title: `${(await params).publicId} · SM Academy` };
+  return { title: `${(await params).publicId}` };
 }
 
 export default async function UserPage({ params }: Props) {

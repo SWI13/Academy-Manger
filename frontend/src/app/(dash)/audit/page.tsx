@@ -10,7 +10,7 @@ import type { AuditLog } from "@/types";
 
 import { AuditFeed } from "./AuditFeed";
 
-export const metadata = { title: "Audit log · SM Academy" };
+export const metadata = { title: "Audit log" };
 
 const FILTERS = ["action", "actor", "object_type", "object_id", "from", "to"];
 

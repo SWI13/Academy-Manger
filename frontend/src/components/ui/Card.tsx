@@ -9,12 +9,19 @@ import { Icon, type IconName } from "./Icon";
  * rather than writing `rounded border border-rule bg-surface p-4` in forty
  * places, which is how the padding on one screen quietly becomes 12px while
  * everywhere else it is 16.
+ *
+ * Glass by default: a graphite tint over the page with a hairline of light
+ * along its top edge. `solid` opts out, and the screens that hold a lot of
+ * small text use it - a table of amounts sitting over a blurred background is
+ * a readability problem dressed up as a design decision.
  */
 export function Card({
   children,
   className = "",
   as: Element = "section",
   padded = true,
+  solid = false,
+  interactive = false,
   ...rest
 }: {
   children: ReactNode;
@@ -22,13 +29,17 @@ export function Card({
   as?: "section" | "div" | "article" | "aside";
   /** Off when the card holds a table or list that must reach its own edges. */
   padded?: boolean;
+  /** Opaque instead of glass, for dense figures and long tables. */
+  solid?: boolean;
+  /** Rises and lights its edge on hover. Only for a card you can click. */
+  interactive?: boolean;
 } & { "aria-label"?: string }) {
   return (
     <Element
       {...rest}
-      className={`rounded-xl border border-rule bg-surface shadow-xs ${
-        padded ? "p-4 sm:p-5" : ""
-      } ${className}`}
+      className={`rounded-xl border border-rule ${
+        solid ? "bg-surface shadow-sm" : "glass"
+      } ${interactive ? "lift" : ""} ${padded ? "p-4 sm:p-5" : ""} ${className}`}
     >
       {children}
     </Element>

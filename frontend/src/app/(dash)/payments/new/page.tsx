@@ -8,7 +8,7 @@ import type { Enrollment } from "@/types";
 
 import { PaymentForm } from "./PaymentForm";
 
-export const metadata = { title: "Record a payment · SM Academy" };
+export const metadata = { title: "Record a payment" };
 
 export default async function NewPaymentPage({
   searchParams,

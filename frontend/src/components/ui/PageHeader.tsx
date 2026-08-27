@@ -59,7 +59,7 @@ export function PageHeader({
   className?: string;
 }) {
   return (
-    <header className={`flex flex-col gap-3 ${className}`}>
+    <header className={`relative flex flex-col gap-3 ${className}`}>
       {back ? (
         <Link
           href={back.href}
@@ -77,7 +77,7 @@ export function PageHeader({
       <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-3">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
-            <h1 className="text-[22px] font-semibold text-ink sm:text-2xl">
+            <h1 className="text-[23px] font-semibold text-white sm:text-[26px]">
               {title}
             </h1>
             {badge}
@@ -96,6 +96,14 @@ export function PageHeader({
           <div className="flex shrink-0 flex-wrap items-center gap-2">{actions}</div>
         ) : null}
       </div>
+
+      {/*
+        The red hairline under every page title - the same short solid segment
+        fading to nothing that sits under the wordmark in the logo. It is the
+        one piece of the brand that appears on every single screen, which is
+        what keeps forty pages feeling like one product.
+      */}
+      <span aria-hidden className="fx-rule mt-1 block h-px w-full max-w-md" />
     </header>
   );
 }

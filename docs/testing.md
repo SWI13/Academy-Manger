@@ -27,6 +27,13 @@ against production or staging settings.
 Then open **<http://localhost:3000>**. Everyone's password is
 `demo-passphrase-2026`.
 
+> **The logo is not in the repository.** Drop the official artwork into
+> `frontend/public/brand/` — the filenames and requirements are listed in
+> [`frontend/public/brand/README.md`](../frontend/public/brand/README.md).
+> Until it is there, every place the mark should appear renders the name in
+> type instead. That is an intentional placeholder, not a fallback logo: the
+> interface never draws a substitute mark.
+
 | Sign in as | ID | |
 | --- | --- | --- |
 | Owner | `OWN-000001` | everything, including the audit log |

@@ -16,7 +16,7 @@ import { EnrollmentPayments } from "./EnrollmentPayments";
 type Props = { params: Promise<{ id: string }> };
 
 export async function generateMetadata({ params }: Props) {
-  return { title: `Enrolment ${(await params).id} · SM Academy` };
+  return { title: `Enrolment ${(await params).id}` };
 }
 
 export default async function EnrollmentPage({ params }: Props) {

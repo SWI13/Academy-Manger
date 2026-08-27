@@ -44,10 +44,10 @@ export function ReportTable({ rows }: { rows: Record<string, unknown>[] }) {
   const keys = Object.keys(rows[0]).filter((key) => key !== "currency");
 
   return (
-    <div className="scroll-slim overflow-x-auto rounded-xl border border-rule bg-surface shadow-xs">
+    <div className="scroll-slim overflow-x-auto glass rounded-xl border border-rule">
       <table className="w-full border-collapse text-sm">
         <thead>
-          <tr className="border-b border-rule bg-sunk/60">
+          <tr className="border-b border-rule bg-black/40">
             {keys.map((key) => (
               <th
                 key={key}
@@ -65,7 +65,7 @@ export function ReportTable({ rows }: { rows: Record<string, unknown>[] }) {
           {rows.map((row, index) => (
             <tr
               key={index}
-              className="border-b border-rule transition-colors last:border-b-0 hover:bg-sunk/60"
+              className="border-b border-rule transition-colors last:border-b-0 hover:bg-white/[0.06]"
             >
               {keys.map((key) => (
                 <td
