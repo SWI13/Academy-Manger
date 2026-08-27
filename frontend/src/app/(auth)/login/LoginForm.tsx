@@ -4,7 +4,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/Button";
-import { Field, FormError } from "@/components/ui/Field";
+import { Field } from "@/components/ui/Field";
+import { Icon } from "@/components/ui/Icon";
 import { ApiFailure, api } from "@/lib/api";
 
 export function LoginForm() {
@@ -12,6 +13,7 @@ export function LoginForm() {
   const params = useSearchParams();
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
+  const [reveal, setReveal] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -51,7 +53,7 @@ export function LoginForm() {
   }
 
   return (
-    <form onSubmit={submit} className="flex flex-col gap-4">
+    <form onSubmit={submit} className="flex flex-col gap-5" noValidate>
       <Field
         label="ID or phone number"
         name="identifier"
@@ -64,29 +66,61 @@ export function LoginForm() {
         placeholder="STU-000042"
         hint="The identifier printed on your card, or the number you registered."
       />
-      <Field
-        label="Password"
-        name="password"
-        type="password"
-        autoComplete="current-password"
-        required
-        icon="lock"
-        value={password}
-        onChange={(event) => setPassword(event.target.value)}
-      />
 
-      {error ? <FormError>{error}</FormError> : null}
+      <div className="relative">
+        <Field
+          label="Password"
+          name="password"
+          type={reveal ? "text" : "password"}
+          autoComplete="current-password"
+          required
+          icon="lock"
+          value={password}
+          onChange={(event) => setPassword(event.target.value)}
+          className="pr-10"
+        />
+        {/*
+          Bottom-anchored rather than vertically centred: the label sits above
+          the input, so centring on the wrapper would put this over the label.
+        */}
+        <button
+          type="button"
+          onClick={() => setReveal((current) => !current)}
+          aria-label={reveal ? "Hide password" : "Show password"}
+          aria-pressed={reveal}
+          className="absolute bottom-[2px] right-1 inline-flex size-8 items-center justify-center rounded-md text-ink-faint transition-colors hover:bg-sunk hover:text-ink"
+        >
+          <Icon name="eye" size={16} />
+        </button>
+      </div>
+
+      {/*
+        The failure, in the semantic red rather than the brand crimson.
+        They are close in hue and this is the one screen where both could
+        appear, so the error carries a wash, a border and an icon while the
+        button is solid crimson with white on it. Nobody has to tell them
+        apart by hue alone.
+      */}
+      {error ? (
+        <p
+          role="alert"
+          className="animate-rise flex items-start gap-2 rounded-lg border border-bad-line bg-bad-wash px-3 py-2.5 text-sm text-bad"
+        >
+          <Icon name="alert" size={16} className="mt-0.5 shrink-0" />
+          <span>{error}</span>
+        </p>
+      ) : null}
 
       <Button
         type="submit"
-        variant="primary"
+        variant="brand"
         size="lg"
         block
         busy={busy}
-        className="mt-1"
+        className="mt-1 text-[15px] tracking-[0.01em]"
         trailing={busy ? undefined : "arrow-right"}
       >
-        Sign in
+        {busy ? "Signing in…" : "Sign in"}
       </Button>
     </form>
   );

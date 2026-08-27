@@ -3,11 +3,17 @@ import type { ButtonHTMLAttributes } from "react";
 
 import { Icon, Spinner, type IconName } from "./Icon";
 
-type Variant = "primary" | "secondary" | "quiet" | "danger" | "ghost";
+type Variant =
+  | "primary"
+  | "brand"
+  | "secondary"
+  | "quiet"
+  | "danger"
+  | "ghost";
 type Size = "sm" | "md" | "lg";
 
 /*
- * One button, five intents, three sizes.
+ * One button, six intents, three sizes.
  *
  * Every dimension is here rather than at the call site, so "Approve" on the
  * payment screen and "Save sheet" on the mark sheet are the same height to
@@ -20,6 +26,17 @@ type Size = "sm" | "md" | "lg";
 const VARIANTS: Record<Variant, string> = {
   primary:
     "border-transparent bg-accent text-accent-ink shadow-xs hover:bg-accent-hover active:translate-y-px disabled:bg-accent/45 disabled:shadow-none",
+  /*
+   * The institute's own crimson, and the only control that wears it.
+   *
+   * Kept apart from `danger` on purpose: `danger` is a wash with red text on
+   * it, this is solid crimson with white on it, and the two never appear in
+   * the same place - the sign-in screen has no destructive action and the
+   * workspace has no brand button. The `sheen` class gives it a light sweep
+   * on hover, which the reduced-motion block switches off entirely.
+   */
+  brand:
+    "sheen border-transparent bg-brand text-brand-ink shadow-sm hover:bg-brand-hover hover:shadow-md active:translate-y-px disabled:bg-brand/45 disabled:shadow-none",
   secondary:
     "border-rule-strong bg-surface text-ink shadow-xs hover:bg-sunk active:translate-y-px disabled:opacity-50 disabled:shadow-none",
   quiet:

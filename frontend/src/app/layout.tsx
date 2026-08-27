@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { IBM_Plex_Mono, Inter } from "next/font/google";
+import { IBM_Plex_Mono, Instrument_Serif, Inter } from "next/font/google";
 
 import { ToastProvider } from "@/components/ui/Toast";
 
@@ -27,6 +27,21 @@ const mono = IBM_Plex_Mono({
   display: "swap",
 });
 
+/*
+ * The display face, for the crest and the institute's name.
+ *
+ * One weight, used in about four places: the monogram, the wordmark and the
+ * two headlines on the sign-in screen. A high-contrast serif is what makes a
+ * crest read as a crest rather than as an app icon - and confining it to the
+ * brand keeps the workspace itself in one voice.
+ */
+const display = Instrument_Serif({
+  variable: "--font-display-face",
+  subsets: ["latin"],
+  weight: ["400"],
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "SM Academy",
   description: "Course and institute management.",
@@ -51,7 +66,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${body.variable} ${mono.variable} h-full antialiased`}
+      className={`${body.variable} ${mono.variable} ${display.variable} h-full antialiased`}
     >
       <body className="font-sans min-h-full flex flex-col">
         <ToastProvider>{children}</ToastProvider>

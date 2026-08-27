@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { Icon } from "@/components/ui/Icon";
+import { Crest } from "@/components/ui/Logo";
 import { ROLE_LABELS, type Permission, type RoleCode } from "@/lib/permissions";
 
 import { NAV_GROUPS, visibleItems, type NavItem } from "./nav-items";
@@ -53,16 +54,12 @@ function Brand({ role }: { role: RoleCode }) {
         href="/dashboard"
         className="flex min-w-0 items-center gap-2.5 rounded-lg py-1"
       >
-        {/* The mark: the monogram in the accent, on the rail's own raised
-            surface. Two letters beat a logo nobody has drawn yet. */}
-        <span
-          aria-hidden
-          className="flex size-9 shrink-0 items-center justify-center rounded-[10px] bg-accent text-[13px] font-bold tracking-tight text-accent-ink shadow-sm"
-        >
-          SM
-        </span>
+        {/* The same crest as the sign-in screen, at rail size: plain rather
+            than detailed, because the mullets and the inner fillet are a
+            smudge below about 40px. */}
+        <Crest size={34} className="shrink-0" />
         <span className="hidden min-w-0 lg:block">
-          <span className="block truncate text-[15px] font-semibold leading-tight text-nav-ink">
+          <span className="block truncate font-display text-[17px] leading-tight text-nav-ink">
             SM Academy
           </span>
           <span className="block truncate text-[11px] font-medium leading-tight text-nav-ink-faint">
@@ -280,14 +277,9 @@ export function MobileNav(props: Props) {
           >
             <div className="flex h-16 shrink-0 items-center justify-between pl-3 pr-2">
               <span className="flex items-center gap-2.5">
-                <span
-                  aria-hidden
-                  className="flex size-9 items-center justify-center rounded-[10px] bg-accent text-[13px] font-bold text-accent-ink"
-                >
-                  SM
-                </span>
+                <Crest size={34} className="shrink-0" />
                 <span>
-                  <span className="block text-[15px] font-semibold leading-tight text-nav-ink">
+                  <span className="block font-display text-[17px] leading-tight text-nav-ink">
                     SM Academy
                   </span>
                   <span className="block text-[11px] font-medium leading-tight text-nav-ink-faint">

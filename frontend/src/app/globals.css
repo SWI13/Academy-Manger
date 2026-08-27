@@ -41,6 +41,27 @@
   --accent-line: #c7cdfa;
   --accent-ink: #ffffff;
 
+  /*
+   * --- the brand -----------------------------------------------------
+   *
+   * The crest and the sign-in button, and nothing else. Deliberately its own
+   * scale rather than a redefinition of --accent: the workspace stays indigo,
+   * because a red that means "the institute" and a red that means "this went
+   * wrong" cannot be the same red on a screen where money is approved.
+   *
+   * The crimson is deeper and bluer than --bad for exactly that reason, and
+   * white on it clears 7:1 - a sign-in button is the one control that must be
+   * legible on a bad monitor in a bright reception hall.
+   */
+  --brand: #a4161a;
+  --brand-deep: #6e0d12;
+  --brand-hover: #8b1216;
+  --brand-soft: #fdeeee;
+  --brand-line: #f3c9c9;
+  --brand-ink: #ffffff;
+  --brand-gold: #c9a227;
+  --brand-gold-soft: #e8cf8f;
+
   /* --- the navigation rail, theme-independent ------------------------ */
   --nav: #0d1224;
   --nav-raised: #161c34;
@@ -109,6 +130,23 @@
     --accent-line: #2f3767;
     --accent-ink: #0b0d14;
 
+    /*
+     * The crest keeps its crimson in the dark - a heraldic red that turns
+     * pink at night is not a brand. It is lifted just far enough to clear
+     * 3:1 against the rail, and no further: white on the lighter red it
+     * wants to be measures 4.35:1, which fails AA for the button label.
+     * This measures 5.52:1, and the hover deepens rather than brightens for
+     * the same reason.
+     */
+    --brand: #c62b38;
+    --brand-deep: #4a0a0e;
+    --brand-hover: #a81f2b;
+    --brand-soft: #2a1013;
+    --brand-line: #5c1f25;
+    --brand-ink: #ffffff;
+    --brand-gold: #d9b96a;
+    --brand-gold-soft: #f0dcaa;
+
     --nav: #080a11;
     --nav-raised: #12161f;
     --nav-ink: #edeff4;
@@ -156,6 +194,15 @@
   --color-accent-line: var(--accent-line);
   --color-accent-ink: var(--accent-ink);
 
+  --color-brand: var(--brand);
+  --color-brand-deep: var(--brand-deep);
+  --color-brand-hover: var(--brand-hover);
+  --color-brand-soft: var(--brand-soft);
+  --color-brand-line: var(--brand-line);
+  --color-brand-ink: var(--brand-ink);
+  --color-brand-gold: var(--brand-gold);
+  --color-brand-gold-soft: var(--brand-gold-soft);
+
   --color-nav: var(--nav);
   --color-nav-raised: var(--nav-raised);
   --color-nav-ink: var(--nav-ink);
@@ -193,6 +240,7 @@
 
   --font-sans: var(--font-body);
   --font-mono: var(--font-mono-face);
+  --font-display: var(--font-display-face);
 }
 
 body {
@@ -358,6 +406,172 @@ h3 {
   animation: shimmer 1.6s infinite;
 }
 
+/* ==========================================================================
+   The brand surface
+   --------------------------------------------------------------------------
+   Only the sign-in screen wears this. Everything here is decoration over a
+   layout that is already correct without it, which is what makes the whole
+   block safe to switch off under `prefers-reduced-motion` below.
+   ========================================================================== */
+
+/* The crimson field behind the crest panel: three stacked radial pools over a
+   diagonal base, so the colour moves across the panel instead of sitting flat
+   the way a single linear gradient does. */
+.brand-field {
+  background-color: var(--brand-deep);
+  background-image:
+    radial-gradient(
+      ellipse 80% 60% at 15% 0%,
+      color-mix(in srgb, var(--brand) 85%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      ellipse 70% 50% at 100% 100%,
+      color-mix(in srgb, var(--brand) 60%, transparent),
+      transparent 65%
+    ),
+    linear-gradient(150deg, var(--brand-deep), #45070b 55%, var(--brand-deep));
+}
+
+/* Heraldic diapering: the fine diagonal lattice found on the field of a coat
+   of arms. Two crossed sets of hairlines at 2% opacity - visible as texture,
+   never as stripes. */
+.brand-diaper {
+  background-image:
+    repeating-linear-gradient(
+      45deg,
+      rgb(255 255 255 / 0.028) 0 1px,
+      transparent 1px 14px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      rgb(255 255 255 / 0.028) 0 1px,
+      transparent 1px 14px
+    );
+}
+
+/* Paper grain. An SVG turbulence at very low opacity, which is what stops a
+   large flat colour field from banding on an 8-bit panel. */
+.brand-grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.4;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.35'/%3E%3C/svg%3E");
+}
+
+/* A hairline in gold, for the rules that separate a crest from its motto. */
+.brand-rule {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--brand-gold) 70%, transparent),
+    transparent
+  );
+}
+
+/* --- movement ---------------------------------------------------------- */
+
+/* The two glows behind the panel, drifting slowly enough that you notice the
+   screen is alive without ever catching it moving. */
+@keyframes brand-drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(3%, -4%, 0) scale(1.08);
+  }
+}
+
+.brand-drift {
+  animation: brand-drift 19s ease-in-out infinite;
+}
+.brand-drift-slow {
+  animation: brand-drift 27s ease-in-out infinite reverse;
+}
+
+/* A light sweeping across polished metal. Used on the crest and on the
+   sign-in button, on hover only - a sheen that runs on a loop is a casino. */
+@keyframes brand-sheen {
+  0% {
+    transform: translateX(-130%) skewX(-18deg);
+  }
+  100% {
+    transform: translateX(240%) skewX(-18deg);
+  }
+}
+
+.sheen {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+.sheen::before {
+  content: "";
+  position: absolute;
+  top: -30%;
+  bottom: -30%;
+  width: 45%;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgb(255 255 255 / 0.34),
+    transparent
+  );
+  transform: translateX(-130%) skewX(-18deg);
+}
+.sheen:hover::before,
+.sheen:focus-visible::before {
+  opacity: 1;
+  animation: brand-sheen 850ms var(--ease);
+}
+
+/* The crest settling into place, once, on arrival. */
+@keyframes crest-set {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.animate-crest {
+  animation: crest-set 620ms var(--ease) both;
+}
+
+/*
+ * A staggered entrance for a short list.
+ *
+ * Set `--step` on the element. Six is the most this is used for; beyond that
+ * the last item waits long enough to read as a page that is still loading.
+ */
+.animate-step {
+  animation: rise 520ms var(--ease) both;
+  animation-delay: calc(var(--step, 0) * 90ms);
+}
+
+/*
+ * Focus follows the brand inside the brand.
+ *
+ * The global ring is the indigo accent, which is right in the workspace and
+ * wrong on a crimson sign-in screen. Scoped rather than global so exactly one
+ * page is affected.
+ */
+.brand-scope *:focus-visible {
+  outline-color: var(--brand);
+}
+.brand-scope-invert *:focus-visible {
+  outline-color: var(--brand-gold-soft);
+}
+
 /*
  * Reduced motion is a preference, not a hint.
  *
@@ -375,6 +589,9 @@ h3 {
     scroll-behavior: auto !important;
   }
   .skeleton::after {
+    display: none;
+  }
+  .sheen::before {
     display: none;
   }
 }
