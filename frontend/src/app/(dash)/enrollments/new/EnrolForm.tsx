@@ -18,6 +18,7 @@ import { useToast } from "@/components/ui/Toast";
 import { ApiFailure, api } from "@/lib/api";
 import { formatDate, formatMoney, formatNumber } from "@/lib/format";
 import type { Course, Enrollment, User } from "@/types";
+import { useDict } from "@/components/LocaleProvider";
 
 /**
  * Putting a student on a course.
@@ -42,6 +43,7 @@ export function EnrolForm({
   courses: Course[];
   existing: Enrollment[];
 }) {
+  const d = useDict();
   const router = useRouter();
   const toast = useToast();
 
@@ -88,7 +90,7 @@ export function EnrolForm({
       });
       toast({
         tone: "ok",
-        title: "Enrolled",
+        title: d.enrollments.enrolled,
         description: `${student?.full_name ?? "The student"} is on ${
           course?.title ?? "the course"
         }.`,
@@ -122,40 +124,40 @@ export function EnrolForm({
       <Card>
         <div className="grid gap-4 sm:grid-cols-2">
           <Select
-            label="Student"
+            label={d.filters.student}
             required
             value={studentId}
             onChange={(event) => setStudentId(event.target.value)}
-            placeholder="Choose a student"
+            placeholder={d.enrollments.chooseStudent}
             options={students.map((row) => ({
               value: row.public_id,
               label: `${row.full_name} — ${row.public_id}`,
             }))}
             error={fieldErrors.student_public_id}
-            hint="Active student accounts only."
+            hint={d.enrollments.chooseStudentHint}
           />
 
           <Select
-            label="Course"
+            label={d.filters.course}
             required
             value={courseId}
             onChange={(event) => setCourseId(event.target.value)}
-            placeholder="Choose a course"
+            placeholder={d.enrollments.chooseCourse}
             options={courses.map((row) => ({
               value: row.public_id,
               label: `${row.title} — ${row.public_id}`,
             }))}
             error={fieldErrors.course_public_id}
-            hint="Draft and active courses accept enrolments."
+            hint={d.enrollments.chooseCourseHint}
           />
 
           <TextArea
-            label="Notes"
+            label={d.payments.notes}
             optional
             rows={2}
             value={notes}
             onChange={(event) => setNotes(event.target.value)}
-            placeholder="Paying in three instalments; sibling of STU-000004."
+            placeholder={d.enrollments.notesPlaceholder}
             wrapperClassName="sm:col-span-2"
           />
         </div>
@@ -164,25 +166,23 @@ export function EnrolForm({
       {/* --- what will actually be written ---------------------------- */}
       {course ? (
         <Card className="animate-rise">
-          <p className="eyebrow">What will be recorded</p>
+          <p className="eyebrow">{d.enrollments.whatWillBeRecorded}</p>
 
           <dl className="mt-4 grid gap-x-8 gap-y-5 sm:grid-cols-2">
             <div>
-              <dt className="text-xs text-ink-faint">Student</dt>
+              <dt className="text-xs text-ink-faint">{d.filters.student}</dt>
               <dd className="mt-1 text-sm font-medium text-ink">
                 {student ? student.full_name : "—"}
               </dd>
             </div>
             <div>
-              <dt className="text-xs text-ink-faint">Course runs</dt>
+              <dt className="text-xs text-ink-faint">{d.enrollments.courseRuns}</dt>
               <dd className="tabular mt-1 text-sm text-ink">
                 {formatDate(course.start_date)} — {formatDate(course.end_date)}
               </dd>
             </div>
             <div>
-              <dt className="text-xs text-ink-faint">
-                Price, frozen at enrolment
-              </dt>
+              <dt className="text-xs text-ink-faint">{d.enrollments.priceFrozen}</dt>
               <dd className="tabular mt-1 text-lg font-semibold text-ink">
                 {course.price_minor === undefined
                   ? "—"
@@ -190,7 +190,7 @@ export function EnrolForm({
               </dd>
             </div>
             <div>
-              <dt className="text-xs text-ink-faint">Seats</dt>
+              <dt className="text-xs text-ink-faint">{d.courses.seats}</dt>
               <dd className="tabular mt-1 text-sm text-ink">
                 {formatNumber(course.seats_taken)}
                 {course.capacity
@@ -232,15 +232,13 @@ export function EnrolForm({
 
       {error ? <FormError>{error}</FormError> : null}
 
-      <FormActions note="They are notified, and the enrolment starts active.">
+      <FormActions note={d.enrollments.notesHint}>
         <Button
           type="submit"
           variant="primary"
           busy={busy}
           disabled={!studentId || !courseId || alreadyEnrolled || full}
-        >
-          Enrol student
-        </Button>
+        >{d.enrollments.submit}</Button>
       </FormActions>
     </form>
   );

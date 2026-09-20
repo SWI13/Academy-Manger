@@ -54,3 +54,77 @@ class ExportRequestSerializer(serializers.Serializer):
     """
 
     filters = serializers.DictField(required=False, default=dict)
+
+
+# ---------------------------------------------------------------------------
+# The two printable whole-institute documents
+#
+# Declared shapes rather than bare dicts, for the reason the audit serializer
+# gives: an endpoint typed as `unknown` in the generated TypeScript is an
+# endpoint the frontend reads with no compiler check, which is the guarantee
+# the generated types exist to provide.
+# ---------------------------------------------------------------------------
+class MoneyTallySerializer(serializers.Serializer):
+    key = serializers.CharField(allow_blank=True)
+    label = serializers.CharField(allow_blank=True)
+    total_minor = serializers.IntegerField()
+    count = serializers.IntegerField()
+
+
+class MonthlyMoneySerializer(serializers.Serializer):
+    year = serializers.IntegerField()
+    month = serializers.IntegerField()
+    income_minor = serializers.IntegerField()
+    expense_minor = serializers.IntegerField()
+    net_minor = serializers.IntegerField()
+
+
+class FinancialSummarySerializer(serializers.Serializer):
+    from_date = serializers.DateField(allow_null=True)
+    to_date = serializers.DateField(allow_null=True)
+    currency = serializers.CharField()
+    income_total_minor = serializers.IntegerField()
+    income_count = serializers.IntegerField()
+    pending_total_minor = serializers.IntegerField()
+    pending_count = serializers.IntegerField()
+    expense_total_minor = serializers.IntegerField()
+    expense_count = serializers.IntegerField()
+    net_minor = serializers.IntegerField()
+    income_by_category = MoneyTallySerializer(many=True)
+    expenses_by_category = MoneyTallySerializer(many=True)
+    monthly = MonthlyMoneySerializer(many=True)
+
+
+class ManagementReportSerializer(serializers.Serializer):
+    year = serializers.IntegerField()
+    month = serializers.IntegerField()
+    from_date = serializers.DateField()
+    to_date = serializers.DateField()
+    currency = serializers.CharField()
+
+    students_total = serializers.IntegerField()
+    students_active = serializers.IntegerField()
+    new_students = serializers.IntegerField()
+    new_enrolments = serializers.IntegerField()
+    courses_active = serializers.IntegerField()
+    enrolments_live = serializers.IntegerField()
+
+    registers_taken = serializers.IntegerField()
+    attendance_present = serializers.IntegerField()
+    attendance_late = serializers.IntegerField()
+    attendance_absent = serializers.IntegerField()
+    attendance_rate = serializers.FloatField(allow_null=True)
+
+    income_total_minor = serializers.IntegerField()
+    pending_total_minor = serializers.IntegerField()
+    expense_total_minor = serializers.IntegerField()
+    net_minor = serializers.IntegerField()
+    outstanding_minor = serializers.IntegerField()
+    income_by_category = MoneyTallySerializer(many=True)
+    expenses_by_category = MoneyTallySerializer(many=True)
+
+    inventory_lines = serializers.IntegerField()
+    inventory_units = serializers.IntegerField()
+    inventory_needs_repair = serializers.IntegerField()
+    inventory_damaged = serializers.IntegerField()
+    inventory_missing = serializers.IntegerField()

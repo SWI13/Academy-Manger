@@ -12,6 +12,7 @@ from rest_framework.response import Response
 
 from apps.audit.models import AuditAction
 from apps.audit.services import record
+from apps.core.printing import PrintableMixin, print_response_serializer, print_schema
 from apps.core.viewsets import ScopedModelViewSet
 from apps.notifications.models import NotificationKind
 from apps.notifications.services import notify
@@ -28,6 +29,8 @@ from .serializers import (
 
 logger = logging.getLogger(__name__)
 
+CoursePrintSerializer = print_response_serializer(CourseSerializer, "CoursePrint")
+
 
 @extend_schema_view(
     list=extend_schema(
@@ -39,12 +42,23 @@ logger = logging.getLogger(__name__)
         ],
     )
 )
-class CourseViewSet(ScopedModelViewSet):
+@print_schema(CoursePrintSerializer)
+class CourseViewSet(PrintableMixin, ScopedModelViewSet):
+    """
+    The catalogue: what is taught, when it runs, and what it costs today.
+
+    Never deleted - enrolments, marks and payments all reference a course, so
+    DELETE answers 405 and the end of a course's life is `status=ARCHIVED`
+    through the status action.
+    """
+
     queryset = Course.objects.all().prefetch_related("assignments__professor")
     lookup_field = "public_id"
     lookup_value_regex = "C-[0-9]{4}-[0-9]+"
 
     required_permissions = {
+        # Printing is exactly as wide a door as reading, never wider.
+        "printable": "course.view",
         "list": "course.view",
         "retrieve": "course.view",
         "create": "course.create",

@@ -10,6 +10,7 @@ import { Icon, type IconName } from "@/components/ui/Icon";
 import { api, type ApiFailure } from "@/lib/api";
 import { formatDate } from "@/lib/format";
 import type { AuditLog } from "@/types";
+import { useDict } from "@/components/LocaleProvider";
 
 /**
  * The log, read forward from a cursor.
@@ -32,6 +33,7 @@ export function AuditFeed({
   initial: AuditLog[];
   initialNext: string | null;
 }) {
+  const d = useDict();
   const [entries, setEntries] = useState(initial);
   const [next, setNext] = useState(initialNext);
   const [busy, setBusy] = useState(false);
@@ -52,7 +54,7 @@ export function AuditFeed({
       setEntries((current) => [...current, ...page.results]);
       setNext(page.next);
     } catch (failure) {
-      setError((failure as ApiFailure).message ?? "Could not load more.");
+      setError((failure as ApiFailure).message ?? d.audit.loadMoreFailed);
     } finally {
       setBusy(false);
     }
@@ -62,8 +64,8 @@ export function AuditFeed({
     return (
       <EmptyState
         icon="shield"
-        title="Nothing recorded for these filters"
-        description="The log holds every consequential action. If this is empty, none of them match — not that none happened."
+        title={d.audit.emptyTitle}
+        description={d.audit.emptyBody}
       />
     );
   }
@@ -105,11 +107,9 @@ export function AuditFeed({
           icon="chevron-down"
           onClick={loadMore}
           className="self-start"
-        >
-          Load more
-        </Button>
+        >{d.audit.loadMore}</Button>
       ) : (
-        <p className="py-2 text-[13px] text-ink-faint">That is the whole trail.</p>
+        <p className="py-2 text-[13px] text-ink-faint">{d.audit.endOfTrail}</p>
       )}
     </div>
   );
@@ -147,6 +147,12 @@ function markFor(action: string): { icon: IconName; tone: string } {
       tone: "border-accent-line bg-accent-soft text-accent",
     };
   }
+  if (action.startsWith("LOGISTICS")) {
+    return { icon: "layers", tone: "border-rule bg-white/[0.06] text-ink-faint" };
+  }
+  if (action.startsWith("EXPENSE")) {
+    return { icon: "receipt", tone: "border-warn-line bg-warn-wash text-warn" };
+  }
   if (action.includes("DOWNLOAD") || action.includes("EXPORT")) {
     return { icon: "download", tone: "border-info-line bg-info-wash text-info" };
   }
@@ -173,16 +179,16 @@ function Entry({ entry }: { entry: AuditLog }) {
   const mark = markFor(entry.action);
 
   return (
-    <article className="relative flex gap-3 py-1.5 pl-1">
+    <article className="relative flex gap-3 py-1.5 ps-1">
       {/* The rail, behind the node, running the height of the entry. */}
       <span
         aria-hidden
-        className="absolute bottom-0 left-[27px] top-0 w-px bg-rule"
+        className="absolute bottom-0 start-[27px] top-0 w-px bg-rule"
       />
 
       <time
         dateTime={entry.created_at}
-        className="tabular hidden w-[4.25rem] shrink-0 pt-3 text-right text-xs text-ink-faint sm:block"
+        className="tabular hidden w-[4.25rem] shrink-0 pt-3 text-end text-xs text-ink-faint sm:block"
       >
         {clock(entry.created_at)}
       </time>

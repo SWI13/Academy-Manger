@@ -9,11 +9,16 @@ import { getJson } from "@/lib/django";
 import { PAGE_SIZE, fetchPage, pageFrom, type SearchParams } from "@/lib/list";
 import { can, cookieHeader, getSession } from "@/lib/session";
 import type { Enrollment, Review } from "@/types";
+import { fill } from "@/lib/i18n";
+import { getDict } from "@/lib/i18n.server";
 
 import { ReviewCard } from "./ReviewCard";
 import { WriteReview } from "./WriteReview";
 
-export const metadata = { title: "Reviews" };
+export async function generateMetadata() {
+  const d = await getDict();
+  return { title: d.nav.reviews };
+}
 
 const FILTERS = ["status", "course", "rating"];
 
@@ -30,6 +35,7 @@ export default async function ReviewsPage({
 }: {
   searchParams: Promise<SearchParams>;
 }) {
+  const d = await getDict();
   const params = await searchParams;
   const cookie = await cookieHeader();
 
@@ -41,10 +47,10 @@ export default async function ReviewsPage({
 
   // Reception holds no review permission - the feedback channel is not part
   // of the desk's work - so the list would come back 403.
-  if (!can(session, "review.view")) return <NoAccess what="Reviews" />;
+  if (!can(session, "review.view")) return <NoAccess what={d.nav.reviews} />;
 
   if (!page) {
-    return <ErrorState title="Reviews could not be loaded" />;
+    return <ErrorState title={d.reviews.errorTitle} />;
   }
 
   const mayModerate = can(session, "review.moderate");
@@ -70,11 +76,11 @@ export default async function ReviewsPage({
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        title="Reviews"
+        title={d.nav.reviews}
         lede={
           mayModerate
-            ? "Written by students who finished a course. Nothing is deleted — hiding or rejecting keeps the row, the decision and who made it."
-            : "What students said about the courses you can see. Approved reviews only, and never with the author’s name attached for a professor."
+            ? d.reviews.lede
+            : d.reviews.ledeProfessor
         }
       />
 
@@ -83,8 +89,8 @@ export default async function ReviewsPage({
       {summary?.length ? (
         <section>
           <SectionHeader
-            title="By course"
-            description="Approved reviews only, worked out on read. A stored average could not be re-derived once a review is hidden."
+            title={d.reviews.byCourse}
+            description={d.reviews.byCourseNote}
           />
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
             {summary.map((row) => (
@@ -97,7 +103,7 @@ export default async function ReviewsPage({
                 </p>
 
                 {row.average_rating === null ? (
-                  <p className="mt-3 text-sm text-ink-faint">No reviews yet</p>
+                  <p className="mt-3 text-sm text-ink-faint">{d.reviews.emptyTitle}</p>
                 ) : (
                   <>
                     <div className="mt-3 flex items-baseline gap-2.5">
@@ -126,21 +132,21 @@ export default async function ReviewsPage({
           filters={[
             {
               param: "status",
-              label: "Status",
+              label: d.filters.status,
               options: [
-                { value: "PENDING", label: "Awaiting moderation" },
-                { value: "APPROVED", label: "Approved" },
-                { value: "HIDDEN", label: "Hidden" },
-                { value: "REJECTED", label: "Rejected" },
+                { value: "PENDING", label: d.reviews.awaitingModeration },
+                { value: "APPROVED", label: d.status.APPROVED },
+                { value: "HIDDEN", label: d.status.HIDDEN },
+                { value: "REJECTED", label: d.status.REJECTED },
               ],
             },
-            { param: "course", label: "Course", placeholder: "C-2026-001" },
+            { param: "course", label: d.filters.course, placeholder: "C-2026-001" },
             {
               param: "rating",
-              label: "Rating",
+              label: d.reviews.rating,
               options: [5, 4, 3, 2, 1].map((star) => ({
                 value: String(star),
-                label: `${star} star${star === 1 ? "" : "s"}`,
+                label: fill(d.phrases.starRating, { count: star }),
               })),
             },
           ]}
@@ -163,11 +169,11 @@ export default async function ReviewsPage({
           <EmptyState
             icon="star"
             title={
-              mayModerate ? "Nothing to moderate" : "No reviews here yet"
+              mayModerate ? d.reviews.nothingToModerate : d.reviews.emptyTitle
             }
             description={
               mayModerate
-                ? "You are all caught up. New reviews arrive as students finish their courses."
+                ? d.reviews.caughtUp
                 : "A review appears once a student has finished a course and a moderator has approved what they wrote."
             }
             tone={mayModerate ? "ok" : "neutral"}
@@ -179,7 +185,7 @@ export default async function ReviewsPage({
         count={page.count}
         page={pageFrom(params)}
         pageSize={PAGE_SIZE}
-        unit="review"
+        unit={d.units.reviews}
       />
     </div>
   );

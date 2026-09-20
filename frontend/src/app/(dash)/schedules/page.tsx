@@ -1,13 +1,20 @@
 import { ErrorState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { PrintButton } from "@/components/ui/PrintButton";
 import { Toolbar } from "@/components/ui/Toolbar";
 import { formatNumber } from "@/lib/format";
 import { fetchPage, type SearchParams } from "@/lib/list";
 import type { Schedule } from "@/types";
+import { weekdayName } from "@/lib/format";
+import { LOCALE_INFO } from "@/lib/i18n";
+import { getDict, getLocale } from "@/lib/i18n.server";
 
 import { WeekGrid, WeekList } from "./WeekGrid";
 
-export const metadata = { title: "Schedule" };
+export async function generateMetadata() {
+  const d = await getDict();
+  return { title: d.nav.schedules };
+}
 
 const FILTERS = ["course", "weekday"];
 
@@ -16,6 +23,8 @@ export default async function SchedulesPage({
 }: {
   searchParams: Promise<SearchParams>;
 }) {
+  const d = await getDict();
+  const intl = LOCALE_INFO[await getLocale()].intl;
   const params = await searchParams;
   // page_size at the cap: a week is drawn as a whole, and paging a timetable
   // would cut Thursday off the bottom of the screen.
@@ -26,30 +35,33 @@ export default async function SchedulesPage({
   );
 
   if (!page) {
-    return <ErrorState title="The schedule could not be loaded" />;
+    return <ErrorState title={d.schedules.errorTitle} />;
   }
 
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        title="Schedule"
-        lede="A recurring weekly pattern, not a diary of dated sessions. Each slot runs every week between its effective dates."
+        title={d.nav.schedules}
+        lede={d.schedules.lede}
+        actions={
+          <PrintButton href="/print/schedule" params={params} filters={["course", "weekday", "professor"]} />
+        }
       />
 
       <Toolbar
         filters={[
-          { param: "course", label: "Course", placeholder: "C-2026-001" },
+          { param: "course", label: d.filters.course, placeholder: "C-2026-001" },
           {
             param: "weekday",
-            label: "Day",
+            label: d.filters.day,
             options: [
-              { value: "6", label: "Sunday" },
-              { value: "0", label: "Monday" },
-              { value: "1", label: "Tuesday" },
-              { value: "2", label: "Wednesday" },
-              { value: "3", label: "Thursday" },
-              { value: "4", label: "Friday" },
-              { value: "5", label: "Saturday" },
+              { value: "6", label: weekdayName(6, intl) },
+              { value: "0", label: weekdayName(0, intl) },
+              { value: "1", label: weekdayName(1, intl) },
+              { value: "2", label: weekdayName(2, intl) },
+              { value: "3", label: weekdayName(3, intl) },
+              { value: "4", label: weekdayName(4, intl) },
+              { value: "5", label: weekdayName(5, intl) },
             ],
           },
         ]}

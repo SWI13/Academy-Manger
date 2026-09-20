@@ -10,11 +10,15 @@ import type { SearchParams } from "@/lib/list";
 import { formatNumber } from "@/lib/format";
 import { can, cookieHeader, getSession } from "@/lib/session";
 import type { Assessment, Course, Gradebook, Score } from "@/types";
+import { getDict } from "@/lib/i18n.server";
 
 import { GradebookTable } from "./GradebookTable";
 import { MyMarks } from "./MyMarks";
 
-export const metadata = { title: "Grades" };
+export async function generateMetadata() {
+  const d = await getDict();
+  return { title: d.nav.grades };
+}
 
 /**
  * One route, two audiences.
@@ -33,6 +37,7 @@ export default async function GradesPage({
 }: {
   searchParams: Promise<SearchParams>;
 }) {
+  const d = await getDict();
   const params = await searchParams;
   const cookie = await cookieHeader();
   const session = await getSession();
@@ -40,7 +45,7 @@ export default async function GradesPage({
   // Reception holds neither score permission. Without this the page would
   // fall through to the student branch and render an empty mark list, which
   // says "you have no marks" to somebody who was never going to have any.
-  if (!can(session, "score.view")) return <NoAccess what="Grades" />;
+  if (!can(session, "score.view")) return <NoAccess what={d.nav.grades} />;
 
   if (!can(session, "score.enter")) {
     const marks = await getJson<Score[]>(
@@ -78,8 +83,8 @@ export default async function GradesPage({
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        title="Grades"
-        lede="Averages are worked out from the raw marks every time they are asked for, never stored. Change an assessment’s weight and every average moves with it."
+        title={d.nav.grades}
+        lede={d.grades.lede}
       />
 
       {/* --- which course ------------------------------------------- */}
@@ -112,20 +117,20 @@ export default async function GradesPage({
       {!teaching.length ? (
         <EmptyState
           icon="book"
-          title="No courses assigned to you"
-          description="A gradebook appears here once you are assigned to a course."
+          title={d.grades.noCourses}
+          description={d.grades.noCoursesBody}
         />
       ) : !course ? (
         <EmptyState
           icon="check-circle"
-          title="Choose a course"
-          description="Pick one above to see its gradebook and mark sheets."
+          title={d.enrollments.chooseCourse}
+          description={d.grades.chooseCourseBody}
         />
       ) : !gradebook ? (
         <EmptyState
           icon="alert"
           title={`No course ${course} that you teach`}
-          description="The gradebook is scoped to the courses you are assigned to."
+          description={d.grades.scopeNote}
         />
       ) : (
         <>
@@ -142,8 +147,8 @@ export default async function GradesPage({
           {assessments?.results.length ? (
             <section>
               <SectionHeader
-                title="Mark sheets"
-                description="Open one to enter or correct marks."
+                title={d.grades.markSheets}
+                description={d.grades.markSheetsNote}
               />
               <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                 {assessments.results.map((assessment) => (
@@ -162,13 +167,9 @@ export default async function GradesPage({
                         </span>
                         <span className="mt-2.5 block">
                           {assessment.is_published ? (
-                            <Badge tone="ok" size="sm" dot>
-                              Published
-                            </Badge>
+                            <Badge tone="ok" size="sm" dot>{d.courses.published}</Badge>
                           ) : (
-                            <Badge tone="warn" size="sm" dot>
-                              Not published
-                            </Badge>
+                            <Badge tone="warn" size="sm" dot>{d.courses.notPublished}</Badge>
                           )}
                         </span>
                       </span>
@@ -185,8 +186,8 @@ export default async function GradesPage({
           ) : (
             <EmptyState
               icon="check-circle"
-              title="No assessments on this course"
-              description="Marks are entered against an assessment, so one has to exist before the sheet does."
+              title={d.grades.noAssessments}
+              description={d.grades.noAssessmentsBody}
             />
           )}
         </>

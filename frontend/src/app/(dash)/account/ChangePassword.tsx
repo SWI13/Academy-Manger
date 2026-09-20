@@ -8,6 +8,7 @@ import { Card, CardHeader } from "@/components/ui/Card";
 import { Field, FormError, Note } from "@/components/ui/Field";
 import { useToast } from "@/components/ui/Toast";
 import { ApiFailure, api } from "@/lib/api";
+import { useDict } from "@/components/LocaleProvider";
 
 /**
  * Changing your own password.
@@ -22,6 +23,7 @@ import { ApiFailure, api } from "@/lib/api";
  * validator's own sentence, put beside the field it belongs to.
  */
 export function ChangePassword() {
+  const d = useDict();
   const router = useRouter();
   const toast = useToast();
 
@@ -52,8 +54,8 @@ export function ChangePassword() {
       setConfirm("");
       toast({
         tone: "ok",
-        title: "Password changed",
-        description: "Use the new one the next time you sign in.",
+        title: d.account.changed,
+        description: d.account.changedNote,
       });
       router.refresh();
     } catch (failure) {
@@ -72,15 +74,15 @@ export function ChangePassword() {
     <Card as="div">
       <form onSubmit={submit} className="flex flex-col gap-5">
         <CardHeader
-          title="Password"
+          title={d.account.password}
           icon="key"
-          description="Changed here, by you. Nobody can read your existing one — it was never stored in a readable form."
+          description={d.account.passwordNote}
           divider
         />
 
         <div className="grid max-w-2xl gap-4 sm:grid-cols-2">
           <Field
-            label="Current password"
+            label={d.account.current}
             type="password"
             required
             autoComplete="current-password"
@@ -91,7 +93,7 @@ export function ChangePassword() {
             wrapperClassName="sm:col-span-2"
           />
           <Field
-            label="New password"
+            label={d.account.newPassword}
             type="password"
             required
             autoComplete="new-password"
@@ -99,17 +101,17 @@ export function ChangePassword() {
             value={next}
             onChange={(event) => setNext(event.target.value)}
             error={errors.new_password}
-            hint="Long beats complicated. A phrase you can remember is stronger than a word with symbols in it."
+            hint={d.account.newPasswordHint}
           />
           <Field
-            label="Repeat the new password"
+            label={d.account.repeat}
             type="password"
             required
             autoComplete="new-password"
             icon="key"
             value={confirm}
             onChange={(event) => setConfirm(event.target.value)}
-            error={mismatch ? "These two do not match." : undefined}
+            error={mismatch ? d.account.mismatch : undefined}
           />
         </div>
 
@@ -128,9 +130,7 @@ export function ChangePassword() {
             icon="check"
             busy={busy}
             disabled={!current || !next || !confirm || mismatch}
-          >
-            Change password
-          </Button>
+          >{d.account.submit}</Button>
         </div>
       </form>
     </Card>

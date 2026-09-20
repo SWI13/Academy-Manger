@@ -1,5 +1,6 @@
 import { LinkButton } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
+import { getDict } from "@/lib/i18n.server";
 
 /**
  * Not found - which here means one of two things, and deliberately does not
@@ -10,7 +11,8 @@ import { Icon } from "@/components/ui/Icon";
  * like PAY-000004 confirms that PAY-000004 is real. This screen keeps that
  * ambiguity rather than helpfully undoing it.
  */
-export default function NotFound() {
+export default async function NotFound() {
+  const d = await getDict();
   return (
     <div className="flex min-h-[50vh] flex-col items-center justify-center px-4 text-center">
       <span
@@ -20,17 +22,13 @@ export default function NotFound() {
         <Icon name="search" size={22} />
       </span>
 
-      <h1 className="text-lg font-semibold text-ink">Not found</h1>
+      <h1 className="text-lg font-semibold text-ink">{d.empty.notFound}</h1>
       <p className="mt-2 max-w-sm text-sm leading-relaxed text-ink-soft">
-        There is no record here for you. Either it does not exist, or it is not
-        one your role can reach — and the platform does not distinguish between
-        those two on purpose.
+        {d.empty.notFoundExplain}
       </p>
 
       <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
-        <LinkButton href="/dashboard" variant="primary" icon="gauge">
-          Back to the dashboard
-        </LinkButton>
+        <LinkButton href="/dashboard" variant="primary" icon="gauge">{d.common.toDashboard}</LinkButton>
       </div>
     </div>
   );

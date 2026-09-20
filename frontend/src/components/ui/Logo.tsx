@@ -133,6 +133,14 @@ function LogoFallback({
   return (
     <span className={className}>
       <span
+        /*
+         * `dir="ltr"` even inside an Arabic page. The name is a mark, and a
+         * mark does not reorder: under RTL the flex row put ACADEMY before SM
+         * and the placeholder read "ACADEMY SM". The same reasoning is why
+         * this is set here rather than left to the bidi algorithm — the words
+         * are Latin either way, but their *order* is part of the brand.
+         */
+        dir="ltr"
         style={{ fontSize: Math.round(height * 0.44), lineHeight: 1 }}
         className="display inline-flex max-w-full select-none items-baseline gap-[0.3em] overflow-hidden whitespace-nowrap italic tracking-tight text-ink"
       >

@@ -8,6 +8,7 @@ import { getJson } from "@/lib/django";
 import { formatDate } from "@/lib/format";
 import { cookieHeader } from "@/lib/session";
 import type { Assessment, Enrollment, Score } from "@/types";
+import { getDict } from "@/lib/i18n.server";
 
 import { MarkSheet } from "./MarkSheet";
 import { PublishPanel } from "./PublishPanel";
@@ -19,6 +20,7 @@ export async function generateMetadata({ params }: Props) {
 }
 
 export default async function AssessmentPage({ params }: Props) {
+  const d = await getDict();
   const { assessmentId } = await params;
   const cookie = await cookieHeader();
 
@@ -55,13 +57,9 @@ export default async function AssessmentPage({ params }: Props) {
         title={assessment.title}
         badge={
           assessment.is_published ? (
-            <Badge tone="ok" dot>
-              Published
-            </Badge>
+            <Badge tone="ok" dot>{d.courses.published}</Badge>
           ) : (
-            <Badge tone="warn" dot>
-              Not published
-            </Badge>
+            <Badge tone="warn" dot>{d.courses.notPublished}</Badge>
           )
         }
         eyebrow={
@@ -74,19 +72,19 @@ export default async function AssessmentPage({ params }: Props) {
 
       <Card>
         <dl className="grid grid-cols-2 gap-x-6 gap-y-5 sm:grid-cols-4">
-          <Figure label="Out of" value={String(assessment.max_score)} />
+          <Figure label={d.grades.outOf} value={String(assessment.max_score)} />
           <Figure
-            label="Weight"
+            label={d.grades.weight}
             value={String(assessment.weight)}
-            note="Its share of the course average"
+            note={d.grades.weightNote}
           />
           <Figure
-            label="Marked"
+            label={d.grades.marked}
             value={`${rows.length - unmarked} / ${rows.length}`}
             tone={unmarked ? "warn" : "ok"}
           />
           <Figure
-            label="Held on"
+            label={d.grades.heldOn}
             value={assessment.held_on ? formatDate(assessment.held_on) : "—"}
           />
         </dl>

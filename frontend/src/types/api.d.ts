@@ -224,6 +224,263 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/attendance/records/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List attendance records
+         * @description The individual marks, read-only.
+         *
+         *     Registers are written a sheet at a time through
+         *     `sessions/{id}/register/`, never a row at a time - so there is no create,
+         *     update or delete here at any version. A screen that could PATCH one row
+         *     would be a second way to write attendance, and two write paths is how one
+         *     of them ends up without an audit trail.
+         */
+        get: operations["v1_attendance_records_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/attendance/records/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description The individual marks, read-only.
+         *
+         *     Registers are written a sheet at a time through
+         *     `sessions/{id}/register/`, never a row at a time - so there is no create,
+         *     update or delete here at any version. A screen that could PATCH one row
+         *     would be a second way to write attendance, and two write paths is how one
+         *     of them ends up without an audit trail.
+         */
+        get: operations["v1_attendance_records_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/attendance/records/print/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The current selection, unpaginated, for printing
+         * @description The individual marks, read-only.
+         *
+         *     Registers are written a sheet at a time through
+         *     `sessions/{id}/register/`, never a row at a time - so there is no create,
+         *     update or delete here at any version. A screen that could PATCH one row
+         *     would be a second way to write attendance, and two write paths is how one
+         *     of them ends up without an audit trail.
+         */
+        get: operations["v1_attendance_records_print_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/attendance/sessions/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List registers
+         * @description One register per course per day.
+         *
+         *     There is no DELETE. A register that was taken is a record of who was in a
+         *     room on a date, and the platform's rule is that such records are not
+         *     destroyed - a register opened by mistake on the wrong day is corrected by
+         *     changing its date, which leaves a trail.
+         */
+        get: operations["v1_attendance_sessions_list"];
+        put?: never;
+        /**
+         * @description Opening a register that already exists returns the existing one.
+         *
+         *     Two professors opening Tuesday's register at the same moment is
+         *     ordinary, and answering the second with a uniqueness error they have
+         *     to interpret would send them looking for a register they are already
+         *     entitled to. 200 rather than 201 says which happened.
+         */
+        post: operations["v1_attendance_sessions_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/attendance/sessions/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description One register per course per day.
+         *
+         *     There is no DELETE. A register that was taken is a record of who was in a
+         *     room on a date, and the platform's rule is that such records are not
+         *     destroyed - a register opened by mistake on the wrong day is corrected by
+         *     changing its date, which leaves a trail.
+         */
+        get: operations["v1_attendance_sessions_retrieve"];
+        /**
+         * @description One register per course per day.
+         *
+         *     There is no DELETE. A register that was taken is a record of who was in a
+         *     room on a date, and the platform's rule is that such records are not
+         *     destroyed - a register opened by mistake on the wrong day is corrected by
+         *     changing its date, which leaves a trail.
+         */
+        put: operations["v1_attendance_sessions_update"];
+        post?: never;
+        /**
+         * @description One register per course per day.
+         *
+         *     There is no DELETE. A register that was taken is a record of who was in a
+         *     room on a date, and the platform's rule is that such records are not
+         *     destroyed - a register opened by mistake on the wrong day is corrected by
+         *     changing its date, which leaves a trail.
+         */
+        delete: operations["v1_attendance_sessions_destroy"];
+        options?: never;
+        head?: never;
+        /**
+         * @description One register per course per day.
+         *
+         *     There is no DELETE. A register that was taken is a record of who was in a
+         *     room on a date, and the platform's rule is that such records are not
+         *     destroyed - a register opened by mistake on the wrong day is corrected by
+         *     changing its date, which leaves a trail.
+         */
+        patch: operations["v1_attendance_sessions_partial_update"];
+        trace?: never;
+    };
+    "/api/v1/attendance/sessions/{id}/register/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Save the whole register
+         * @description One register per course per day.
+         *
+         *     There is no DELETE. A register that was taken is a record of who was in a
+         *     room on a date, and the platform's rule is that such records are not
+         *     destroyed - a register opened by mistake on the wrong day is corrected by
+         *     changing its date, which leaves a trail.
+         */
+        put: operations["v1_attendance_sessions_register_update"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/attendance/sessions/{id}/sheet/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The register, roster and all
+         * @description Every name on the course, with whatever has been marked filled in.
+         *
+         *     This is what both the screen and the printed sheet render. A register
+         *     nobody has taken yet answers with the roster and blank statuses, which
+         *     is exactly the blank sheet a professor carries into the room.
+         */
+        get: operations["v1_attendance_sessions_sheet_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/attendance/sessions/print/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The current selection, unpaginated, for printing
+         * @description One register per course per day.
+         *
+         *     There is no DELETE. A register that was taken is a record of who was in a
+         *     room on a date, and the platform's rule is that such records are not
+         *     destroyed - a register opened by mistake on the wrong day is corrected by
+         *     changing its date, which leaves a trail.
+         */
+        get: operations["v1_attendance_sessions_print_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/attendance/summary/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Attendance rates for a course, a student or a period
+         * @description Attendance rates over a selection, tallied by the backend.
+         *
+         *     Never in the browser. A percentage worked out from the twenty-five rows on
+         *     a page is a percentage that disagrees with the register as soon as anybody
+         *     turns to page two, and it is the figure that goes on a report a parent
+         *     reads.
+         */
+        get: operations["v1_attendance_summary_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/audit/": {
         parameters: {
             query?: never;
@@ -364,42 +621,20 @@ export interface paths {
         };
         /**
          * List courses
-         * @description The base every resource viewset should inherit.
+         * @description The catalogue: what is taught, when it runs, and what it costs today.
          *
-         *     Both gates are wired in by default:
-         *
-         *         class PaymentViewSet(ScopedModelViewSet):
-         *             queryset = Payment.objects.all()
-         *             required_permissions = {
-         *                 "list": "payment.view",
-         *                 "retrieve": "payment.view",
-         *                 "create": "payment.create",
-         *             }
-         *
-         *             def scope_queryset(self, queryset, user):
-         *                 if has_permission(user, "payment.view_all"):
-         *                     return queryset
-         *                 return queryset.filter(enrollment__student__user=user)
+         *     Never deleted - enrolments, marks and payments all reference a course, so
+         *     DELETE answers 405 and the end of a course's life is `status=ARCHIVED`
+         *     through the status action.
          */
         get: operations["v1_courses_list"];
         put?: never;
         /**
-         * @description The base every resource viewset should inherit.
+         * @description The catalogue: what is taught, when it runs, and what it costs today.
          *
-         *     Both gates are wired in by default:
-         *
-         *         class PaymentViewSet(ScopedModelViewSet):
-         *             queryset = Payment.objects.all()
-         *             required_permissions = {
-         *                 "list": "payment.view",
-         *                 "retrieve": "payment.view",
-         *                 "create": "payment.create",
-         *             }
-         *
-         *             def scope_queryset(self, queryset, user):
-         *                 if has_permission(user, "payment.view_all"):
-         *                     return queryset
-         *                 return queryset.filter(enrollment__student__user=user)
+         *     Never deleted - enrolments, marks and payments all reference a course, so
+         *     DELETE answers 405 and the end of a course's life is `status=ARCHIVED`
+         *     through the status action.
          */
         post: operations["v1_courses_create"];
         delete?: never;
@@ -416,82 +651,38 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * @description The base every resource viewset should inherit.
+         * @description The catalogue: what is taught, when it runs, and what it costs today.
          *
-         *     Both gates are wired in by default:
-         *
-         *         class PaymentViewSet(ScopedModelViewSet):
-         *             queryset = Payment.objects.all()
-         *             required_permissions = {
-         *                 "list": "payment.view",
-         *                 "retrieve": "payment.view",
-         *                 "create": "payment.create",
-         *             }
-         *
-         *             def scope_queryset(self, queryset, user):
-         *                 if has_permission(user, "payment.view_all"):
-         *                     return queryset
-         *                 return queryset.filter(enrollment__student__user=user)
+         *     Never deleted - enrolments, marks and payments all reference a course, so
+         *     DELETE answers 405 and the end of a course's life is `status=ARCHIVED`
+         *     through the status action.
          */
         get: operations["v1_courses_retrieve"];
         /**
-         * @description The base every resource viewset should inherit.
+         * @description The catalogue: what is taught, when it runs, and what it costs today.
          *
-         *     Both gates are wired in by default:
-         *
-         *         class PaymentViewSet(ScopedModelViewSet):
-         *             queryset = Payment.objects.all()
-         *             required_permissions = {
-         *                 "list": "payment.view",
-         *                 "retrieve": "payment.view",
-         *                 "create": "payment.create",
-         *             }
-         *
-         *             def scope_queryset(self, queryset, user):
-         *                 if has_permission(user, "payment.view_all"):
-         *                     return queryset
-         *                 return queryset.filter(enrollment__student__user=user)
+         *     Never deleted - enrolments, marks and payments all reference a course, so
+         *     DELETE answers 405 and the end of a course's life is `status=ARCHIVED`
+         *     through the status action.
          */
         put: operations["v1_courses_update"];
         post?: never;
         /**
-         * @description The base every resource viewset should inherit.
+         * @description The catalogue: what is taught, when it runs, and what it costs today.
          *
-         *     Both gates are wired in by default:
-         *
-         *         class PaymentViewSet(ScopedModelViewSet):
-         *             queryset = Payment.objects.all()
-         *             required_permissions = {
-         *                 "list": "payment.view",
-         *                 "retrieve": "payment.view",
-         *                 "create": "payment.create",
-         *             }
-         *
-         *             def scope_queryset(self, queryset, user):
-         *                 if has_permission(user, "payment.view_all"):
-         *                     return queryset
-         *                 return queryset.filter(enrollment__student__user=user)
+         *     Never deleted - enrolments, marks and payments all reference a course, so
+         *     DELETE answers 405 and the end of a course's life is `status=ARCHIVED`
+         *     through the status action.
          */
         delete: operations["v1_courses_destroy"];
         options?: never;
         head?: never;
         /**
-         * @description The base every resource viewset should inherit.
+         * @description The catalogue: what is taught, when it runs, and what it costs today.
          *
-         *     Both gates are wired in by default:
-         *
-         *         class PaymentViewSet(ScopedModelViewSet):
-         *             queryset = Payment.objects.all()
-         *             required_permissions = {
-         *                 "list": "payment.view",
-         *                 "retrieve": "payment.view",
-         *                 "create": "payment.create",
-         *             }
-         *
-         *             def scope_queryset(self, queryset, user):
-         *                 if has_permission(user, "payment.view_all"):
-         *                     return queryset
-         *                 return queryset.filter(enrollment__student__user=user)
+         *     Never deleted - enrolments, marks and payments all reference a course, so
+         *     DELETE answers 405 and the end of a course's life is `status=ARCHIVED`
+         *     through the status action.
          */
         patch: operations["v1_courses_partial_update"];
         trace?: never;
@@ -505,63 +696,30 @@ export interface paths {
         };
         /**
          * Assign or unassign a professor
-         * @description The base every resource viewset should inherit.
+         * @description The catalogue: what is taught, when it runs, and what it costs today.
          *
-         *     Both gates are wired in by default:
-         *
-         *         class PaymentViewSet(ScopedModelViewSet):
-         *             queryset = Payment.objects.all()
-         *             required_permissions = {
-         *                 "list": "payment.view",
-         *                 "retrieve": "payment.view",
-         *                 "create": "payment.create",
-         *             }
-         *
-         *             def scope_queryset(self, queryset, user):
-         *                 if has_permission(user, "payment.view_all"):
-         *                     return queryset
-         *                 return queryset.filter(enrollment__student__user=user)
+         *     Never deleted - enrolments, marks and payments all reference a course, so
+         *     DELETE answers 405 and the end of a course's life is `status=ARCHIVED`
+         *     through the status action.
          */
         get: operations["v1_courses_professors_retrieve"];
         put?: never;
         /**
          * Assign or unassign a professor
-         * @description The base every resource viewset should inherit.
+         * @description The catalogue: what is taught, when it runs, and what it costs today.
          *
-         *     Both gates are wired in by default:
-         *
-         *         class PaymentViewSet(ScopedModelViewSet):
-         *             queryset = Payment.objects.all()
-         *             required_permissions = {
-         *                 "list": "payment.view",
-         *                 "retrieve": "payment.view",
-         *                 "create": "payment.create",
-         *             }
-         *
-         *             def scope_queryset(self, queryset, user):
-         *                 if has_permission(user, "payment.view_all"):
-         *                     return queryset
-         *                 return queryset.filter(enrollment__student__user=user)
+         *     Never deleted - enrolments, marks and payments all reference a course, so
+         *     DELETE answers 405 and the end of a course's life is `status=ARCHIVED`
+         *     through the status action.
          */
         post: operations["v1_courses_professors_create"];
         /**
          * Assign or unassign a professor
-         * @description The base every resource viewset should inherit.
+         * @description The catalogue: what is taught, when it runs, and what it costs today.
          *
-         *     Both gates are wired in by default:
-         *
-         *         class PaymentViewSet(ScopedModelViewSet):
-         *             queryset = Payment.objects.all()
-         *             required_permissions = {
-         *                 "list": "payment.view",
-         *                 "retrieve": "payment.view",
-         *                 "create": "payment.create",
-         *             }
-         *
-         *             def scope_queryset(self, queryset, user):
-         *                 if has_permission(user, "payment.view_all"):
-         *                     return queryset
-         *                 return queryset.filter(enrollment__student__user=user)
+         *     Never deleted - enrolments, marks and payments all reference a course, so
+         *     DELETE answers 405 and the end of a course's life is `status=ARCHIVED`
+         *     through the status action.
          */
         delete: operations["v1_courses_professors_destroy"];
         options?: never;
@@ -580,24 +738,37 @@ export interface paths {
         put?: never;
         /**
          * Change course status
-         * @description The base every resource viewset should inherit.
+         * @description The catalogue: what is taught, when it runs, and what it costs today.
          *
-         *     Both gates are wired in by default:
-         *
-         *         class PaymentViewSet(ScopedModelViewSet):
-         *             queryset = Payment.objects.all()
-         *             required_permissions = {
-         *                 "list": "payment.view",
-         *                 "retrieve": "payment.view",
-         *                 "create": "payment.create",
-         *             }
-         *
-         *             def scope_queryset(self, queryset, user):
-         *                 if has_permission(user, "payment.view_all"):
-         *                     return queryset
-         *                 return queryset.filter(enrollment__student__user=user)
+         *     Never deleted - enrolments, marks and payments all reference a course, so
+         *     DELETE answers 405 and the end of a course's life is `status=ARCHIVED`
+         *     through the status action.
          */
         post: operations["v1_courses_status_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/print/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The current selection, unpaginated, for printing
+         * @description The catalogue: what is taught, when it runs, and what it costs today.
+         *
+         *     Never deleted - enrolments, marks and payments all reference a course, so
+         *     DELETE answers 405 and the end of a course's life is `status=ARCHIVED`
+         *     through the status action.
+         */
+        get: operations["v1_courses_print_retrieve"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -613,42 +784,20 @@ export interface paths {
         };
         /**
          * List enrolments
-         * @description The base every resource viewset should inherit.
+         * @description A student on a course, and the price they agreed to.
          *
-         *     Both gates are wired in by default:
-         *
-         *         class PaymentViewSet(ScopedModelViewSet):
-         *             queryset = Payment.objects.all()
-         *             required_permissions = {
-         *                 "list": "payment.view",
-         *                 "retrieve": "payment.view",
-         *                 "create": "payment.create",
-         *             }
-         *
-         *             def scope_queryset(self, queryset, user):
-         *                 if has_permission(user, "payment.view_all"):
-         *                     return queryset
-         *                 return queryset.filter(enrollment__student__user=user)
+         *     The price is copied onto the enrolment rather than read from the course,
+         *     so raising the catalogue price next term does not silently re-price
+         *     everybody already enrolled.
          */
         get: operations["v1_enrollments_list"];
         put?: never;
         /**
-         * @description The base every resource viewset should inherit.
+         * @description A student on a course, and the price they agreed to.
          *
-         *     Both gates are wired in by default:
-         *
-         *         class PaymentViewSet(ScopedModelViewSet):
-         *             queryset = Payment.objects.all()
-         *             required_permissions = {
-         *                 "list": "payment.view",
-         *                 "retrieve": "payment.view",
-         *                 "create": "payment.create",
-         *             }
-         *
-         *             def scope_queryset(self, queryset, user):
-         *                 if has_permission(user, "payment.view_all"):
-         *                     return queryset
-         *                 return queryset.filter(enrollment__student__user=user)
+         *     The price is copied onto the enrolment rather than read from the course,
+         *     so raising the catalogue price next term does not silently re-price
+         *     everybody already enrolled.
          */
         post: operations["v1_enrollments_create"];
         delete?: never;
@@ -665,82 +814,38 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * @description The base every resource viewset should inherit.
+         * @description A student on a course, and the price they agreed to.
          *
-         *     Both gates are wired in by default:
-         *
-         *         class PaymentViewSet(ScopedModelViewSet):
-         *             queryset = Payment.objects.all()
-         *             required_permissions = {
-         *                 "list": "payment.view",
-         *                 "retrieve": "payment.view",
-         *                 "create": "payment.create",
-         *             }
-         *
-         *             def scope_queryset(self, queryset, user):
-         *                 if has_permission(user, "payment.view_all"):
-         *                     return queryset
-         *                 return queryset.filter(enrollment__student__user=user)
+         *     The price is copied onto the enrolment rather than read from the course,
+         *     so raising the catalogue price next term does not silently re-price
+         *     everybody already enrolled.
          */
         get: operations["v1_enrollments_retrieve"];
         /**
-         * @description The base every resource viewset should inherit.
+         * @description A student on a course, and the price they agreed to.
          *
-         *     Both gates are wired in by default:
-         *
-         *         class PaymentViewSet(ScopedModelViewSet):
-         *             queryset = Payment.objects.all()
-         *             required_permissions = {
-         *                 "list": "payment.view",
-         *                 "retrieve": "payment.view",
-         *                 "create": "payment.create",
-         *             }
-         *
-         *             def scope_queryset(self, queryset, user):
-         *                 if has_permission(user, "payment.view_all"):
-         *                     return queryset
-         *                 return queryset.filter(enrollment__student__user=user)
+         *     The price is copied onto the enrolment rather than read from the course,
+         *     so raising the catalogue price next term does not silently re-price
+         *     everybody already enrolled.
          */
         put: operations["v1_enrollments_update"];
         post?: never;
         /**
-         * @description The base every resource viewset should inherit.
+         * @description A student on a course, and the price they agreed to.
          *
-         *     Both gates are wired in by default:
-         *
-         *         class PaymentViewSet(ScopedModelViewSet):
-         *             queryset = Payment.objects.all()
-         *             required_permissions = {
-         *                 "list": "payment.view",
-         *                 "retrieve": "payment.view",
-         *                 "create": "payment.create",
-         *             }
-         *
-         *             def scope_queryset(self, queryset, user):
-         *                 if has_permission(user, "payment.view_all"):
-         *                     return queryset
-         *                 return queryset.filter(enrollment__student__user=user)
+         *     The price is copied onto the enrolment rather than read from the course,
+         *     so raising the catalogue price next term does not silently re-price
+         *     everybody already enrolled.
          */
         delete: operations["v1_enrollments_destroy"];
         options?: never;
         head?: never;
         /**
-         * @description The base every resource viewset should inherit.
+         * @description A student on a course, and the price they agreed to.
          *
-         *     Both gates are wired in by default:
-         *
-         *         class PaymentViewSet(ScopedModelViewSet):
-         *             queryset = Payment.objects.all()
-         *             required_permissions = {
-         *                 "list": "payment.view",
-         *                 "retrieve": "payment.view",
-         *                 "create": "payment.create",
-         *             }
-         *
-         *             def scope_queryset(self, queryset, user):
-         *                 if has_permission(user, "payment.view_all"):
-         *                     return queryset
-         *                 return queryset.filter(enrollment__student__user=user)
+         *     The price is copied onto the enrolment rather than read from the course,
+         *     so raising the catalogue price next term does not silently re-price
+         *     everybody already enrolled.
          */
         patch: operations["v1_enrollments_partial_update"];
         trace?: never;
@@ -797,24 +902,37 @@ export interface paths {
         put?: never;
         /**
          * Change enrolment status
-         * @description The base every resource viewset should inherit.
+         * @description A student on a course, and the price they agreed to.
          *
-         *     Both gates are wired in by default:
-         *
-         *         class PaymentViewSet(ScopedModelViewSet):
-         *             queryset = Payment.objects.all()
-         *             required_permissions = {
-         *                 "list": "payment.view",
-         *                 "retrieve": "payment.view",
-         *                 "create": "payment.create",
-         *             }
-         *
-         *             def scope_queryset(self, queryset, user):
-         *                 if has_permission(user, "payment.view_all"):
-         *                     return queryset
-         *                 return queryset.filter(enrollment__student__user=user)
+         *     The price is copied onto the enrolment rather than read from the course,
+         *     so raising the catalogue price next term does not silently re-price
+         *     everybody already enrolled.
          */
         post: operations["v1_enrollments_status_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/enrollments/print/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The current selection, unpaginated, for printing
+         * @description A student on a course, and the price they agreed to.
+         *
+         *     The price is copied onto the enrolment rather than read from the course,
+         *     so raising the catalogue price next term does not silently re-price
+         *     everybody already enrolled.
+         */
+        get: operations["v1_enrollments_print_retrieve"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -929,6 +1047,352 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/logistics/categories/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List logistics categories
+         * @description The labels, as rows.
+         *
+         *     This viewset is the answer to "add new item types without changing the
+         *     code". There is no DELETE: a category is referenced by every row filed
+         *     under it, and deleting one would either orphan those rows or take them
+         *     with it. Retiring is `is_active = false`, which removes it from the
+         *     dropdowns and leaves the history intact.
+         */
+        get: operations["v1_logistics_categories_list"];
+        put?: never;
+        /**
+         * @description The labels, as rows.
+         *
+         *     This viewset is the answer to "add new item types without changing the
+         *     code". There is no DELETE: a category is referenced by every row filed
+         *     under it, and deleting one would either orphan those rows or take them
+         *     with it. Retiring is `is_active = false`, which removes it from the
+         *     dropdowns and leaves the history intact.
+         */
+        post: operations["v1_logistics_categories_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/logistics/categories/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description The labels, as rows.
+         *
+         *     This viewset is the answer to "add new item types without changing the
+         *     code". There is no DELETE: a category is referenced by every row filed
+         *     under it, and deleting one would either orphan those rows or take them
+         *     with it. Retiring is `is_active = false`, which removes it from the
+         *     dropdowns and leaves the history intact.
+         */
+        get: operations["v1_logistics_categories_retrieve"];
+        put?: never;
+        post?: never;
+        /**
+         * @description The labels, as rows.
+         *
+         *     This viewset is the answer to "add new item types without changing the
+         *     code". There is no DELETE: a category is referenced by every row filed
+         *     under it, and deleting one would either orphan those rows or take them
+         *     with it. Retiring is `is_active = false`, which removes it from the
+         *     dropdowns and leaves the history intact.
+         */
+        delete: operations["v1_logistics_categories_destroy"];
+        options?: never;
+        head?: never;
+        /**
+         * @description The labels, as rows.
+         *
+         *     This viewset is the answer to "add new item types without changing the
+         *     code". There is no DELETE: a category is referenced by every row filed
+         *     under it, and deleting one would either orphan those rows or take them
+         *     with it. Retiring is `is_active = false`, which removes it from the
+         *     dropdowns and leaves the history intact.
+         */
+        patch: operations["v1_logistics_categories_partial_update"];
+        trace?: never;
+    };
+    "/api/v1/logistics/expenses/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List expenses
+         * @description Monthly operating costs. Filed by accounting month, not by payment date.
+         */
+        get: operations["v1_logistics_expenses_list"];
+        put?: never;
+        /** @description Monthly operating costs. Filed by accounting month, not by payment date. */
+        post: operations["v1_logistics_expenses_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/logistics/expenses/{public_id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Monthly operating costs. Filed by accounting month, not by payment date. */
+        get: operations["v1_logistics_expenses_retrieve"];
+        /** @description Monthly operating costs. Filed by accounting month, not by payment date. */
+        put: operations["v1_logistics_expenses_update"];
+        post?: never;
+        /** @description Monthly operating costs. Filed by accounting month, not by payment date. */
+        delete: operations["v1_logistics_expenses_destroy"];
+        options?: never;
+        head?: never;
+        /** @description Monthly operating costs. Filed by accounting month, not by payment date. */
+        patch: operations["v1_logistics_expenses_partial_update"];
+        trace?: never;
+    };
+    "/api/v1/logistics/expenses/history/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Previous months and what each of them cost
+         * @description Monthly operating costs. Filed by accounting month, not by payment date.
+         */
+        get: operations["v1_logistics_expenses_history_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/logistics/expenses/print/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * One month's expenses, unpaginated, for printing
+         * @description Monthly operating costs. Filed by accounting month, not by payment date.
+         */
+        get: operations["v1_logistics_expenses_print_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/logistics/expenses/summary/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Totals for one month, its year and the month before it
+         * @description Monthly operating costs. Filed by accounting month, not by payment date.
+         */
+        get: operations["v1_logistics_expenses_summary_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/logistics/items/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List inventory items
+         * @description The inventory.
+         *
+         *     DELETE is a soft delete - see `perform_destroy`. The row leaves every list
+         *     and every total immediately, and what the institute once owned survives
+         *     somebody tidying up.
+         */
+        get: operations["v1_logistics_items_list"];
+        put?: never;
+        /**
+         * @description The inventory.
+         *
+         *     DELETE is a soft delete - see `perform_destroy`. The row leaves every list
+         *     and every total immediately, and what the institute once owned survives
+         *     somebody tidying up.
+         */
+        post: operations["v1_logistics_items_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/logistics/items/{public_id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description The inventory.
+         *
+         *     DELETE is a soft delete - see `perform_destroy`. The row leaves every list
+         *     and every total immediately, and what the institute once owned survives
+         *     somebody tidying up.
+         */
+        get: operations["v1_logistics_items_retrieve"];
+        /**
+         * @description The inventory.
+         *
+         *     DELETE is a soft delete - see `perform_destroy`. The row leaves every list
+         *     and every total immediately, and what the institute once owned survives
+         *     somebody tidying up.
+         */
+        put: operations["v1_logistics_items_update"];
+        post?: never;
+        /**
+         * @description The inventory.
+         *
+         *     DELETE is a soft delete - see `perform_destroy`. The row leaves every list
+         *     and every total immediately, and what the institute once owned survives
+         *     somebody tidying up.
+         */
+        delete: operations["v1_logistics_items_destroy"];
+        options?: never;
+        head?: never;
+        /**
+         * @description The inventory.
+         *
+         *     DELETE is a soft delete - see `perform_destroy`. The row leaves every list
+         *     and every total immediately, and what the institute once owned survives
+         *     somebody tidying up.
+         */
+        patch: operations["v1_logistics_items_partial_update"];
+        trace?: never;
+    };
+    "/api/v1/logistics/items/print/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The inventory, unpaginated, for printing
+         * @description The same filters as the list, without the page boundary.
+         *
+         *     A printed inventory that silently stops at the twenty-fifth row is
+         *     worse than no printed inventory: it looks complete.
+         *
+         *     The totals travel with the rows and describe the same filtered set, so
+         *     "Total items: 63" on the sheet is the number of lines below it - not
+         *     the size of an inventory the reader is only seeing part of.
+         */
+        get: operations["v1_logistics_items_print_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/logistics/locations/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List rooms and stores
+         * @description Rooms and stores. Retired the same way categories are, and for the same reason.
+         */
+        get: operations["v1_logistics_locations_list"];
+        put?: never;
+        /** @description Rooms and stores. Retired the same way categories are, and for the same reason. */
+        post: operations["v1_logistics_locations_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/logistics/locations/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Rooms and stores. Retired the same way categories are, and for the same reason. */
+        get: operations["v1_logistics_locations_retrieve"];
+        put?: never;
+        post?: never;
+        /** @description Rooms and stores. Retired the same way categories are, and for the same reason. */
+        delete: operations["v1_logistics_locations_destroy"];
+        options?: never;
+        head?: never;
+        /** @description Rooms and stores. Retired the same way categories are, and for the same reason. */
+        patch: operations["v1_logistics_locations_partial_update"];
+        trace?: never;
+    };
+    "/api/v1/logistics/overview/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Inventory overview
+         * @description The dashboard figures.
+         *
+         *     A view of its own rather than an action on the item viewset, because it
+         *     describes the section rather than the collection - and because a screen
+         *     that shows tiles above a table should be able to ask for the tiles without
+         *     also asking for a page of rows it is not going to render.
+         */
+        get: operations["v1_logistics_overview_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/notifications/": {
         parameters: {
             query?: never;
@@ -1012,6 +1476,40 @@ export interface paths {
         options?: never;
         head?: never;
         patch?: never;
+        trace?: never;
+    };
+    "/api/v1/organisation/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The organisation's own details
+         * @description `GET` for anybody signed in, `PATCH` for `settings.manage`.
+         *
+         *     Not a ScopedModelViewSet: there is exactly one row and no per-user scope
+         *     to apply. The two gates are still both here - the class refuses a
+         *     deactivated account, and the write path checks the codename explicitly
+         *     rather than relying on the screen not offering the form.
+         */
+        get: operations["v1_organisation_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Edit the organisation's details
+         * @description `GET` for anybody signed in, `PATCH` for `settings.manage`.
+         *
+         *     Not a ScopedModelViewSet: there is exactly one row and no per-user scope
+         *     to apply. The two gates are still both here - the class refuses a
+         *     deactivated account, and the write path checks the codename explicitly
+         *     rather than relying on the screen not offering the form.
+         */
+        patch: operations["v1_organisation_partial_update"];
         trace?: never;
     };
     "/api/v1/payments/": {
@@ -1232,6 +1730,31 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/payments/print/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The current selection, unpaginated, for printing
+         * @description No PATCH and no DELETE.
+         *
+         *     A payment is not editable. It is created PENDING and moves by named
+         *     transition, each recording who acted and when. A mistake before approval
+         *     is cancelled; a mistake after approval is corrected with a new record
+         *     (architecture D-4).
+         */
+        get: operations["v1_payments_print_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/proofs/{id}/download/": {
         parameters: {
             query?: never;
@@ -1324,6 +1847,56 @@ export interface paths {
          * @description Returns only the tiles the caller's permissions allow. A figure this endpoint never sends cannot leak through a new screen or the browser's network tab.
          */
         get: operations["v1_reports_dashboard_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/reports/financial-summary/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Income, expenditure and the net figure
+         * @description Income against expenditure, over any date range.
+         *
+         *     Behind `report.view_financial`, which reception and professors do not
+         *     hold - the same line the revenue report draws. Printing must never be a
+         *     way around a permission, so this is the one gate and there is no second
+         *     path to the same numbers.
+         */
+        get: operations["v1_reports_financial_summary_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/reports/management/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The month's management report
+         * @description One month of the institute on one sheet - "August 2026 Management Report".
+         *
+         *     `report.view_financial` rather than `report.view_operational`, because the
+         *     sheet carries income, expenditure and what is outstanding. An operational
+         *     reader gets the dashboard, which is assembled tile by tile from the
+         *     permissions they actually hold.
+         */
+        get: operations["v1_reports_management_retrieve"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1444,42 +2017,20 @@ export interface paths {
         };
         /**
          * List schedule slots
-         * @description The base every resource viewset should inherit.
+         * @description The weekly pattern: "Monday 17:00-19:00 in Room A-102".
          *
-         *     Both gates are wired in by default:
-         *
-         *         class PaymentViewSet(ScopedModelViewSet):
-         *             queryset = Payment.objects.all()
-         *             required_permissions = {
-         *                 "list": "payment.view",
-         *                 "retrieve": "payment.view",
-         *                 "create": "payment.create",
-         *             }
-         *
-         *             def scope_queryset(self, queryset, user):
-         *                 if has_permission(user, "payment.view_all"):
-         *                     return queryset
-         *                 return queryset.filter(enrollment__student__user=user)
+         *     A recurring slot rather than dated sessions (architecture D-3), resolved
+         *     into concrete dates on demand. A register for one particular day is an
+         *     attendance session, not a schedule row.
          */
         get: operations["v1_schedules_list"];
         put?: never;
         /**
-         * @description The base every resource viewset should inherit.
+         * @description The weekly pattern: "Monday 17:00-19:00 in Room A-102".
          *
-         *     Both gates are wired in by default:
-         *
-         *         class PaymentViewSet(ScopedModelViewSet):
-         *             queryset = Payment.objects.all()
-         *             required_permissions = {
-         *                 "list": "payment.view",
-         *                 "retrieve": "payment.view",
-         *                 "create": "payment.create",
-         *             }
-         *
-         *             def scope_queryset(self, queryset, user):
-         *                 if has_permission(user, "payment.view_all"):
-         *                     return queryset
-         *                 return queryset.filter(enrollment__student__user=user)
+         *     A recurring slot rather than dated sessions (architecture D-3), resolved
+         *     into concrete dates on demand. A register for one particular day is an
+         *     attendance session, not a schedule row.
          */
         post: operations["v1_schedules_create"];
         delete?: never;
@@ -1496,82 +2047,38 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * @description The base every resource viewset should inherit.
+         * @description The weekly pattern: "Monday 17:00-19:00 in Room A-102".
          *
-         *     Both gates are wired in by default:
-         *
-         *         class PaymentViewSet(ScopedModelViewSet):
-         *             queryset = Payment.objects.all()
-         *             required_permissions = {
-         *                 "list": "payment.view",
-         *                 "retrieve": "payment.view",
-         *                 "create": "payment.create",
-         *             }
-         *
-         *             def scope_queryset(self, queryset, user):
-         *                 if has_permission(user, "payment.view_all"):
-         *                     return queryset
-         *                 return queryset.filter(enrollment__student__user=user)
+         *     A recurring slot rather than dated sessions (architecture D-3), resolved
+         *     into concrete dates on demand. A register for one particular day is an
+         *     attendance session, not a schedule row.
          */
         get: operations["v1_schedules_retrieve"];
         /**
-         * @description The base every resource viewset should inherit.
+         * @description The weekly pattern: "Monday 17:00-19:00 in Room A-102".
          *
-         *     Both gates are wired in by default:
-         *
-         *         class PaymentViewSet(ScopedModelViewSet):
-         *             queryset = Payment.objects.all()
-         *             required_permissions = {
-         *                 "list": "payment.view",
-         *                 "retrieve": "payment.view",
-         *                 "create": "payment.create",
-         *             }
-         *
-         *             def scope_queryset(self, queryset, user):
-         *                 if has_permission(user, "payment.view_all"):
-         *                     return queryset
-         *                 return queryset.filter(enrollment__student__user=user)
+         *     A recurring slot rather than dated sessions (architecture D-3), resolved
+         *     into concrete dates on demand. A register for one particular day is an
+         *     attendance session, not a schedule row.
          */
         put: operations["v1_schedules_update"];
         post?: never;
         /**
-         * @description The base every resource viewset should inherit.
+         * @description The weekly pattern: "Monday 17:00-19:00 in Room A-102".
          *
-         *     Both gates are wired in by default:
-         *
-         *         class PaymentViewSet(ScopedModelViewSet):
-         *             queryset = Payment.objects.all()
-         *             required_permissions = {
-         *                 "list": "payment.view",
-         *                 "retrieve": "payment.view",
-         *                 "create": "payment.create",
-         *             }
-         *
-         *             def scope_queryset(self, queryset, user):
-         *                 if has_permission(user, "payment.view_all"):
-         *                     return queryset
-         *                 return queryset.filter(enrollment__student__user=user)
+         *     A recurring slot rather than dated sessions (architecture D-3), resolved
+         *     into concrete dates on demand. A register for one particular day is an
+         *     attendance session, not a schedule row.
          */
         delete: operations["v1_schedules_destroy"];
         options?: never;
         head?: never;
         /**
-         * @description The base every resource viewset should inherit.
+         * @description The weekly pattern: "Monday 17:00-19:00 in Room A-102".
          *
-         *     Both gates are wired in by default:
-         *
-         *         class PaymentViewSet(ScopedModelViewSet):
-         *             queryset = Payment.objects.all()
-         *             required_permissions = {
-         *                 "list": "payment.view",
-         *                 "retrieve": "payment.view",
-         *                 "create": "payment.create",
-         *             }
-         *
-         *             def scope_queryset(self, queryset, user):
-         *                 if has_permission(user, "payment.view_all"):
-         *                     return queryset
-         *                 return queryset.filter(enrollment__student__user=user)
+         *     A recurring slot rather than dated sessions (architecture D-3), resolved
+         *     into concrete dates on demand. A register for one particular day is an
+         *     attendance session, not a schedule row.
          */
         patch: operations["v1_schedules_partial_update"];
         trace?: never;
@@ -1585,22 +2092,11 @@ export interface paths {
         };
         /**
          * The caller's next seven days
-         * @description The base every resource viewset should inherit.
+         * @description The weekly pattern: "Monday 17:00-19:00 in Room A-102".
          *
-         *     Both gates are wired in by default:
-         *
-         *         class PaymentViewSet(ScopedModelViewSet):
-         *             queryset = Payment.objects.all()
-         *             required_permissions = {
-         *                 "list": "payment.view",
-         *                 "retrieve": "payment.view",
-         *                 "create": "payment.create",
-         *             }
-         *
-         *             def scope_queryset(self, queryset, user):
-         *                 if has_permission(user, "payment.view_all"):
-         *                     return queryset
-         *                 return queryset.filter(enrollment__student__user=user)
+         *     A recurring slot rather than dated sessions (architecture D-3), resolved
+         *     into concrete dates on demand. A register for one particular day is an
+         *     attendance session, not a schedule row.
          */
         get: operations["v1_schedules_my_week_list"];
         put?: never;
@@ -1623,6 +2119,30 @@ export interface paths {
          * @description Resolves the recurring pattern into the next concrete date and time, with the room and how many students are enrolled. Returns 204 when there is nothing upcoming.
          */
         get: operations["v1_schedules_next_session_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/schedules/print/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The current selection, unpaginated, for printing
+         * @description The weekly pattern: "Monday 17:00-19:00 in Room A-102".
+         *
+         *     A recurring slot rather than dated sessions (architecture D-3), resolved
+         *     into concrete dates on demand. A register for one particular day is an
+         *     attendance session, not a schedule row.
+         */
+        get: operations["v1_schedules_print_retrieve"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1734,6 +2254,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/users/print/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The current selection, unpaginated, for printing
+         * @description No destroy(). A user is deactivated, never deleted - their enrolments,
+         *     payments and marks have to remain attributable.
+         */
+        get: operations["v1_users_print_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1809,6 +2350,138 @@ export interface components {
          * @enum {string}
          */
         AssignmentStatusEnum: "ACTIVE" | "ENDED";
+        AttendanceRecord: {
+            readonly id: number;
+            readonly session: number;
+            readonly enrollment: number;
+            readonly student_public_id: string;
+            readonly student_name: string;
+            readonly status: components["schemas"]["AttendanceStatusEnum"];
+            readonly status_display: string;
+            readonly minutes_late: number | null;
+            readonly note: string;
+            readonly was_corrected: boolean;
+            readonly change_count: number;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        AttendanceRecordPrint: {
+            results: components["schemas"]["AttendanceRecord"][];
+            count: number;
+            truncated: boolean;
+            /** Format: date-time */
+            printed_at: string;
+        };
+        AttendanceSession: {
+            readonly id: number;
+            course: number;
+            readonly course_public_id: string;
+            readonly course_title: string;
+            /** Format: date */
+            held_on: string;
+            schedule?: number | null;
+            /** @default  */
+            readonly room: string;
+            readonly status: components["schemas"]["SessionStatusEnum"];
+            /** @description What was covered, if it is worth recording. */
+            topic?: string;
+            notes?: string;
+            readonly present_count: number;
+            readonly absent_count: number;
+            readonly late_count: number;
+            readonly marked_count: number;
+            readonly roster_count: number;
+            /** Format: date-time */
+            readonly submitted_at: string | null;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        AttendanceSessionPrint: {
+            results: components["schemas"]["AttendanceSession"][];
+            count: number;
+            truncated: boolean;
+            /** Format: date-time */
+            printed_at: string;
+        };
+        /**
+         * @description Opening a register.
+         *
+         *     `course` and `held_on` together are unique, and DRF's own uniqueness
+         *     handling produces "The fields course, held_on must make a unique set",
+         *     which is not a sentence to put in front of a professor. The viewset
+         *     catches the clash and answers with the register that already exists
+         *     instead - see `AttendanceSessionViewSet.create`.
+         */
+        AttendanceSessionWrite: {
+            readonly id: number;
+            course: number;
+            readonly course_public_id: string;
+            readonly course_title: string;
+            /** Format: date */
+            held_on: string;
+            schedule?: number | null;
+            /** @default  */
+            readonly room: string;
+            readonly status: components["schemas"]["SessionStatusEnum"];
+            /** @description What was covered, if it is worth recording. */
+            topic?: string;
+            notes?: string;
+            readonly present_count: number;
+            readonly absent_count: number;
+            readonly late_count: number;
+            readonly marked_count: number;
+            readonly roster_count: number;
+            /** Format: date-time */
+            readonly submitted_at: string | null;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        /**
+         * @description * `PRESENT` - Present
+         *     * `ABSENT` - Absent
+         *     * `LATE` - Late
+         * @enum {string}
+         */
+        AttendanceStatusEnum: "PRESENT" | "ABSENT" | "LATE";
+        AttendanceStudentRow: {
+            present: number;
+            late: number;
+            absent: number;
+            total: number;
+            /** Format: double */
+            rate: number | null;
+            enrollment_id: number;
+            student_public_id: string;
+            student_name: string;
+            course_public_id: string;
+            course_title: string;
+        };
+        /** @description One course, or one student, tallied over a period. */
+        AttendanceSummary: {
+            totals: components["schemas"]["AttendanceTally"];
+            students: components["schemas"]["AttendanceStudentRow"][];
+            session_count: number;
+            course_public_id: string;
+            course_title: string;
+            /** Format: date */
+            from_date: string | null;
+            /** Format: date */
+            to_date: string | null;
+        };
+        AttendanceTally: {
+            present: number;
+            late: number;
+            absent: number;
+            total: number;
+            /** Format: double */
+            rate: number | null;
+        };
         /**
          * @description * `USER_CREATED` - User created
          *     * `USER_UPDATED` - User updated
@@ -1829,20 +2502,29 @@ export interface components {
          *     * `MARK_ENTERED` - Mark entered
          *     * `MARK_CHANGED` - Mark changed
          *     * `MARKS_PUBLISHED` - Marks published
+         *     * `ATTENDANCE_TAKEN` - Register taken
+         *     * `ATTENDANCE_CHANGED` - Attendance corrected
          *     * `PAYMENT_CREATED` - Payment recorded
          *     * `PAYMENT_APPROVED` - Payment approved
          *     * `PAYMENT_REJECTED` - Payment rejected
          *     * `PAYMENT_CANCELLED` - Payment cancelled
          *     * `PROOF_UPLOADED` - Payment proof uploaded
          *     * `PROOF_DOWNLOADED` - Payment proof downloaded
+         *     * `LOGISTICS_ITEM_CREATED` - Inventory item added
+         *     * `LOGISTICS_ITEM_UPDATED` - Inventory item edited
+         *     * `LOGISTICS_ITEM_DELETED` - Inventory item removed
+         *     * `EXPENSE_CREATED` - Expense recorded
+         *     * `EXPENSE_UPDATED` - Expense edited
+         *     * `EXPENSE_DELETED` - Expense removed
          *     * `REVIEW_CREATED` - Review written
          *     * `REVIEW_UPDATED` - Review edited
          *     * `REVIEW_MODERATED` - Review moderated
+         *     * `ORGANISATION_UPDATED` - Organisation profile updated
          *     * `REPORT_EXPORTED` - Report exported
          *     * `EXPORT_DOWNLOADED` - Export downloaded
          * @enum {string}
          */
-        AuditActionEnum: "USER_CREATED" | "USER_UPDATED" | "USER_STATUS_CHANGED" | "PASSWORD_RESET" | "PASSWORD_CHANGED" | "ROLE_GRANTED" | "ROLE_REVOKED" | "LOGIN_FAILED" | "COURSE_CREATED" | "COURSE_UPDATED" | "COURSE_STATUS_CHANGED" | "PROFESSOR_ASSIGNED" | "PROFESSOR_UNASSIGNED" | "SCHEDULE_CHANGED" | "ENROLLMENT_CREATED" | "ENROLLMENT_STATUS_CHANGED" | "MARK_ENTERED" | "MARK_CHANGED" | "MARKS_PUBLISHED" | "PAYMENT_CREATED" | "PAYMENT_APPROVED" | "PAYMENT_REJECTED" | "PAYMENT_CANCELLED" | "PROOF_UPLOADED" | "PROOF_DOWNLOADED" | "REVIEW_CREATED" | "REVIEW_UPDATED" | "REVIEW_MODERATED" | "REPORT_EXPORTED" | "EXPORT_DOWNLOADED";
+        AuditActionEnum: "USER_CREATED" | "USER_UPDATED" | "USER_STATUS_CHANGED" | "PASSWORD_RESET" | "PASSWORD_CHANGED" | "ROLE_GRANTED" | "ROLE_REVOKED" | "LOGIN_FAILED" | "COURSE_CREATED" | "COURSE_UPDATED" | "COURSE_STATUS_CHANGED" | "PROFESSOR_ASSIGNED" | "PROFESSOR_UNASSIGNED" | "SCHEDULE_CHANGED" | "ENROLLMENT_CREATED" | "ENROLLMENT_STATUS_CHANGED" | "MARK_ENTERED" | "MARK_CHANGED" | "MARKS_PUBLISHED" | "ATTENDANCE_TAKEN" | "ATTENDANCE_CHANGED" | "PAYMENT_CREATED" | "PAYMENT_APPROVED" | "PAYMENT_REJECTED" | "PAYMENT_CANCELLED" | "PROOF_UPLOADED" | "PROOF_DOWNLOADED" | "LOGISTICS_ITEM_CREATED" | "LOGISTICS_ITEM_UPDATED" | "LOGISTICS_ITEM_DELETED" | "EXPENSE_CREATED" | "EXPENSE_UPDATED" | "EXPENSE_DELETED" | "REVIEW_CREATED" | "REVIEW_UPDATED" | "REVIEW_MODERATED" | "ORGANISATION_UPDATED" | "REPORT_EXPORTED" | "EXPORT_DOWNLOADED";
         AuditLog: {
             readonly id: number;
             /** Format: date-time */
@@ -1884,6 +2566,12 @@ export interface components {
             reason?: string;
         };
         /**
+         * @description * `ITEM` - Inventory item
+         *     * `EXPENSE` - Expense
+         * @enum {string}
+         */
+        CategoryKindEnum: "ITEM" | "EXPENSE";
+        /**
          * @description * `application/pdf` - application/pdf
          *     * `image/jpeg` - image/jpeg
          *     * `image/png` - image/png
@@ -1912,6 +2600,13 @@ export interface components {
             /** Format: date-time */
             readonly updated_at: string;
             readonly professors: components["schemas"]["CourseProfessor"][];
+        };
+        CoursePrint: {
+            results: components["schemas"]["Course"][];
+            count: number;
+            truncated: boolean;
+            /** Format: date-time */
+            printed_at: string;
         };
         CourseProfessor: {
             readonly id: number;
@@ -1986,6 +2681,13 @@ export interface components {
             course_public_id: string;
             notes?: string;
         };
+        EnrollmentPrint: {
+            results: components["schemas"]["Enrollment"][];
+            count: number;
+            truncated: boolean;
+            /** Format: date-time */
+            printed_at: string;
+        };
         EnrollmentStatus: {
             status: components["schemas"]["EnrollmentStatusEnum"];
             reason?: string;
@@ -1999,6 +2701,113 @@ export interface components {
          * @enum {string}
          */
         EnrollmentStatusEnum: "ACTIVE" | "COMPLETED" | "CANCELLED" | "SUSPENDED" | "DROPPED";
+        Expense: {
+            readonly id: number;
+            readonly public_id: string;
+            name: string;
+            category: number;
+            readonly category_name: string;
+            /**
+             * Format: int64
+             * @description Integer minor units. Never a float.
+             */
+            amount_minor: number;
+            currency?: string;
+            /**
+             * Format: date
+             * @description When the money left, not when it was typed in.
+             */
+            spent_on: string;
+            period_year: number;
+            period_month: number;
+            readonly period: string;
+            method?: string;
+            readonly method_display: string;
+            /** @description Receipt or invoice number, if there is one. */
+            reference?: string;
+            notes?: string;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        ExpenseHistory: {
+            results: components["schemas"]["ExpenseHistoryRow"][];
+        };
+        ExpenseHistoryRow: {
+            year: number;
+            month: number;
+            total_minor: number;
+            count: number;
+            top_category: string;
+            top_category_total_minor: number;
+            currency: string;
+        };
+        ExpenseMonth: {
+            year: number;
+            month: number;
+            total_minor: number;
+            count: number;
+        };
+        /** @description What the printable expenses endpoint answers with. */
+        ExpensePrint: {
+            results: components["schemas"]["Expense"][];
+            summary: components["schemas"]["ExpenseSummary"];
+            /** Format: date-time */
+            printed_at: string;
+        };
+        ExpenseSummary: {
+            year: number;
+            month: number;
+            currency: string;
+            month_total_minor: number;
+            month_count: number;
+            previous_year: number;
+            previous_month: number;
+            previous_total_minor: number;
+            change_minor: number;
+            year_total_minor: number;
+            by_category: components["schemas"]["ExpenseTally"][];
+            monthly: components["schemas"]["ExpenseMonth"][];
+        };
+        ExpenseTally: {
+            key: string;
+            label: string;
+            total_minor: number;
+            count: number;
+        };
+        /** @description The read shape plus the rules. See `LogisticsItemWriteSerializer`. */
+        ExpenseWrite: {
+            readonly id: number;
+            readonly public_id: string;
+            name: string;
+            category: number;
+            readonly category_name: string;
+            /**
+             * Format: int64
+             * @description Integer minor units. Never a float.
+             */
+            amount_minor: number;
+            currency?: string;
+            /**
+             * Format: date
+             * @description When the money left, not when it was typed in.
+             */
+            spent_on: string;
+            period_year?: number;
+            period_month?: number;
+            readonly period: string;
+            /** @default  */
+            method: components["schemas"]["PaymentMethodEnum"] | components["schemas"]["BlankEnum"];
+            readonly method_display: string;
+            /** @description Receipt or invoice number, if there is one. */
+            reference?: string;
+            notes?: string;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
         /**
          * @description Filters for the export, passed through to the same query the JSON
          *     endpoint runs. Free-form because each report takes different ones; the
@@ -2017,6 +2826,23 @@ export interface components {
          * @enum {string}
          */
         ExportStatusEnum: "PENDING" | "RUNNING" | "READY" | "FAILED";
+        FinancialSummary: {
+            /** Format: date */
+            from_date: string | null;
+            /** Format: date */
+            to_date: string | null;
+            currency: string;
+            income_total_minor: number;
+            income_count: number;
+            pending_total_minor: number;
+            pending_count: number;
+            expense_total_minor: number;
+            expense_count: number;
+            net_minor: number;
+            income_by_category: components["schemas"]["MoneyTally"][];
+            expenses_by_category: components["schemas"]["MoneyTally"][];
+            monthly: components["schemas"]["MonthlyMoney"][];
+        };
         Gradebook: {
             course_public_id: string;
             course_title: string;
@@ -2034,10 +2860,209 @@ export interface components {
             marked_count: number;
             assessment_count: number;
         };
+        /**
+         * @description Every figure `services.inventory_overview` produces.
+         *
+         *     Split from the overview endpoint's own shape because the printable
+         *     endpoint sends the same totals without the "recently added" list - a
+         *     printed sheet has no use for a five-row activity feed.
+         */
+        InventoryTotals: {
+            items_total: number;
+            units_total: number;
+            needs_repair_items: number;
+            needs_repair_units: number;
+            damaged_items: number;
+            damaged_units: number;
+            missing_items: number;
+            missing_units: number;
+            under_repair_items: number;
+            under_repair_units: number;
+            available_items: number;
+            available_units: number;
+            in_use_items: number;
+            in_use_units: number;
+            categories_total: number;
+            locations_total: number;
+            by_category: components["schemas"]["Tally"][];
+            by_condition: components["schemas"]["Tally"][];
+            by_location: components["schemas"]["Tally"][];
+        };
+        /**
+         * @description * `NEW` - New
+         *     * `GOOD` - Good
+         *     * `NEEDS_REPAIR` - Needs repair
+         *     * `DAMAGED` - Damaged
+         * @enum {string}
+         */
+        ItemConditionEnum: "NEW" | "GOOD" | "NEEDS_REPAIR" | "DAMAGED";
+        /**
+         * @description * `AVAILABLE` - Available
+         *     * `IN_USE` - In use
+         *     * `UNDER_REPAIR` - Under repair
+         *     * `MISSING` - Missing
+         * @enum {string}
+         */
+        ItemStatusEnum: "AVAILABLE" | "IN_USE" | "UNDER_REPAIR" | "MISSING";
         Login: {
             /** @description User ID (STU-000123) or phone number. */
             identifier: string;
             password: string;
+        };
+        LogisticsCategory: {
+            readonly id: number;
+            kind: components["schemas"]["CategoryKindEnum"];
+            name: string;
+            description?: string;
+            is_active?: boolean;
+            readonly usage_count: number;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        /**
+         * @description The read shape.
+         *
+         *     The category and location are flattened to a name beside their id rather
+         *     than nested. Every screen that shows an item wants the label, and a nested
+         *     object would mean the table asking for `item.category.name` through two
+         *     optional levels for a value that is never absent.
+         */
+        LogisticsItem: {
+            readonly id: number;
+            readonly public_id: string;
+            name: string;
+            category: number;
+            readonly category_name: string;
+            quantity?: number;
+            condition?: components["schemas"]["ItemConditionEnum"];
+            readonly condition_display: string;
+            status?: components["schemas"]["ItemStatusEnum"];
+            readonly status_display: string;
+            location?: number | null;
+            readonly location_name: string | null;
+            /** Format: date */
+            purchase_date?: string | null;
+            /** Format: int64 */
+            purchase_price_minor?: number | null;
+            currency?: string;
+            serial_number?: string;
+            notes?: string;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        /**
+         * @description The write shape, which is the read shape with the rules attached.
+         *
+         *     It *extends* the reader rather than listing its own subset of fields, the
+         *     same way `CourseWriteSerializer` does - and for a reason worth stating,
+         *     because the alternative looks tidier and is broken: a create whose
+         *     response body is the write shape does not carry `public_id`, so the caller
+         *     that just made the row cannot say which row it made. The frontend
+         *     navigates to the item it created; with a narrower serializer it would
+         *     navigate to `/logistics/undefined`.
+         */
+        LogisticsItemWrite: {
+            readonly id: number;
+            readonly public_id: string;
+            name: string;
+            category: number;
+            readonly category_name: string;
+            quantity?: number;
+            condition?: components["schemas"]["ItemConditionEnum"];
+            readonly condition_display: string;
+            status?: components["schemas"]["ItemStatusEnum"];
+            readonly status_display: string;
+            location?: number | null;
+            readonly location_name: string | null;
+            /** Format: date */
+            purchase_date?: string | null;
+            /** Format: int64 */
+            purchase_price_minor?: number | null;
+            currency?: string;
+            serial_number?: string;
+            notes?: string;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        LogisticsLocation: {
+            readonly id: number;
+            name: string;
+            description?: string;
+            is_active?: boolean;
+            readonly usage_count: number;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        /** @description The totals, plus what was added most recently. */
+        LogisticsOverview: {
+            items_total: number;
+            units_total: number;
+            needs_repair_items: number;
+            needs_repair_units: number;
+            damaged_items: number;
+            damaged_units: number;
+            missing_items: number;
+            missing_units: number;
+            under_repair_items: number;
+            under_repair_units: number;
+            available_items: number;
+            available_units: number;
+            in_use_items: number;
+            in_use_units: number;
+            categories_total: number;
+            locations_total: number;
+            by_category: components["schemas"]["Tally"][];
+            by_condition: components["schemas"]["Tally"][];
+            by_location: components["schemas"]["Tally"][];
+            recent: components["schemas"]["LogisticsItem"][];
+        };
+        /** @description What the printable inventory endpoint answers with. */
+        LogisticsPrint: {
+            results: components["schemas"]["LogisticsItem"][];
+            overview: components["schemas"]["InventoryTotals"];
+            /** Format: date-time */
+            printed_at: string;
+        };
+        ManagementReport: {
+            year: number;
+            month: number;
+            /** Format: date */
+            from_date: string;
+            /** Format: date */
+            to_date: string;
+            currency: string;
+            students_total: number;
+            students_active: number;
+            new_students: number;
+            new_enrolments: number;
+            courses_active: number;
+            enrolments_live: number;
+            registers_taken: number;
+            attendance_present: number;
+            attendance_late: number;
+            attendance_absent: number;
+            /** Format: double */
+            attendance_rate: number | null;
+            income_total_minor: number;
+            pending_total_minor: number;
+            expense_total_minor: number;
+            net_minor: number;
+            outstanding_minor: number;
+            income_by_category: components["schemas"]["MoneyTally"][];
+            expenses_by_category: components["schemas"]["MoneyTally"][];
+            inventory_lines: number;
+            inventory_units: number;
+            inventory_needs_repair: number;
+            inventory_damaged: number;
+            inventory_missing: number;
         };
         /**
          * @description The whole sheet, in one request.
@@ -2067,6 +3092,19 @@ export interface components {
          * @enum {string}
          */
         ModerationStatusEnum: "APPROVED" | "HIDDEN" | "REJECTED";
+        MoneyTally: {
+            key: string;
+            label: string;
+            total_minor: number;
+            count: number;
+        };
+        MonthlyMoney: {
+            year: number;
+            month: number;
+            income_minor: number;
+            expense_minor: number;
+            net_minor: number;
+        };
         /** @description What a professor's "what is next" screen needs, and nothing else. */
         NextSession: {
             course_public_id: string;
@@ -2108,6 +3146,26 @@ export interface components {
          * @enum {string}
          */
         NotificationKindEnum: "COURSE_ASSIGNED" | "SESSION_REMINDER" | "ROSTER_CHANGED" | "SCHEDULE_CHANGED" | "ENROLLED" | "MARKS_PUBLISHED" | "PAYMENT_APPROVED" | "PAYMENT_REJECTED" | "PROOF_REVIEW_NEEDED";
+        Organisation: {
+            name?: string;
+            legal_name?: string;
+            address_line?: string;
+            city?: string;
+            wilaya?: string;
+            readonly address: string;
+            phone?: string;
+            /** Format: email */
+            email?: string;
+            website?: string;
+            readonly contact_line: string;
+            registration_number?: string;
+            tagline?: string;
+            /** @description Printed at the foot of every page, beside the page number. */
+            print_footer?: string;
+            readonly can_manage: boolean;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
         PaginatedAssessmentList: {
             /** @example 123 */
             count: number;
@@ -2122,6 +3180,36 @@ export interface components {
              */
             previous?: string | null;
             results: components["schemas"]["Assessment"][];
+        };
+        PaginatedAttendanceRecordList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["AttendanceRecord"][];
+        };
+        PaginatedAttendanceSessionList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["AttendanceSession"][];
         };
         PaginatedAuditLogList: {
             /**
@@ -2180,6 +3268,66 @@ export interface components {
              */
             previous?: string | null;
             results: components["schemas"]["Enrollment"][];
+        };
+        PaginatedExpenseList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["Expense"][];
+        };
+        PaginatedLogisticsCategoryList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["LogisticsCategory"][];
+        };
+        PaginatedLogisticsItemList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["LogisticsItem"][];
+        };
+        PaginatedLogisticsLocationList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["LogisticsLocation"][];
         };
         PaginatedNextSessionList: {
             /** @example 123 */
@@ -2342,6 +3490,41 @@ export interface components {
             /** Format: date */
             held_on?: string | null;
         };
+        /**
+         * @description Opening a register.
+         *
+         *     `course` and `held_on` together are unique, and DRF's own uniqueness
+         *     handling produces "The fields course, held_on must make a unique set",
+         *     which is not a sentence to put in front of a professor. The viewset
+         *     catches the clash and answers with the register that already exists
+         *     instead - see `AttendanceSessionViewSet.create`.
+         */
+        PatchedAttendanceSessionWrite: {
+            readonly id?: number;
+            course?: number;
+            readonly course_public_id?: string;
+            readonly course_title?: string;
+            /** Format: date */
+            held_on?: string;
+            schedule?: number | null;
+            /** @default  */
+            readonly room: string;
+            readonly status?: components["schemas"]["SessionStatusEnum"];
+            /** @description What was covered, if it is worth recording. */
+            topic?: string;
+            notes?: string;
+            readonly present_count?: number;
+            readonly absent_count?: number;
+            readonly late_count?: number;
+            readonly marked_count?: number;
+            readonly roster_count?: number;
+            /** Format: date-time */
+            readonly submitted_at?: string | null;
+            /** Format: date-time */
+            readonly created_at?: string;
+            /** Format: date-time */
+            readonly updated_at?: string;
+        };
         PatchedCourseWrite: {
             readonly id?: number;
             readonly public_id?: string;
@@ -2376,6 +3559,117 @@ export interface components {
             readonly price_at_enrollment_minor?: number;
             readonly currency?: string;
             readonly notes?: string;
+        };
+        /** @description The read shape plus the rules. See `LogisticsItemWriteSerializer`. */
+        PatchedExpenseWrite: {
+            readonly id?: number;
+            readonly public_id?: string;
+            name?: string;
+            category?: number;
+            readonly category_name?: string;
+            /**
+             * Format: int64
+             * @description Integer minor units. Never a float.
+             */
+            amount_minor?: number;
+            currency?: string;
+            /**
+             * Format: date
+             * @description When the money left, not when it was typed in.
+             */
+            spent_on?: string;
+            period_year?: number;
+            period_month?: number;
+            readonly period?: string;
+            /** @default  */
+            method: components["schemas"]["PaymentMethodEnum"] | components["schemas"]["BlankEnum"];
+            readonly method_display?: string;
+            /** @description Receipt or invoice number, if there is one. */
+            reference?: string;
+            notes?: string;
+            /** Format: date-time */
+            readonly created_at?: string;
+            /** Format: date-time */
+            readonly updated_at?: string;
+        };
+        PatchedLogisticsCategory: {
+            readonly id?: number;
+            kind?: components["schemas"]["CategoryKindEnum"];
+            name?: string;
+            description?: string;
+            is_active?: boolean;
+            readonly usage_count?: number;
+            /** Format: date-time */
+            readonly created_at?: string;
+            /** Format: date-time */
+            readonly updated_at?: string;
+        };
+        /**
+         * @description The write shape, which is the read shape with the rules attached.
+         *
+         *     It *extends* the reader rather than listing its own subset of fields, the
+         *     same way `CourseWriteSerializer` does - and for a reason worth stating,
+         *     because the alternative looks tidier and is broken: a create whose
+         *     response body is the write shape does not carry `public_id`, so the caller
+         *     that just made the row cannot say which row it made. The frontend
+         *     navigates to the item it created; with a narrower serializer it would
+         *     navigate to `/logistics/undefined`.
+         */
+        PatchedLogisticsItemWrite: {
+            readonly id?: number;
+            readonly public_id?: string;
+            name?: string;
+            category?: number;
+            readonly category_name?: string;
+            quantity?: number;
+            condition?: components["schemas"]["ItemConditionEnum"];
+            readonly condition_display?: string;
+            status?: components["schemas"]["ItemStatusEnum"];
+            readonly status_display?: string;
+            location?: number | null;
+            readonly location_name?: string | null;
+            /** Format: date */
+            purchase_date?: string | null;
+            /** Format: int64 */
+            purchase_price_minor?: number | null;
+            currency?: string;
+            serial_number?: string;
+            notes?: string;
+            /** Format: date-time */
+            readonly created_at?: string;
+            /** Format: date-time */
+            readonly updated_at?: string;
+        };
+        PatchedLogisticsLocation: {
+            readonly id?: number;
+            name?: string;
+            description?: string;
+            is_active?: boolean;
+            readonly usage_count?: number;
+            /** Format: date-time */
+            readonly created_at?: string;
+            /** Format: date-time */
+            readonly updated_at?: string;
+        };
+        PatchedOrganisation: {
+            name?: string;
+            legal_name?: string;
+            address_line?: string;
+            city?: string;
+            wilaya?: string;
+            readonly address?: string;
+            phone?: string;
+            /** Format: email */
+            email?: string;
+            website?: string;
+            readonly contact_line?: string;
+            registration_number?: string;
+            tagline?: string;
+            /** @description Printed at the foot of every page, beside the page number. */
+            print_footer?: string;
+            readonly can_manage?: boolean;
+            /** Format: date-time */
+            readonly updated_at?: string;
         };
         PatchedPayment: {
             readonly id?: number;
@@ -2502,6 +3796,13 @@ export interface components {
          * @enum {string}
          */
         PaymentMethodEnum: "CASH" | "BANK_TRANSFER" | "CCP" | "CARD" | "CHEQUE" | "OTHER";
+        PaymentPrint: {
+            results: components["schemas"]["Payment"][];
+            count: number;
+            truncated: boolean;
+            /** Format: date-time */
+            printed_at: string;
+        };
         PaymentProof: {
             readonly id: number;
             readonly original_filename: string;
@@ -2568,6 +3869,30 @@ export interface components {
             filename: string;
             content_type: components["schemas"]["ContentTypeEnum"];
             size_bytes: number;
+        };
+        /**
+         * @description The whole sheet, saved at once.
+         *
+         *     Membership is resolved and checked here rather than in the service, so a
+         *     row naming an enrolment on another course is a 400 with the offending id
+         *     in it rather than a row written where it does not belong.
+         */
+        Register: {
+            rows: components["schemas"]["RegisterRow"][];
+        };
+        RegisterResult: {
+            created: number;
+            updated: number;
+            unchanged: number;
+            records: components["schemas"]["AttendanceRecord"][];
+        };
+        /** @description One name on the sheet. */
+        RegisterRow: {
+            enrollment: number;
+            status: components["schemas"]["AttendanceStatusEnum"];
+            minutes_late?: number | null;
+            /** @default  */
+            note: string;
         };
         Rejection: {
             reason: string;
@@ -2663,6 +3988,20 @@ export interface components {
          */
         RoleCodeEnum: "OWNER" | "ADMIN" | "RECEPTION" | "PROFESSOR" | "STUDENT";
         /**
+         * @description A name on a register that has not been taken yet.
+         *
+         *     What makes an unfilled register printable: a blank sheet of the class,
+         *     with the marks already recorded filled in where there are any.
+         */
+        RosterRow: {
+            enrollment: number;
+            student_public_id: string;
+            student_name: string;
+            status: string;
+            minutes_late: number | null;
+            note: string;
+        };
+        /**
          * @description * `PENDING` - Pending
          *     * `CLEAN` - Clean
          *     * `INFECTED` - Infected
@@ -2687,6 +4026,13 @@ export interface components {
             effective_to?: string | null;
             status?: components["schemas"]["ScheduleStatusEnum"];
             notes?: string;
+        };
+        SchedulePrint: {
+            results: components["schemas"]["Schedule"][];
+            count: number;
+            truncated: boolean;
+            /** Format: date-time */
+            printed_at: string;
         };
         /**
          * @description * `ACTIVE` - Active
@@ -2736,6 +4082,18 @@ export interface components {
             readonly last_changed_at: string | null;
             readonly last_changed_by_public_id: string;
         };
+        /** @description The register as a screen or a sheet of paper wants it: session + roster. */
+        SessionSheet: {
+            session: components["schemas"]["AttendanceSession"];
+            rows: components["schemas"]["RosterRow"][];
+            totals: components["schemas"]["AttendanceTally"];
+        };
+        /**
+         * @description * `OPEN` - Open
+         *     * `SUBMITTED` - Submitted
+         * @enum {string}
+         */
+        SessionStatusEnum: "OPEN" | "SUBMITTED";
         StatusChange: {
             status: components["schemas"]["UserStatusEnum"];
             reason?: string;
@@ -2837,6 +4195,13 @@ export interface components {
             /** @description Administrative notes. Not visible to the student. */
             notes?: string;
         };
+        /** @description One row of a breakdown: a label, and the two ways of counting it. */
+        Tally: {
+            key: string;
+            label: string;
+            items: number;
+            units: number;
+        };
         User: {
             readonly id: number;
             readonly public_id: string;
@@ -2882,6 +4247,13 @@ export interface components {
             qualifications?: string;
             /** Format: date */
             hired_at?: string | null;
+        };
+        UserPrint: {
+            results: components["schemas"]["User"][];
+            count: number;
+            truncated: boolean;
+            /** Format: date-time */
+            printed_at: string;
         };
         /**
          * @description * `ACTIVE` - Active
@@ -3274,6 +4646,338 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PaginatedScoreList"];
+                };
+            };
+        };
+    };
+    v1_attendance_records_list: {
+        parameters: {
+            query?: {
+                /** @description Course public ID. */
+                course?: string;
+                /** @description Held on or after (ISO date). */
+                from?: string;
+                /** @description Which field to use when ordering the results. */
+                ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                page_size?: number;
+                /** @description PRESENT, ABSENT or LATE. */
+                status?: string;
+                /** @description Student public ID. */
+                student?: string;
+                /** @description Held on or before (ISO date). */
+                to?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedAttendanceRecordList"];
+                };
+            };
+        };
+    };
+    v1_attendance_records_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A unique integer value identifying this attendance record. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AttendanceRecord"];
+                };
+            };
+        };
+    };
+    v1_attendance_records_print_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AttendanceRecordPrint"];
+                };
+            };
+        };
+    };
+    v1_attendance_sessions_list: {
+        parameters: {
+            query?: {
+                /** @description Course public ID. */
+                course?: string;
+                /** @description Held on or after (ISO date). */
+                from?: string;
+                /** @description Which field to use when ordering the results. */
+                ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                page_size?: number;
+                /** @description OPEN or SUBMITTED. */
+                status?: string;
+                /** @description Held on or before (ISO date). */
+                to?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedAttendanceSessionList"];
+                };
+            };
+        };
+    };
+    v1_attendance_sessions_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AttendanceSessionWrite"];
+                "application/x-www-form-urlencoded": components["schemas"]["AttendanceSessionWrite"];
+                "multipart/form-data": components["schemas"]["AttendanceSessionWrite"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AttendanceSessionWrite"];
+                };
+            };
+        };
+    };
+    v1_attendance_sessions_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A unique integer value identifying this attendance session. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AttendanceSession"];
+                };
+            };
+        };
+    };
+    v1_attendance_sessions_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A unique integer value identifying this attendance session. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AttendanceSessionWrite"];
+                "application/x-www-form-urlencoded": components["schemas"]["AttendanceSessionWrite"];
+                "multipart/form-data": components["schemas"]["AttendanceSessionWrite"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AttendanceSessionWrite"];
+                };
+            };
+        };
+    };
+    v1_attendance_sessions_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A unique integer value identifying this attendance session. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    v1_attendance_sessions_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A unique integer value identifying this attendance session. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedAttendanceSessionWrite"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedAttendanceSessionWrite"];
+                "multipart/form-data": components["schemas"]["PatchedAttendanceSessionWrite"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AttendanceSessionWrite"];
+                };
+            };
+        };
+    };
+    v1_attendance_sessions_register_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A unique integer value identifying this attendance session. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Register"];
+                "application/x-www-form-urlencoded": components["schemas"]["Register"];
+                "multipart/form-data": components["schemas"]["Register"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RegisterResult"];
+                };
+            };
+        };
+    };
+    v1_attendance_sessions_sheet_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A unique integer value identifying this attendance session. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SessionSheet"];
+                };
+            };
+        };
+    };
+    v1_attendance_sessions_print_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AttendanceSessionPrint"];
+                };
+            };
+        };
+    };
+    v1_attendance_summary_retrieve: {
+        parameters: {
+            query?: {
+                /** @description Course public ID. */
+                course?: string;
+                /** @description Held on or after (ISO date). */
+                from?: string;
+                /** @description Student public ID. */
+                student?: string;
+                /** @description Held on or before (ISO date). */
+                to?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AttendanceSummary"];
                 };
             };
         };
@@ -3722,6 +5426,25 @@ export interface operations {
             };
         };
     };
+    v1_courses_print_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CoursePrint"];
+                };
+            };
+        };
+    };
     v1_enrollments_list: {
         parameters: {
             query?: {
@@ -3948,6 +5671,25 @@ export interface operations {
             };
         };
     };
+    v1_enrollments_print_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnrollmentPrint"];
+                };
+            };
+        };
+    };
     v1_exports_list: {
         parameters: {
             query?: {
@@ -4078,6 +5820,676 @@ export interface operations {
             };
         };
     };
+    v1_logistics_categories_list: {
+        parameters: {
+            query?: {
+                /** @description true to hide retired categories. */
+                active?: string;
+                /** @description ITEM or EXPENSE. */
+                kind?: string;
+                /** @description Which field to use when ordering the results. */
+                ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                page_size?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedLogisticsCategoryList"];
+                };
+            };
+        };
+    };
+    v1_logistics_categories_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LogisticsCategory"];
+                "application/x-www-form-urlencoded": components["schemas"]["LogisticsCategory"];
+                "multipart/form-data": components["schemas"]["LogisticsCategory"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LogisticsCategory"];
+                };
+            };
+        };
+    };
+    v1_logistics_categories_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A unique integer value identifying this category. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LogisticsCategory"];
+                };
+            };
+        };
+    };
+    v1_logistics_categories_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A unique integer value identifying this category. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    v1_logistics_categories_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A unique integer value identifying this category. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedLogisticsCategory"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedLogisticsCategory"];
+                "multipart/form-data": components["schemas"]["PatchedLogisticsCategory"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LogisticsCategory"];
+                };
+            };
+        };
+    };
+    v1_logistics_expenses_list: {
+        parameters: {
+            query?: {
+                /** @description Category id. */
+                category?: number;
+                /** @description Payment method. */
+                method?: string;
+                /** @description Accounting month, 1-12. */
+                month?: number;
+                /** @description amount_minor, spent_on, created_at. Prefix with - to reverse. */
+                ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                page_size?: number;
+                /** @description Search name, ID, reference or notes. */
+                q?: string;
+                /** @description Accounting year. */
+                year?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedExpenseList"];
+                };
+            };
+        };
+    };
+    v1_logistics_expenses_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExpenseWrite"];
+                "application/x-www-form-urlencoded": components["schemas"]["ExpenseWrite"];
+                "multipart/form-data": components["schemas"]["ExpenseWrite"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExpenseWrite"];
+                };
+            };
+        };
+    };
+    v1_logistics_expenses_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                public_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Expense"];
+                };
+            };
+        };
+    };
+    v1_logistics_expenses_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                public_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExpenseWrite"];
+                "application/x-www-form-urlencoded": components["schemas"]["ExpenseWrite"];
+                "multipart/form-data": components["schemas"]["ExpenseWrite"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExpenseWrite"];
+                };
+            };
+        };
+    };
+    v1_logistics_expenses_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                public_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    v1_logistics_expenses_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                public_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedExpenseWrite"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedExpenseWrite"];
+                "multipart/form-data": components["schemas"]["PatchedExpenseWrite"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExpenseWrite"];
+                };
+            };
+        };
+    };
+    v1_logistics_expenses_history_retrieve: {
+        parameters: {
+            query?: {
+                /** @description Limit to one year. */
+                year?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExpenseHistory"];
+                };
+            };
+        };
+    };
+    v1_logistics_expenses_print_retrieve: {
+        parameters: {
+            query?: {
+                month?: number;
+                year?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExpensePrint"];
+                };
+            };
+        };
+    };
+    v1_logistics_expenses_summary_retrieve: {
+        parameters: {
+            query?: {
+                month?: number;
+                year?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExpenseSummary"];
+                };
+            };
+        };
+    };
+    v1_logistics_items_list: {
+        parameters: {
+            query?: {
+                /** @description Category id. */
+                category?: number;
+                /** @description NEW, GOOD, NEEDS_REPAIR, DAMAGED. */
+                condition?: string;
+                /** @description Location id. */
+                location?: number;
+                /** @description quantity, name, purchase_date, created_at, updated_at. Prefix with - to reverse. */
+                ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                page_size?: number;
+                /** @description Search name, ID or serial number. */
+                q?: string;
+                /** @description AVAILABLE, IN_USE, UNDER_REPAIR, MISSING. */
+                status?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedLogisticsItemList"];
+                };
+            };
+        };
+    };
+    v1_logistics_items_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LogisticsItemWrite"];
+                "application/x-www-form-urlencoded": components["schemas"]["LogisticsItemWrite"];
+                "multipart/form-data": components["schemas"]["LogisticsItemWrite"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LogisticsItemWrite"];
+                };
+            };
+        };
+    };
+    v1_logistics_items_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                public_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LogisticsItem"];
+                };
+            };
+        };
+    };
+    v1_logistics_items_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                public_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LogisticsItemWrite"];
+                "application/x-www-form-urlencoded": components["schemas"]["LogisticsItemWrite"];
+                "multipart/form-data": components["schemas"]["LogisticsItemWrite"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LogisticsItemWrite"];
+                };
+            };
+        };
+    };
+    v1_logistics_items_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                public_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    v1_logistics_items_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                public_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedLogisticsItemWrite"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedLogisticsItemWrite"];
+                "multipart/form-data": components["schemas"]["PatchedLogisticsItemWrite"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LogisticsItemWrite"];
+                };
+            };
+        };
+    };
+    v1_logistics_items_print_retrieve: {
+        parameters: {
+            query?: {
+                category?: number;
+                condition?: string;
+                location?: number;
+                q?: string;
+                status?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LogisticsPrint"];
+                };
+            };
+        };
+    };
+    v1_logistics_locations_list: {
+        parameters: {
+            query?: {
+                /** @description Which field to use when ordering the results. */
+                ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                page_size?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedLogisticsLocationList"];
+                };
+            };
+        };
+    };
+    v1_logistics_locations_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LogisticsLocation"];
+                "application/x-www-form-urlencoded": components["schemas"]["LogisticsLocation"];
+                "multipart/form-data": components["schemas"]["LogisticsLocation"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LogisticsLocation"];
+                };
+            };
+        };
+    };
+    v1_logistics_locations_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A unique integer value identifying this location. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LogisticsLocation"];
+                };
+            };
+        };
+    };
+    v1_logistics_locations_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A unique integer value identifying this location. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    v1_logistics_locations_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A unique integer value identifying this location. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedLogisticsLocation"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedLogisticsLocation"];
+                "multipart/form-data": components["schemas"]["PatchedLogisticsLocation"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LogisticsLocation"];
+                };
+            };
+        };
+    };
+    v1_logistics_overview_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LogisticsOverview"];
+                };
+            };
+        };
+    };
     v1_notifications_list: {
         parameters: {
             query?: {
@@ -4181,6 +6593,50 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    v1_organisation_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Organisation"];
+                };
+            };
+        };
+    };
+    v1_organisation_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedOrganisation"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedOrganisation"];
+                "multipart/form-data": components["schemas"]["PatchedOrganisation"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Organisation"];
+                };
             };
         };
     };
@@ -4469,6 +6925,25 @@ export interface operations {
             };
         };
     };
+    v1_payments_print_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaymentPrint"];
+                };
+            };
+        };
+    };
     v1_proofs_download_retrieve: {
         parameters: {
             query?: never;
@@ -4582,6 +7057,54 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    v1_reports_financial_summary_retrieve: {
+        parameters: {
+            query?: {
+                /** @description On or after (ISO date). */
+                from?: string;
+                /** @description On or before (ISO date). */
+                to?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FinancialSummary"];
+                };
+            };
+        };
+    };
+    v1_reports_management_retrieve: {
+        parameters: {
+            query?: {
+                /** @description 1-12. Defaults to this month. */
+                month?: number;
+                /** @description Defaults to this year. */
+                year?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ManagementReport"];
+                };
             };
         };
     };
@@ -4968,6 +7491,25 @@ export interface operations {
             };
         };
     };
+    v1_schedules_print_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SchedulePrint"];
+                };
+            };
+        };
+    };
     v1_users_list: {
         parameters: {
             query?: {
@@ -5164,6 +7706,25 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["User"];
+                };
+            };
+        };
+    };
+    v1_users_print_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserPrint"];
                 };
             };
         };

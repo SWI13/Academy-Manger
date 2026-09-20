@@ -13,8 +13,9 @@ import { ConfirmDialog } from "@/components/ui/Modal";
 import { useToast } from "@/components/ui/Toast";
 import { ApiFailure, api } from "@/lib/api";
 import { manageableRoles } from "@/lib/manageable";
-import { ROLE_LABELS, type RoleCode } from "@/lib/permissions";
+import type { RoleCode } from "@/lib/permissions";
 import type { User } from "@/types";
+import { useDict, useFill } from "@/components/LocaleProvider";
 
 type StatusCode = "ACTIVE" | "SUSPENDED" | "INACTIVE";
 
@@ -34,6 +35,8 @@ type StatusCode = "ACTIVE" | "SUSPENDED" | "INACTIVE";
  * feeling arbitrary.
  */
 export function AccountPanel({ user }: { user: User }) {
+  const d = useDict();
+  const t = useFill();
   const router = useRouter();
   const can = useCan();
   const session = useSession();
@@ -63,7 +66,7 @@ export function AccountPanel({ user }: { user: User }) {
       setError(
         failure instanceof ApiFailure
           ? failure.message
-          : "Could not reach the server.",
+          : d.ui.serverUnreachable,
       );
     } finally {
       setBusy(null);
@@ -79,10 +82,10 @@ export function AccountPanel({ user }: { user: User }) {
           reason,
         }),
       status === "ACTIVE"
-        ? "Account reactivated"
+        ? d.users.reactivated
         : status === "SUSPENDED"
-          ? "Account suspended"
-          : "Account deactivated",
+          ? d.users.suspended
+          : d.users.deactivated,
     );
     setAsking(null);
     setReason("");
@@ -104,7 +107,7 @@ export function AccountPanel({ user }: { user: User }) {
       setError(
         failure instanceof ApiFailure
           ? failure.message
-          : "Could not reach the server.",
+          : d.ui.serverUnreachable,
       );
     } finally {
       setBusy(null);
@@ -116,9 +119,9 @@ export function AccountPanel({ user }: { user: User }) {
       {/* --- roles ---------------------------------------------------- */}
       <Card>
         <CardHeader
-          title="Roles"
+          title={d.users.roles}
           icon="shield"
-          description="A role is a set of permissions, not a label. The primary one decides which dashboard they land on."
+          description={d.users.rolesNote}
           divider
           className="mb-4"
         />
@@ -130,7 +133,7 @@ export function AccountPanel({ user }: { user: User }) {
                 key={code}
                 tone={code === user.primary_role ? "accent" : "neutral"}
               >
-                {ROLE_LABELS[code as RoleCode] ?? code}
+                {d.roles[code as RoleCode] ?? code}
                 {code === user.primary_role ? " · primary" : ""}
               </Badge>
             ))
@@ -161,11 +164,11 @@ export function AccountPanel({ user }: { user: User }) {
                         api.post(`/users/${user.public_id}/roles`, {
                           role: code,
                         }),
-                      `${ROLE_LABELS[code]} granted`,
+                      t(d.users.roleGranted, { role: d.roles[code] }),
                     )
                   }
                 >
-                  Grant {ROLE_LABELS[code]}
+                  {t(d.users.grantRole, { role: d.roles[code] })}
                 </Button>
               ))}
             {user.roles.length > 1
@@ -185,11 +188,11 @@ export function AccountPanel({ user }: { user: User }) {
                             api.delete(`/users/${user.public_id}/roles`, {
                               role: code,
                             }),
-                          `${ROLE_LABELS[code as RoleCode] ?? code} revoked`,
+                          `${d.roles[code as RoleCode] ?? code} revoked`,
                         )
                       }
                     >
-                      Revoke {ROLE_LABELS[code as RoleCode] ?? code}
+                      Revoke {d.roles[code as RoleCode] ?? code}
                     </Button>
                   ))
               : null}
@@ -205,9 +208,9 @@ export function AccountPanel({ user }: { user: User }) {
       {/* --- status --------------------------------------------------- */}
       <Card>
         <CardHeader
-          title="Account status"
+          title={d.users.accountStatus}
           icon="lock"
-          description="Accounts are deactivated, never deleted — their enrolments, payments and marks stay attributable."
+          description={d.users.accountStatusNote}
           divider
           className="mb-4"
         />
@@ -226,23 +229,17 @@ export function AccountPanel({ user }: { user: User }) {
                   variant="primary"
                   icon="check"
                   onClick={() => setAsking("ACTIVE")}
-                >
-                  Reactivate
-                </Button>
+                >{d.users.reactivate}</Button>
               ) : null}
               {user.status !== "SUSPENDED" ? (
-                <Button icon="clock" onClick={() => setAsking("SUSPENDED")}>
-                  Suspend
-                </Button>
+                <Button icon="clock" onClick={() => setAsking("SUSPENDED")}>{d.users.suspend}</Button>
               ) : null}
               {user.status !== "INACTIVE" ? (
                 <Button
                   variant="danger"
                   icon="close"
                   onClick={() => setAsking("INACTIVE")}
-                >
-                  Deactivate
-                </Button>
+                >{d.users.deactivate}</Button>
               ) : null}
             </div>
 
@@ -252,23 +249,19 @@ export function AccountPanel({ user }: { user: User }) {
             </p>
           </>
         ) : (
-          <Note tone="neutral">
-            Your role cannot change this account’s status.
-          </Note>
+          <Note tone="neutral">{d.users.cannotChangeStatus}</Note>
         )}
       </Card>
 
       {/* --- password ------------------------------------------------- */}
       {mayReset && !isSelf ? (
         <Card>
-          <CardHeader title="Password" icon="key" divider className="mb-4" />
+          <CardHeader title={d.account.password} icon="key" divider className="mb-4" />
 
           {temporary ? (
             <div className="rounded-lg border border-warn-line bg-warn-wash p-3.5">
               <p className="flex items-center gap-2 text-sm font-medium text-warn">
-                <Icon name="alert" size={16} />
-                Give this to them now. It is not shown again.
-              </p>
+                <Icon name="alert" size={16} />{d.users.newPasswordOnce}</p>
               <p className="tabular mt-3 select-all break-all rounded-md border border-warn-line bg-black/40 px-3 py-2.5 font-mono text-base text-ink">
                 {temporary}
               </p>
@@ -288,9 +281,7 @@ export function AccountPanel({ user }: { user: User }) {
                 icon="key"
                 busy={busy === "reset"}
                 onClick={() => setResetting(true)}
-              >
-                Reset password
-              </Button>
+              >{d.users.resetPassword}</Button>
             </>
           )}
         </Card>
@@ -318,24 +309,24 @@ export function AccountPanel({ user }: { user: User }) {
         }
         confirmLabel={
           asking === "ACTIVE"
-            ? "Reactivate"
+            ? d.users.reactivate
             : asking === "SUSPENDED"
-              ? "Suspend"
-              : "Deactivate"
+              ? d.users.suspend
+              : d.users.deactivate
         }
         description={
           asking === "ACTIVE"
-            ? "They will be able to sign in again."
-            : "They are signed out on their next request and cannot sign back in. Their records stay exactly where they are."
+            ? d.users.reactivatedNote
+            : d.users.deactivatedNote
         }
       >
         <Field
-          label="Reason"
+          label={d.users.reason}
           optional
           value={reason}
           onChange={(event) => setReason(event.target.value)}
-          placeholder="Left the institute at the end of the term."
-          hint="Recorded in the audit log beside who made the change."
+          placeholder={d.users.reasonPlaceholder}
+          hint={d.users.reasonNote}
         />
       </ConfirmDialog>
 
@@ -346,9 +337,9 @@ export function AccountPanel({ user }: { user: User }) {
         busy={busy === "reset"}
         tone="danger"
         icon="key"
-        title="Reset this password?"
-        confirmLabel="Reset password"
-        description="Every session they have open stops working immediately, and the new password is shown to you once."
+        title={d.users.resetPasswordTitle}
+        confirmLabel={d.users.resetPassword}
+        description={d.users.resetPasswordNote}
       >
         <Note tone="warn">
           Only do this with them in front of you or on the phone. The temporary

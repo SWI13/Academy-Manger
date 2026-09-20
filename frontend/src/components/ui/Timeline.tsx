@@ -42,7 +42,7 @@ export function Timeline({ entries }: { entries: TimelineEntry[] }) {
           {index < entries.length - 1 ? (
             <span
               aria-hidden
-              className="absolute left-[15px] top-8 h-[calc(100%+4px)] w-px bg-rule"
+              className="absolute start-[15px] top-8 h-[calc(100%+4px)] w-px bg-rule"
             />
           ) : null}
 

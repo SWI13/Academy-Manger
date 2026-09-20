@@ -1,17 +1,21 @@
 import { LinkButton } from "@/components/ui/Button";
 import { ErrorState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { PrintButton } from "@/components/ui/PrintButton";
 import { Pagination } from "@/components/ui/Pagination";
 import { Toolbar } from "@/components/ui/Toolbar";
 import { PAGE_SIZE, fetchPage, pageFrom, type SearchParams } from "@/lib/list";
 import { manageableRoles } from "@/lib/manageable";
-import { ROLE_LABELS } from "@/lib/permissions";
 import { can, getSession } from "@/lib/session";
 import type { User } from "@/types";
+import { getDict } from "@/lib/i18n.server";
 
 import { UsersTable } from "./UsersTable";
 
-export const metadata = { title: "People" };
+export async function generateMetadata() {
+  const d = await getDict();
+  return { title: d.nav.users };
+}
 
 const FILTERS = ["q", "role", "status"];
 
@@ -20,6 +24,7 @@ export default async function UsersPage({
 }: {
   searchParams: Promise<SearchParams>;
 }) {
+  const d = await getDict();
   const params = await searchParams;
   const [page, session] = await Promise.all([
     fetchPage<User>("users", params, FILTERS),
@@ -27,7 +32,7 @@ export default async function UsersPage({
   ]);
 
   if (!page) {
-    return <ErrorState title="People could not be loaded" />;
+    return <ErrorState title={d.users.errorTitle} />;
   }
 
   const roles = manageableRoles((permission) => can(session, permission));
@@ -41,43 +46,50 @@ export default async function UsersPage({
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        title={seesOthers ? "People" : "Your account"}
+        title={seesOthers ? d.nav.users : d.nav.account}
         lede={
           seesOthers
-            ? "Accounts are deactivated, never deleted — enrolments, payments and marks have to stay attributable to someone."
-            : "The details we hold for you. Ask reception to correct anything that is wrong."
+            ? d.users.lede
+            : d.users.ledeSelf
         }
         actions={
-          mayCreate ? (
-            <LinkButton href="/users/new" variant="primary" icon="user-plus">
-              New person
-            </LinkButton>
-          ) : null
+          <>
+            <PrintButton
+              href="/print/students"
+              params={params}
+              filters={["q", "role", "status"]}
+            />
+            {mayCreate ? (
+              <LinkButton href="/users/new" variant="primary" icon="user-plus">
+                {d.users.newPerson}
+              </LinkButton>
+            ) : null}
+          </>
         }
       />
 
       {seesOthers ? (
         <Toolbar
           filters={[
-            { param: "q", label: "Search", placeholder: "Name, ID or phone" },
+            { param: "q", label: d.filters.search, placeholder: d.users.searchPlaceholder },
             {
               param: "role",
-              label: "Role",
+              label: d.filters.role,
               // Only the roles this caller can reach at all. An admin
               // filtering for owners would always get an empty page, because
               // owner accounts are outside their scoped queryset entirely.
               options: roles.map((code) => ({
                 value: code,
-                label: ROLE_LABELS[code],
+                label: d.roles[code],
               })),
             },
             {
               param: "status",
-              label: "Status",
+              label: d.filters.status,
               options: [
-                { value: "ACTIVE", label: "Active" },
-                { value: "INACTIVE", label: "Inactive" },
-                { value: "SUSPENDED", label: "Suspended" },
+                { value: "ACTIVE", label: d.status.ACTIVE },
+                { value: "INACTIVE", label: d.status.INACTIVE },
+                { value: "SUSPENDED", label: d.status.SUSPENDED },
               ],
             },
           ]}
@@ -90,8 +102,7 @@ export default async function UsersPage({
         count={page.count}
         page={pageFrom(params)}
         pageSize={PAGE_SIZE}
-        unit="person"
-        plural="people"
+        unit={d.units.people}
       />
     </div>
   );

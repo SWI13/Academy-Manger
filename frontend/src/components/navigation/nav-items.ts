@@ -1,4 +1,5 @@
 import type { IconName } from "@/components/ui/Icon";
+import type { Dict } from "@/lib/dict/en";
 import type { Permission } from "@/lib/permissions";
 
 /**
@@ -16,89 +17,130 @@ import type { Permission } from "@/lib/permissions";
 
 export type NavItem = {
   href: string;
-  label: string;
+  /**
+   * A key into `dict.nav`, not a label.
+   *
+   * The rail is rendered in whichever of three languages the reader chose, so
+   * an English string here would be an English word in an Arabic sidebar.
+   * Typed against the dictionary, so a key that does not exist will not
+   * compile.
+   */
+  key: keyof Dict["nav"];
   icon: IconName;
   /** Rendered only if the caller holds this. Undefined means everyone. */
   needs?: Permission;
   group: NavGroup;
 };
 
-export type NavGroup = "Work" | "People" | "Oversight";
+export type NavGroup = "work" | "people" | "oversight";
+
+/** The group headings, as keys into `dict.nav`. */
+export const GROUP_KEYS: Record<NavGroup, keyof Dict["nav"]> = {
+  work: "groupWork",
+  people: "groupPeople",
+  oversight: "groupOversight",
+};
 
 export const NAV_ITEMS: NavItem[] = [
-  { href: "/dashboard", label: "Dashboard", icon: "gauge", group: "Work" },
+  { href: "/dashboard", key: "dashboard", icon: "gauge", group: "work" },
   {
     href: "/courses",
-    label: "Courses",
+    key: "courses",
     icon: "book",
     needs: "course.view",
-    group: "Work",
+    group: "work",
   },
   {
     href: "/enrollments",
-    label: "Enrolments",
+    key: "enrollments",
     icon: "graduation",
     needs: "enrollment.view",
-    group: "Work",
+    group: "work",
   },
   {
     href: "/schedules",
-    label: "Schedule",
+    key: "schedules",
     icon: "calendar",
     needs: "schedule.view",
-    group: "Work",
+    group: "work",
   },
   {
     href: "/grades",
-    label: "Grades",
+    key: "grades",
     icon: "check-circle",
     needs: "score.view",
-    group: "Work",
+    group: "work",
+  },
+  {
+    href: "/attendance",
+    key: "attendance",
+    icon: "clipboard",
+    needs: "attendance.view",
+    group: "work",
   },
   {
     href: "/payments",
-    label: "Payments",
+    key: "payments",
     icon: "wallet",
     needs: "payment.view",
-    group: "Work",
+    group: "work",
+  },
+  {
+    // One entry for a section with four screens. Inventory, expenses, history
+    // and setup are tabs within it rather than four rails: `currentItem`
+    // matches on prefix, so every one of them still lights this link up.
+    href: "/logistics",
+    key: "logistics",
+    icon: "layers",
+    needs: "logistics.view",
+    group: "work",
   },
   {
     href: "/users",
-    label: "People",
+    key: "users",
     icon: "users",
     needs: "user.view",
-    group: "People",
+    group: "people",
   },
   {
     href: "/reviews",
-    label: "Reviews",
+    key: "reviews",
     icon: "star",
     needs: "review.view",
-    group: "People",
+    group: "people",
   },
   {
     href: "/notifications",
-    label: "Notifications",
+    key: "notifications",
     icon: "bell",
-    group: "People",
+    group: "people",
   },
   {
     href: "/reports",
-    label: "Reports",
+    key: "reports",
     icon: "activity",
     needs: "report.view_operational",
-    group: "Oversight",
+    group: "oversight",
   },
   {
     href: "/audit",
-    label: "Audit log",
+    key: "audit",
     icon: "shield",
     needs: "audit.view",
-    group: "Oversight",
+    group: "oversight",
+  },
+  {
+    // The institute's own details, which open every printed document. Offered
+    // to whoever may change them; everybody else reads them on the paper.
+    href: "/settings",
+    key: "settings",
+    icon: "settings",
+    needs: "settings.manage",
+    group: "oversight",
   },
 ];
 
-export const NAV_GROUPS: NavGroup[] = ["Work", "People", "Oversight"];
+export const NAV_GROUPS: NavGroup[] = ["work", "people", "oversight"];
 
 export function visibleItems(permissions: readonly Permission[]): NavItem[] {
   const held = new Set<string>(permissions);

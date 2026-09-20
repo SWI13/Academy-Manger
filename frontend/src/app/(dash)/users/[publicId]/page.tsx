@@ -7,11 +7,14 @@ import { Card, CardHeader, SectionHeader } from "@/components/ui/Card";
 import { DescriptionList } from "@/components/ui/DescriptionList";
 import { Icon } from "@/components/ui/Icon";
 import { BackLink } from "@/components/ui/PageHeader";
+import { PrintButton } from "@/components/ui/PrintButton";
 import { getJson } from "@/lib/django";
 import { formatDate, formatDateTime, formatMoney } from "@/lib/format";
 import { ROLE_LABELS, type RoleCode } from "@/lib/permissions";
 import { can, cookieHeader, getSession } from "@/lib/session";
 import type { Enrollment, User } from "@/types";
+import { getDict } from "@/lib/i18n.server";
+import { fill } from "@/lib/i18n";
 
 import { AccountPanel } from "./AccountPanel";
 
@@ -22,6 +25,7 @@ export async function generateMetadata({ params }: Props) {
 }
 
 export default async function UserPage({ params }: Props) {
+  const d = await getDict();
   const { publicId } = await params;
   const cookie = await cookieHeader();
 
@@ -47,7 +51,18 @@ export default async function UserPage({ params }: Props) {
 
   return (
     <div className="flex flex-col gap-6">
-      <BackLink href="/users" label="People" />
+      {/*
+        The way back on the left, the profile sheet on the right. This page's
+        heading is the identity card below rather than a title, so the print
+        control sits on the same line as the back link instead.
+      */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <BackLink href="/users" label={d.nav.users} />
+        <PrintButton
+          href={`/print/student/${user.public_id}`}
+          label={d.print.studentProfile}
+        />
+      </div>
 
       {/* --- the identity card ---------------------------------------- */}
       <Card>
@@ -114,7 +129,7 @@ export default async function UserPage({ params }: Props) {
       {student ? (
         <Card>
           <CardHeader
-            title="Student record"
+            title={d.users.studentRecord}
             icon="graduation"
             divider
             className="mb-5"
@@ -122,7 +137,7 @@ export default async function UserPage({ params }: Props) {
           <DescriptionList
             items={[
               {
-                label: "Date of birth",
+                label: d.users.dateOfBirth,
                 // Age is derived, never stored - a stored age is wrong within
                 // a year.
                 value: student.date_of_birth ? (
@@ -134,11 +149,11 @@ export default async function UserPage({ params }: Props) {
                   "—"
                 ),
               },
-              { label: "Wilaya", value: student.wilaya_name || "—" },
-              { label: "Prior level", value: student.prior_level || "—" },
-              { label: "Address", value: student.address || "—" },
+              { label: d.users.wilaya, value: student.wilaya_name || "—" },
+              { label: d.users.priorLevel, value: student.prior_level || "—" },
+              { label: d.users.address, value: student.address || "—" },
               {
-                label: "Emergency contact",
+                label: d.users.emergencyContact,
                 value: student.emergency_contact_name
                   ? `${student.emergency_contact_name} · ${
                       student.emergency_contact_phone || "no number"
@@ -148,7 +163,7 @@ export default async function UserPage({ params }: Props) {
               // Absent entirely when the student is looking at their own
               // record: the serializer drops it, so there is nothing to hide.
               student.notes
-                ? { label: "Staff notes", value: student.notes, wide: true }
+                ? { label: d.users.staffNotes, value: student.notes, wide: true }
                 : null,
             ]}
           />
@@ -158,7 +173,7 @@ export default async function UserPage({ params }: Props) {
       {professor ? (
         <Card>
           <CardHeader
-            title="Professor record"
+            title={d.users.professorRecord}
             icon="book"
             divider
             className="mb-5"
@@ -166,10 +181,10 @@ export default async function UserPage({ params }: Props) {
           <DescriptionList
             items={[
               {
-                label: "Specialisation",
+                label: d.users.specialisation,
                 value: professor.specialisation || "—",
               },
-              { label: "Wilaya", value: professor.wilaya_name || "—" },
+              { label: d.users.wilaya, value: professor.wilaya_name || "—" },
               {
                 label: "Hired",
                 value: professor.hired_at ? (
@@ -186,7 +201,7 @@ export default async function UserPage({ params }: Props) {
               professor.hourly_rate_minor !== undefined &&
               professor.hourly_rate_minor !== null
                 ? {
-                    label: "Hourly rate",
+                    label: d.users.hourlyRate,
                     value: (
                       <span className="tabular">
                         {formatMoney(
@@ -198,7 +213,7 @@ export default async function UserPage({ params }: Props) {
                   }
                 : null,
               {
-                label: "Qualifications",
+                label: d.users.qualifications,
                 value: professor.qualifications || "—",
                 wide: true,
               },
@@ -210,8 +225,10 @@ export default async function UserPage({ params }: Props) {
       {enrolments?.results.length ? (
         <section>
           <SectionHeader
-            title="Enrolments"
-            description={`${enrolments.results.length} on record`}
+            title={d.nav.enrollments}
+            description={fill(d.phrases.onRecord, {
+              count: enrolments.results.length,
+            })}
           />
           <ul className="flex flex-col gap-2">
             {enrolments.results.map((enrolment) => (

@@ -10,6 +10,7 @@ import {
 } from "react";
 
 import { Icon, type IconName } from "./Icon";
+import { useDict } from "@/components/LocaleProvider";
 
 /**
  * Confirmation that something happened, away from where it happened.
@@ -73,7 +74,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
         // doing, rather than interrupting them mid-sentence.
         aria-live="polite"
         aria-atomic="false"
-        className="pointer-events-none fixed inset-x-0 bottom-0 z-[60] flex flex-col items-center gap-2 p-4 sm:inset-x-auto sm:right-0 sm:items-end"
+        className="pointer-events-none fixed inset-x-0 bottom-0 z-[60] flex flex-col items-center gap-2 p-4 sm:inset-x-auto sm:end-0 sm:items-end"
       >
         {toasts.map((toast) => (
           <Item key={toast.id} toast={toast} onDismiss={() => dismiss(toast.id)} />
@@ -84,6 +85,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
 }
 
 function Item({ toast, onDismiss }: { toast: Toast; onDismiss: () => void }) {
+  const d = useDict();
   useEffect(() => {
     const timer = setTimeout(onDismiss, LIFETIME_MS);
     return () => clearTimeout(timer);
@@ -103,7 +105,7 @@ function Item({ toast, onDismiss }: { toast: Toast; onDismiss: () => void }) {
       <button
         type="button"
         onClick={onDismiss}
-        aria-label="Dismiss"
+        aria-label={d.common.close}
         className="-m-1 rounded-md p-1 text-ink-faint transition-colors hover:bg-white/[0.06] hover:text-ink"
       >
         <Icon name="close" size={15} />

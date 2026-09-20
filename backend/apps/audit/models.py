@@ -47,6 +47,14 @@ class AuditAction(models.TextChoices):
     MARK_CHANGED = "MARK_CHANGED", "Mark changed"
     MARKS_PUBLISHED = "MARKS_PUBLISHED", "Marks published"
 
+    # Attendance
+    #
+    # Taking a register is one row for the whole sheet; correcting one is a
+    # row each, with both values. Forty entries saying "PRESENT" is not a
+    # trail anybody reads, and a mark changed three weeks later is.
+    ATTENDANCE_TAKEN = "ATTENDANCE_TAKEN", "Register taken"
+    ATTENDANCE_CHANGED = "ATTENDANCE_CHANGED", "Attendance corrected"
+
     # Money
     PAYMENT_CREATED = "PAYMENT_CREATED", "Payment recorded"
     PAYMENT_APPROVED = "PAYMENT_APPROVED", "Payment approved"
@@ -55,12 +63,25 @@ class AuditAction(models.TextChoices):
     PROOF_UPLOADED = "PROOF_UPLOADED", "Payment proof uploaded"
     PROOF_DOWNLOADED = "PROOF_DOWNLOADED", "Payment proof downloaded"
 
+    # Logistics
+    #
+    # Deletion is recorded because deletion is soft: the row is gone from
+    # every screen, and this is the line that says who removed the institute's
+    # projector from the inventory and when.
+    LOGISTICS_ITEM_CREATED = "LOGISTICS_ITEM_CREATED", "Inventory item added"
+    LOGISTICS_ITEM_UPDATED = "LOGISTICS_ITEM_UPDATED", "Inventory item edited"
+    LOGISTICS_ITEM_DELETED = "LOGISTICS_ITEM_DELETED", "Inventory item removed"
+    EXPENSE_CREATED = "EXPENSE_CREATED", "Expense recorded"
+    EXPENSE_UPDATED = "EXPENSE_UPDATED", "Expense edited"
+    EXPENSE_DELETED = "EXPENSE_DELETED", "Expense removed"
+
     # Engagement
     REVIEW_CREATED = "REVIEW_CREATED", "Review written"
     REVIEW_UPDATED = "REVIEW_UPDATED", "Review edited"
     REVIEW_MODERATED = "REVIEW_MODERATED", "Review moderated"
 
     # Oversight
+    ORGANISATION_UPDATED = "ORGANISATION_UPDATED", "Organisation profile updated"
     REPORT_EXPORTED = "REPORT_EXPORTED", "Report exported"
     EXPORT_DOWNLOADED = "EXPORT_DOWNLOADED", "Export downloaded"
 

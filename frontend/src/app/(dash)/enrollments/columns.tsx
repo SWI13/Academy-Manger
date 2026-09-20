@@ -6,6 +6,7 @@ import { StatusBadge } from "@/components/ui/Badge";
 import { PersonCell } from "@/components/ui/Avatar";
 import type { Column } from "@/components/ui/DataTable";
 import { formatDate, formatMoney } from "@/lib/format";
+import type { Dict } from "@/lib/dict/en";
 import type { Permission } from "@/lib/permissions";
 import type { Enrollment } from "@/types";
 
@@ -18,11 +19,12 @@ import type { Enrollment } from "@/types";
  */
 export function enrollmentColumns(
   can: (permission: Permission) => boolean,
+  d: Dict,
 ): Column<Enrollment>[] {
   const columns: Column<Enrollment>[] = [
     {
       key: "student",
-      header: "Student",
+      header: d.filters.student,
       lead: true,
       cell: (enrollment) => (
         <PersonCell
@@ -33,7 +35,7 @@ export function enrollmentColumns(
     },
     {
       key: "course",
-      header: "Course",
+      header: d.filters.course,
       cell: (enrollment) => (
         <Link
           href={`/courses/${enrollment.course_public_id}`}
@@ -53,7 +55,7 @@ export function enrollmentColumns(
     columns.push(
       {
         key: "age",
-        header: "Age",
+        header: d.columns.age,
         numeric: true,
         secondary: true,
         // Never stored - derived from date of birth, because a stored age is
@@ -62,7 +64,7 @@ export function enrollmentColumns(
       },
       {
         key: "level",
-        header: "Level",
+        header: d.columns.level,
         secondary: true,
         cell: (enrollment) => (
           <span className="text-ink-soft">
@@ -72,7 +74,7 @@ export function enrollmentColumns(
       },
       {
         key: "wilaya",
-        header: "Wilaya",
+        header: d.columns.wilaya,
         secondary: true,
         cell: (enrollment) => (
           <span className="text-ink-soft">{enrollment.student.wilaya || "—"}</span>
@@ -84,7 +86,7 @@ export function enrollmentColumns(
   if (can("payment.view")) {
     columns.push({
       key: "price",
-      header: "Agreed price",
+      header: d.enrollments.agreedPrice,
       numeric: true,
       cell: (enrollment) => (
         <span className="font-medium text-ink">
@@ -100,7 +102,7 @@ export function enrollmentColumns(
   columns.push(
     {
       key: "enrolled_at",
-      header: "Enrolled",
+      header: d.enrollments.enrolled,
       secondary: true,
       cell: (enrollment) => (
         <span className="tabular whitespace-nowrap text-ink-soft">
@@ -110,7 +112,7 @@ export function enrollmentColumns(
     },
     {
       key: "status",
-      header: "Status",
+      header: d.columns.status,
       trail: true,
       width: "1%",
       cell: (enrollment) => <StatusBadge status={enrollment.status} />,

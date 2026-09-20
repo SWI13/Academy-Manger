@@ -4,6 +4,7 @@ import { useEffect } from "react";
 
 import { Button, LinkButton } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
+import { useDict } from "@/components/LocaleProvider";
 
 /**
  * Something threw while rendering a signed-in page.
@@ -24,6 +25,8 @@ export default function DashboardError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const d = useDict();
+
   useEffect(() => {
     console.error("Page failed to render:", error);
   }, [error]);
@@ -37,26 +40,19 @@ export default function DashboardError({
         <Icon name="alert" size={22} />
       </span>
 
-      <h1 className="text-lg font-semibold text-ink">
-        This page did not load
-      </h1>
+      <h1 className="text-lg font-semibold text-ink">{d.empty.crashTitle}</h1>
       <p className="mt-2 max-w-sm text-sm leading-relaxed text-ink-soft">
-        Something went wrong on the way here. Nothing you were doing has been
-        saved or changed — trying again is safe.
+        {d.empty.crashExplain}
       </p>
 
       <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
-        <Button variant="primary" icon="loader" onClick={reset}>
-          Try again
-        </Button>
-        <LinkButton href="/dashboard" icon="gauge">
-          Back to the dashboard
-        </LinkButton>
+        <Button variant="primary" icon="loader" onClick={reset}>{d.common.retry}</Button>
+        <LinkButton href="/dashboard" icon="gauge">{d.common.toDashboard}</LinkButton>
       </div>
 
       {error.digest ? (
         <p className="tabular mt-6 text-xs text-ink-faint">
-          Reference {error.digest}
+          {d.empty.reference} {error.digest}
         </p>
       ) : null}
     </div>

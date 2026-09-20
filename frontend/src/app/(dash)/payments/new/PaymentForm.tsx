@@ -22,6 +22,7 @@ import { formatMoney, toMinorUnits } from "@/lib/format";
 import type { Enrollment, Payment } from "@/types";
 
 import type { Balance } from "../../enrollments/[id]/BalanceCard";
+import { useDict, useFill } from "@/components/LocaleProvider";
 
 /**
  * Recording money that arrived.
@@ -46,6 +47,8 @@ export function PaymentForm({
   preset: string | null;
   mayApprove: boolean;
 }) {
+  const d = useDict();
+  const t = useFill();
   const router = useRouter();
   const toast = useToast();
 
@@ -75,9 +78,9 @@ export function PaymentForm({
   const minor = amount.trim() === "" ? null : toMinorUnits(amount, currency);
   const amountError =
     amount.trim() !== "" && minor === null
-      ? "Enter an amount, like 20000 or 20000.50."
+      ? d.payments.amountInvalid
       : minor !== null && minor <= 0
-        ? "An amount has to be more than nothing."
+        ? d.payments.amountTooSmall
         : undefined;
 
   // The balance for the chosen enrolment, from the endpoint that owns it.
@@ -119,8 +122,8 @@ export function PaymentForm({
       });
       toast({
         tone: "ok",
-        title: "Payment recorded",
-        description: `${created.public_id} is pending approval.`,
+        title: d.audit.actions.paymentRecorded,
+        description: t(d.phrases.pendingApproval, { id: created.public_id }),
       });
       router.push(`/payments/${created.public_id}`);
       router.refresh();
@@ -152,22 +155,22 @@ export function PaymentForm({
       <Card>
         <div className="grid gap-4 sm:grid-cols-2">
           <Select
-            label="Enrolment"
+            label={d.payments.enrollment}
             required
             value={enrollmentId}
             onChange={(event) => setEnrollmentId(event.target.value)}
-            placeholder="Choose a student and course"
+            placeholder={d.payments.chooseEnrollment}
             options={enrolments.map((row) => ({
               value: String(row.id),
               label: `${row.student.full_name} — ${row.course_title}`,
             }))}
             error={fieldErrors.enrollment_id}
-            hint="Active enrolments only. Money against a withdrawn one needs a live enrolment first."
+            hint={d.payments.chooseEnrollmentHint}
             wrapperClassName="sm:col-span-2"
           />
 
           <Field
-            label="Amount"
+            label={d.payments.amount}
             required
             inputMode="decimal"
             autoComplete="off"
@@ -179,38 +182,38 @@ export function PaymentForm({
             hint={
               minor !== null && !amountError
                 ? `Recorded as ${formatMoney(minor, currency)}`
-                : "The amount handed over, in whole units or with centimes."
+                : d.payments.amountHint
             }
           />
 
           <Field
-            label="Paid on"
+            label={d.payments.paidOn}
             type="date"
             required
             max={today()}
             value={paidOn}
             onChange={(event) => setPaidOn(event.target.value)}
             error={fieldErrors.paid_on}
-            hint="The day the money arrived, not today’s date if they differ."
+            hint={d.payments.paidOnHint}
           />
 
           <Select
-            label="Method"
+            label={d.payments.method}
             required
             value={method}
             onChange={(event) => setMethod(event.target.value)}
             options={PAYMENT_METHODS}
-            placeholder="How it was paid"
+            placeholder={d.payments.methodHint}
             error={fieldErrors.method}
           />
 
           <TextArea
-            label="Notes"
+            label={d.payments.notes}
             optional
             rows={2}
             value={notes}
             onChange={(event) => setNotes(event.target.value)}
-            placeholder="Second instalment; receipt number 41."
+            placeholder={d.payments.notesPlaceholder}
             error={fieldErrors.notes}
           />
         </div>
@@ -221,7 +224,7 @@ export function PaymentForm({
         <Card className="animate-rise">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0">
-              <p className="eyebrow">Against</p>
+              <p className="eyebrow">{d.payments.against}</p>
               <p className="mt-1.5 font-medium text-ink">
                 {enrolment.student.full_name}
               </p>
@@ -238,25 +241,28 @@ export function PaymentForm({
                 value={balance.paid_minor}
                 max={balance.total_minor}
                 tone={balance.is_settled ? "ok" : "accent"}
-                label={`${formatMoney(balance.paid_minor, balance.currency)} paid of ${formatMoney(balance.total_minor, balance.currency)}`}
+                label={t(d.phrases.paidOf, {
+                  paid: formatMoney(balance.paid_minor, balance.currency),
+                  total: formatMoney(balance.total_minor, balance.currency),
+                })}
               />
               <dl className="mt-3 grid grid-cols-2 gap-4 sm:grid-cols-4">
                 <Pair
-                  label="Agreed"
+                  label={d.payments.agreed}
                   value={formatMoney(balance.total_minor, balance.currency)}
                 />
                 <Pair
-                  label="Paid"
+                  label={d.payments.paid}
                   value={formatMoney(balance.paid_minor, balance.currency)}
                   tone="text-ok"
                 />
                 <Pair
-                  label="Pending"
+                  label={d.payments.pending}
                   value={formatMoney(balance.pending_minor, balance.currency)}
                   tone="text-warn"
                 />
                 <Pair
-                  label="Remaining"
+                  label={d.payments.remaining}
                   value={formatMoney(balance.remaining_minor, balance.currency)}
                   tone={balance.remaining_minor > 0 ? "text-bad" : "text-ok"}
                 />
@@ -268,17 +274,15 @@ export function PaymentForm({
               </p>
             </div>
           ) : (
-            <p className="mt-4 border-t border-rule pt-4 text-[13px] text-ink-faint">
-              Loading the balance…
-            </p>
+            <p className="mt-4 border-t border-rule pt-4 text-[13px] text-ink-faint">{d.payments.loadingBalance}</p>
           )}
         </Card>
       ) : null}
 
       <Note tone={mayApprove ? "info" : "neutral"} icon="lock">
         {mayApprove
-          ? "This entry will be pending. You will not be able to approve it yourself — whoever records a payment cannot be the one who confirms it arrived."
-          : "This entry will be pending until somebody with approval rights confirms it. Reception records money; it does not approve it."}
+          ? d.payments.pendingNoticeSelf
+          : d.payments.pendingNotice}
       </Note>
 
       {error ? <FormError>{error}</FormError> : null}
@@ -286,9 +290,7 @@ export function PaymentForm({
       <FormActions
         note={
           <span className="inline-flex items-center gap-1.5">
-            <Icon name="file" size={14} />
-            Attach the bank slip on the payment’s own page, once it exists.
-          </span>
+            <Icon name="file" size={14} />{d.payments.attachLater}</span>
         }
       >
         <Button
@@ -297,9 +299,7 @@ export function PaymentForm({
           icon="check"
           busy={busy}
           disabled={!enrollmentId || minor === null || minor <= 0 || !paidOn}
-        >
-          Record payment
-        </Button>
+        >{d.payments.submit}</Button>
       </FormActions>
     </form>
   );

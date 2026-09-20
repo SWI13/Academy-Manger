@@ -37,6 +37,9 @@ export const PERMISSIONS = [
   "score.view",
   "score.enter",
   "score.publish",
+  // Attendance
+  "attendance.view",
+  "attendance.record",
   // Money
   "payment.view",
   "payment.create",
@@ -50,6 +53,11 @@ export const PERMISSIONS = [
   "review.view",
   "review.moderate",
   "notification.send",
+  // Logistics
+  "logistics.view",
+  "logistics.manage",
+  "expense.view",
+  "expense.manage",
   // Oversight
   "report.view_operational",
   "report.view_financial",

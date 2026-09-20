@@ -4,11 +4,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import { useDict } from "@/components/LocaleProvider";
 import { Icon } from "@/components/ui/Icon";
 import { Logo } from "@/components/ui/Logo";
-import { ROLE_LABELS, type Permission, type RoleCode } from "@/lib/permissions";
+import type { Permission, RoleCode } from "@/lib/permissions";
 
-import { NAV_GROUPS, visibleItems, type NavItem } from "./nav-items";
+import { GROUP_KEYS, NAV_GROUPS, visibleItems, type NavItem } from "./nav-items";
 
 /**
  * The rail.
@@ -34,7 +35,7 @@ type Props = {
 
 export function Sidebar(props: Props) {
   return (
-    <aside className="sticky top-0 hidden h-svh shrink-0 flex-col border-r border-nav-rule bg-nav md:flex md:w-[68px] lg:w-64">
+    <aside className="sticky top-0 hidden h-svh shrink-0 flex-col border-e border-nav-rule bg-nav md:flex md:w-[68px] lg:w-64">
       <Brand role={props.role} />
       <Nav {...props} />
       <Rule />
@@ -48,11 +49,12 @@ function Rule() {
 }
 
 function Brand({ role }: { role: RoleCode }) {
+  const d = useDict();
   return (
     <div className="flex h-16 shrink-0 items-center gap-2.5 px-3 lg:px-4">
       <Link
         href="/dashboard"
-        aria-label="SM Academy — dashboard"
+        aria-label={d.nav.toDashboard}
         className="flex min-w-0 items-center gap-2.5 rounded-md py-1"
       >
         {/*
@@ -66,7 +68,7 @@ function Brand({ role }: { role: RoleCode }) {
         <span className="hidden min-w-0 lg:block">
           <Logo height={30} title="SM Academy" />
           <span className="mt-1 block truncate text-[11px] font-medium leading-tight text-nav-ink-faint">
-            {ROLE_LABELS[role]}
+            {d.roles[role]}
           </span>
         </span>
       </Link>
@@ -75,12 +77,13 @@ function Brand({ role }: { role: RoleCode }) {
 }
 
 function Nav({ permissions, unread }: Props) {
+  const d = useDict();
   const pathname = usePathname();
   const items = visibleItems(permissions);
 
   return (
     <nav
-      aria-label="Main"
+      aria-label={d.nav.main}
       className="scroll-slim flex-1 overflow-y-auto px-2.5 pb-4 lg:px-3"
     >
       {NAV_GROUPS.map((group) => {
@@ -90,7 +93,7 @@ function Nav({ permissions, unread }: Props) {
         return (
           <div key={group} className="mb-5 last:mb-0">
             <p className="hidden px-2.5 pb-1.5 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-nav-ink-faint lg:block">
-              {group}
+              {d.nav[GROUP_KEYS[group]]}
             </p>
             {/* On the icon rail the group heading would be a word in a column
                 with no room for one, so the groups are separated by space. */}
@@ -124,6 +127,8 @@ export function NavLink({
   /** Forces the label on, for the mobile drawer where width is not the issue. */
   showLabel?: boolean;
 }) {
+  const d = useDict();
+  const label = d.nav[item.key];
   const active =
     pathname === item.href || pathname.startsWith(`${item.href}/`);
 
@@ -131,7 +136,7 @@ export function NavLink({
     <Link
       href={item.href}
       aria-current={active ? "page" : undefined}
-      title={showLabel ? undefined : item.label}
+      title={showLabel ? undefined : label}
       className={`group relative flex h-9 items-center gap-3 rounded-lg px-2.5 text-sm transition-colors duration-[110ms] ${
         active
           ? "bg-nav-active font-medium text-nav-ink"
@@ -143,7 +148,7 @@ export function NavLink({
       {active ? (
         <span
           aria-hidden
-          className="absolute -left-2.5 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-nav-accent lg:-left-3"
+          className="absolute -start-2.5 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-e-full bg-nav-accent lg:-start-3"
         />
       ) : null}
 
@@ -154,17 +159,17 @@ export function NavLink({
       />
 
       <span className={showLabel ? "flex-1" : "sr-only flex-1 lg:not-sr-only"}>
-        {item.label}
+        {label}
       </span>
 
       {badge > 0 ? (
         <span
           className={`tabular inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-accent-fill px-1.5 text-[11px] font-semibold text-accent-ink ${
-            showLabel ? "" : "absolute right-1.5 top-1 lg:static lg:right-auto lg:top-auto"
+            showLabel ? "" : "absolute end-1.5 top-1 lg:static lg:end-auto lg:top-auto"
           }`}
         >
           {badge > 99 ? "99+" : badge}
-          <span className="sr-only"> unread</span>
+          <span className="sr-only"> {d.shell.unread}</span>
         </span>
       ) : null}
     </Link>
@@ -172,12 +177,13 @@ export function NavLink({
 }
 
 function Identity({ fullName, publicId, role }: Props) {
+  const d = useDict();
   return (
     <div className="p-3">
       <Link
         href="/account"
         className="flex items-center gap-2.5 rounded-lg p-1.5 transition-colors hover:bg-nav-raised"
-        title="Your account"
+        title={d.nav.account}
       >
         <span
           aria-hidden
@@ -190,7 +196,7 @@ function Identity({ fullName, publicId, role }: Props) {
             {fullName}
           </span>
           <span className="tabular block truncate text-[11px] leading-tight text-nav-ink-faint">
-            {publicId} · {ROLE_LABELS[role]}
+            {publicId} · {d.roles[role]}
           </span>
         </span>
         <Icon
@@ -219,6 +225,7 @@ function initials(name: string): string {
  * the page underneath does not move while it is open.
  */
 export function MobileNav(props: Props) {
+  const d = useDict();
   const pathname = usePathname();
 
   /*
@@ -253,15 +260,15 @@ export function MobileNav(props: Props) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        aria-label="Open navigation"
+        aria-label={d.nav.openNavigation}
         aria-expanded={open}
-        className="relative -ml-1 inline-flex size-9 items-center justify-center rounded-md text-ink-soft transition-colors hover:bg-white/[0.06] hover:text-ink md:hidden"
+        className="relative -ms-1 inline-flex size-9 items-center justify-center rounded-md text-ink-soft transition-colors hover:bg-white/[0.06] hover:text-ink md:hidden"
       >
         <Icon name="menu" size={20} />
         {props.unread > 0 ? (
           <span
             aria-hidden
-            className="absolute right-1.5 top-1.5 size-2 rounded-full bg-accent ring-2 ring-surface"
+            className="absolute end-1.5 top-1.5 size-2 rounded-full bg-accent ring-2 ring-surface"
           />
         ) : null}
       </button>
@@ -275,22 +282,22 @@ export function MobileNav(props: Props) {
           <div
             role="dialog"
             aria-modal="true"
-            aria-label="Navigation"
+            aria-label={d.nav.navigation}
             className="animate-drawer relative flex h-full w-[min(19rem,85vw)] flex-col bg-nav shadow-xl"
           >
-            <div className="flex h-16 shrink-0 items-center justify-between pl-3 pr-2">
+            <div className="flex h-16 shrink-0 items-center justify-between ps-3 pe-2">
               <span className="flex min-w-0 items-center">
                 <span className="min-w-0">
                   <Logo height={30} title="SM Academy" />
                   <span className="mt-1 block truncate text-[11px] font-medium leading-tight text-nav-ink-faint">
-                    {ROLE_LABELS[props.role]}
+                    {d.roles[props.role]}
                   </span>
                 </span>
               </span>
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                aria-label="Close navigation"
+                aria-label={d.nav.closeNavigation}
                 className="inline-flex size-9 items-center justify-center rounded-md text-nav-ink-soft transition-colors hover:bg-nav-raised hover:text-nav-ink"
               >
                 <Icon name="close" size={18} />
@@ -298,7 +305,7 @@ export function MobileNav(props: Props) {
             </div>
 
             <nav
-              aria-label="Main"
+              aria-label={d.nav.main}
               className="scroll-slim flex-1 overflow-y-auto px-3 pb-4"
             >
               {NAV_GROUPS.map((group) => {

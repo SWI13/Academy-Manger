@@ -52,6 +52,13 @@ PERMISSIONS: dict[str, tuple[str, str]] = {
     "score.view": ("View marks", "Grades"),
     "score.enter": ("Enter and correct marks", "Grades"),
     "score.publish": ("Publish marks to students", "Grades"),
+    # Attendance
+    #
+    # Split the same way logistics is: seeing a register and writing one are
+    # different powers. Reception answers "was my child in on Tuesday" and
+    # cannot change the answer.
+    "attendance.view": ("View registers", "Attendance"),
+    "attendance.record": ("Take and correct registers", "Attendance"),
     # Money
     "payment.view": ("View payments", "Money"),
     "payment.create": ("Record payments", "Money"),
@@ -65,6 +72,16 @@ PERMISSIONS: dict[str, tuple[str, str]] = {
     "review.view": ("View reviews", "Engagement"),
     "review.moderate": ("Moderate reviews", "Engagement"),
     "notification.send": ("Send notifications", "Engagement"),
+    # Logistics
+    #
+    # Two permissions per half, and the split is the whole requirement:
+    # reception is to see everything and change nothing, so "see" and "change"
+    # have to be separable. One `logistics.access` permission could not
+    # express that without a role check somewhere else.
+    "logistics.view": ("View the inventory", "Logistics"),
+    "logistics.manage": ("Add, edit and remove inventory", "Logistics"),
+    "expense.view": ("View expenses", "Logistics"),
+    "expense.manage": ("Record and edit expenses", "Logistics"),
     # Oversight
     "report.view_operational": ("View operational reports", "Oversight"),
     "report.view_financial": ("View financial reports", "Oversight"),
@@ -99,6 +116,8 @@ ROLE_MATRIX: dict[str, dict[str, str]] = {
         "score.view": FULL,
         "score.enter": FULL,
         "score.publish": FULL,
+        "attendance.view": FULL,
+        "attendance.record": FULL,
         "payment.view": FULL,
         "payment.create": FULL,
         "payment.approve": FULL,
@@ -114,6 +133,10 @@ ROLE_MATRIX: dict[str, dict[str, str]] = {
         "report.export": FULL,
         "audit.view": FULL,
         "settings.manage": FULL,
+        "logistics.view": FULL,
+        "logistics.manage": FULL,
+        "expense.view": FULL,
+        "expense.manage": FULL,
         # Deliberately absent: review.create. Only a student who took the
         # course may review it, and the owner is not exempt from that.
     },
@@ -139,6 +162,8 @@ ROLE_MATRIX: dict[str, dict[str, str]] = {
         "score.view": FULL,
         "score.enter": FULL,
         "score.publish": FULL,
+        "attendance.view": FULL,
+        "attendance.record": FULL,
         "payment.view": FULL,
         "payment.create": FULL,
         "payment.approve": FULL,
@@ -152,6 +177,10 @@ ROLE_MATRIX: dict[str, dict[str, str]] = {
         "report.view_operational": FULL,
         "report.view_financial": FULL,
         "report.export": FULL,
+        "logistics.view": FULL,
+        "logistics.manage": FULL,
+        "expense.view": FULL,
+        "expense.manage": FULL,
         # Absent: user.assign_role, role.manage, audit.view, settings.manage.
         # An admin cannot grant themselves powers, nor read the log that
         # records what they did.
@@ -171,6 +200,16 @@ ROLE_MATRIX: dict[str, dict[str, str]] = {
         "proof.upload": FULL,
         "proof.view": FULL,
         "report.view_operational": SCOPED,
+        # Attendance, read and nothing else. The desk is asked "was my child
+        # in on Tuesday" and must be able to answer it without being able to
+        # change the answer.
+        "attendance.view": FULL,
+        # Logistics, read and nothing else. The desk needs to answer "how many
+        # chairs are in Room 3" and "what did we spend on electricity in
+        # March" without being able to change either answer - so the two
+        # `.view` permissions are granted and neither `.manage` is.
+        "logistics.view": FULL,
+        "expense.view": FULL,
         # Absent, and this is the separation of duty that matters:
         # payment.approve and payment.reject. Whoever takes the money must
         # not be the one who confirms it was taken.
@@ -186,6 +225,8 @@ ROLE_MATRIX: dict[str, dict[str, str]] = {
         "score.view": SCOPED,
         "score.enter": SCOPED,
         "score.publish": SCOPED,
+        "attendance.view": SCOPED,
+        "attendance.record": SCOPED,
         "review.view": SCOPED,
         "report.view_operational": SCOPED,
         # Absent: every payment.* and proof.* permission. A professor sees
@@ -199,6 +240,7 @@ ROLE_MATRIX: dict[str, dict[str, str]] = {
         "enrollment.view": SCOPED,
         "assessment.view": SCOPED,
         "score.view": SCOPED,
+        "attendance.view": SCOPED,
         "payment.view": SCOPED,
         "proof.upload": SCOPED,
         "proof.view": SCOPED,

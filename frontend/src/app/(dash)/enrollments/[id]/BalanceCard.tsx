@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/Card";
 import { Icon } from "@/components/ui/Icon";
 import { Meter } from "@/components/ui/Stars";
 import { formatMoney } from "@/lib/format";
+import { getDict } from "@/lib/i18n.server";
 
 export type Balance = {
   currency: string;
@@ -27,46 +28,45 @@ export type Balance = {
  * not money received, and a family whose cheque has not cleared still owes
  * it. Making that visually obvious is the whole job of this card.
  */
-export function BalanceCard({ balance }: { balance: Balance }) {
+export async function BalanceCard({ balance }: { balance: Balance }) {
+  const d = await getDict();
   const figures = [
     {
       key: "agreed",
-      label: "Agreed",
+      label: d.payments.agreed,
       value: balance.total_minor,
       tone: "text-ink",
-      note: "Frozen at enrolment",
+      note: d.enrollments.frozenAtEnrollment,
     },
     {
       key: "paid",
-      label: "Paid",
+      label: d.payments.paid,
       value: balance.paid_minor,
       tone: "text-ok",
-      note: "Approved payments",
+      note: d.enrollments.approvedPayments,
     },
     {
       key: "pending",
       label: "Awaiting approval",
       value: balance.pending_minor,
       tone: "text-warn",
-      note: "Not counted as paid",
+      note: d.enrollments.notCountedAsPaid,
     },
     {
       key: "remaining",
-      label: "Remaining",
+      label: d.payments.remaining,
       value: balance.remaining_minor,
       tone: balance.remaining_minor > 0 ? "text-bad" : "text-ok",
-      note: balance.remaining_minor > 0 ? "Still owed" : "Settled",
+      note: balance.remaining_minor > 0 ? d.enrollments.stillOwed : "Settled",
     },
   ];
 
   return (
-    <Card aria-label="Balance">
+    <Card aria-label={d.enrollments.balance}>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="eyebrow">Balance</p>
-          <p className="mt-1 text-[13px] text-ink-faint">
-            Computed from the payment rows on every read, never stored.
-          </p>
+          <p className="eyebrow">{d.enrollments.balance}</p>
+          <p className="mt-1 text-[13px] text-ink-faint">{d.enrollments.balanceNote}</p>
         </div>
         <Badge tone={balance.is_settled ? "ok" : "warn"} dot>
           {balance.is_settled ? "Settled" : "Outstanding"}

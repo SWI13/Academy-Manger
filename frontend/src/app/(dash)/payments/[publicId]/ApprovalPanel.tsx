@@ -12,6 +12,7 @@ import { useToast } from "@/components/ui/Toast";
 import { ApiFailure, api } from "@/lib/api";
 import { formatMoney } from "@/lib/format";
 import type { Payment } from "@/types";
+import { useDict, useFill } from "@/components/LocaleProvider";
 
 type Action = "approve" | "reject" | "cancel";
 
@@ -30,6 +31,8 @@ type Action = "approve" | "reject" | "cancel";
  * catches a misclick.
  */
 export function ApprovalPanel({ payment }: { payment: Payment }) {
+  const d = useDict();
+  const t = useFill();
   const router = useRouter();
   const can = useCan();
   const session = useSession();
@@ -69,21 +72,21 @@ export function ApprovalPanel({ payment }: { payment: Payment }) {
         tone: action === "approve" ? "ok" : "info",
         title:
           action === "approve"
-            ? "Payment approved"
+            ? d.payments.approved
             : action === "reject"
-              ? "Payment rejected"
-              : "Entry cancelled",
+              ? d.payments.rejected
+              : d.payments.cancelled,
         description:
           action === "approve"
-            ? `${amount} now counts against the balance.`
-            : `${payment.public_id} is closed. The record stays in the ledger.`,
+            ? t(d.phrases.countsAgainstBalance, { amount })
+            : t(d.phrases.closedInLedger, { id: payment.public_id }),
       });
       router.refresh();
     } catch (failure) {
       setError(
         failure instanceof ApiFailure
           ? failure.message
-          : "Could not reach the server.",
+          : d.ui.serverUnreachable,
       );
     } finally {
       setBusy(null);
@@ -93,9 +96,9 @@ export function ApprovalPanel({ payment }: { payment: Payment }) {
   return (
     <Card>
       <CardHeader
-        title="Decision"
+        title={d.payments.decision}
         icon="check-circle"
-        description="Recorded by one person, confirmed by another."
+        description={d.payments.decisionNote}
         divider
         className="mb-4"
       />
@@ -116,27 +119,21 @@ export function ApprovalPanel({ payment }: { payment: Payment }) {
             disabled={recordedByMe}
             title={
               recordedByMe
-                ? "You recorded this payment. Someone else must approve it."
+                ? d.payments.selfApproveBlocked
                 : undefined
             }
             onClick={() => setPrompting("approve")}
-          >
-            Approve payment
-          </Button>
+          >{d.payments.approveAction}</Button>
         ) : null}
         {mayReject ? (
           <Button
             variant="danger"
             icon="close"
             onClick={() => setPrompting("reject")}
-          >
-            Reject
-          </Button>
+          >{d.payments.reject}</Button>
         ) : null}
         {mayCancel ? (
-          <Button icon="minus" onClick={() => setPrompting("cancel")}>
-            Cancel entry
-          </Button>
+          <Button icon="minus" onClick={() => setPrompting("cancel")}>{d.payments.cancelAction}</Button>
         ) : null}
       </div>
 
@@ -155,9 +152,9 @@ export function ApprovalPanel({ payment }: { payment: Payment }) {
         busy={busy === "approve"}
         tone="primary"
         icon="check"
-        title="Approve this payment?"
-        confirmLabel="Approve payment"
-        description="This counts the money against the balance and cannot be undone."
+        title={d.payments.approveTitle}
+        confirmLabel={d.payments.approveAction}
+        description={d.payments.approveBody}
       >
         <Summary payment={payment} amount={amount} />
       </ConfirmDialog>
@@ -174,20 +171,20 @@ export function ApprovalPanel({ payment }: { payment: Payment }) {
         disabled={!reason.trim()}
         tone="danger"
         icon="close"
-        title="Reject this payment?"
-        confirmLabel="Reject payment"
-        description="The record stays in the ledger with the reason attached."
+        title={d.payments.rejectTitle}
+        confirmLabel={d.payments.rejectAction}
+        description={d.payments.rejectBody}
       >
         <Summary payment={payment} amount={amount} />
         <div className="mt-4">
           <TextArea
-            label="Why is this being rejected?"
+            label={d.payments.rejectWhy}
             required
             rows={3}
             value={reason}
             onChange={(event) => setReason(event.target.value)}
-            placeholder="The person who was refused has to be able to be told why."
-            hint="Recorded against the payment and shown to whoever reads it."
+            placeholder={d.payments.rejectWhyHint}
+            hint={d.payments.reasonShown}
           />
         </div>
       </ConfirmDialog>
@@ -203,19 +200,19 @@ export function ApprovalPanel({ payment }: { payment: Payment }) {
         busy={busy === "cancel"}
         tone="danger"
         icon="minus"
-        title="Cancel this entry?"
-        confirmLabel="Cancel entry"
-        description="For an entry that should not have been made. It stays in the ledger, closed."
+        title={d.payments.cancelTitle}
+        confirmLabel={d.payments.cancelAction}
+        description={d.payments.cancelBody}
       >
         <Summary payment={payment} amount={amount} />
         <div className="mt-4">
           <TextArea
-            label="Why is this being cancelled?"
+            label={d.payments.cancelWhy}
             optional
             rows={2}
             value={reason}
             onChange={(event) => setReason(event.target.value)}
-            placeholder="Recorded against the wrong enrolment."
+            placeholder={d.payments.cancelWhyPlaceholder}
           />
         </div>
       </ConfirmDialog>
@@ -225,18 +222,19 @@ export function ApprovalPanel({ payment }: { payment: Payment }) {
 
 /** The amount and the name, once more, inside the dialog. */
 function Summary({ payment, amount }: { payment: Payment; amount: string }) {
+  const d = useDict();
   return (
     <dl className="rounded-lg border border-rule bg-black/30 p-3.5">
       <div className="flex items-baseline justify-between gap-4">
-        <dt className="text-xs text-ink-faint">Amount</dt>
+        <dt className="text-xs text-ink-faint">{d.payments.amount}</dt>
         <dd className="tabular text-lg font-semibold text-ink">{amount}</dd>
       </div>
       <div className="mt-2 flex items-baseline justify-between gap-4">
-        <dt className="text-xs text-ink-faint">Student</dt>
+        <dt className="text-xs text-ink-faint">{d.filters.student}</dt>
         <dd className="truncate text-sm text-ink">{payment.student_name}</dd>
       </div>
       <div className="mt-2 flex items-baseline justify-between gap-4">
-        <dt className="text-xs text-ink-faint">Reference</dt>
+        <dt className="text-xs text-ink-faint">{d.payments.reference}</dt>
         <dd className="tabular text-sm text-ink-soft">{payment.public_id}</dd>
       </div>
     </dl>

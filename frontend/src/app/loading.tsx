@@ -1,5 +1,6 @@
 import { Logo } from "@/components/ui/Logo";
 import { Vfx } from "@/components/ui/Vfx";
+import { getDict } from "@/lib/i18n.server";
 
 /**
  * The boot screen.
@@ -13,7 +14,8 @@ import { Vfx } from "@/components/ui/Vfx";
  * The indicator is a single red line filling under the mark. No spinner: a
  * spinner says "something is happening", a line says "and it is nearly done".
  */
-export default function Loading() {
+export default async function Loading() {
+  const d = await getDict();
   return (
     <div className="relative isolate flex min-h-svh flex-col items-center justify-center gap-6 overflow-hidden bg-paper px-6">
       <Vfx level={2} />
@@ -22,7 +24,7 @@ export default function Loading() {
 
       <div
         role="status"
-        aria-label="Loading"
+        aria-label={d.common.loading}
         className="h-px w-40 overflow-hidden bg-white/10"
       >
         <span

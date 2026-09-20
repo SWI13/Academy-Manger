@@ -3,7 +3,9 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { useDict, useFill } from "@/components/LocaleProvider";
 import { Icon } from "@/components/ui/Icon";
+import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
 import { Logo } from "@/components/ui/Logo";
 import type { Permission, RoleCode } from "@/lib/permissions";
 
@@ -37,6 +39,8 @@ export function TopBar({
   permissions: Permission[];
   unread: number;
 }) {
+  const d = useDict();
+  const t = useFill();
   const pathname = usePathname();
   // Named from the caller's own navigation, so a URL their role does not
   // include is not labelled with the section behind it on the way to being
@@ -59,7 +63,7 @@ export function TopBar({
         least sure which of several tabs they are looking at, so the logo
         earns its 26 pixels here.
       */}
-      <Link href="/dashboard" aria-label="SM Academy — dashboard" className="md:hidden">
+      <Link href="/dashboard" aria-label={d.nav.toDashboard} className="md:hidden">
         <Logo variant="icon" height={26} />
       </Link>
 
@@ -78,16 +82,18 @@ export function TopBar({
               size={16}
               className="hidden text-accent sm:block"
             />
-            <span className="truncate">{here.label}</span>
+            <span className="truncate">{d.nav[here.key]}</span>
           </>
         ) : null}
       </p>
 
-      <div className="ml-auto flex items-center gap-1 sm:gap-2">
+      <div className="ms-auto flex items-center gap-1 sm:gap-2">
         <Link
           href="/notifications"
           aria-label={
-            unread ? `Notifications, ${unread} unread` : "Notifications"
+            unread
+              ? t(d.shell.notificationsWithCount, { count: unread })
+              : d.shell.notifications
           }
           className="relative inline-flex size-9 items-center justify-center rounded-md text-ink-soft transition-colors hover:bg-white/[0.06] hover:text-ink"
         >
@@ -95,12 +101,14 @@ export function TopBar({
           {unread > 0 ? (
             <span
               aria-hidden
-              className="tabular absolute -right-0.5 -top-0.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-accent-fill px-1 text-[10px] font-bold text-accent-ink ring-2 ring-paper/90"
+              className="tabular absolute -end-0.5 -top-0.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-accent-fill px-1 text-[10px] font-bold text-accent-ink ring-2 ring-paper/90"
             >
               {unread > 9 ? "9+" : unread}
             </span>
           ) : null}
         </Link>
+
+        <LanguageSwitcher />
 
         <span aria-hidden className="mx-1 hidden h-6 w-px bg-rule sm:block" />
 

@@ -2,6 +2,8 @@
 
 import { useEffect, useRef } from "react";
 
+import { useDict } from "@/components/LocaleProvider";
+
 import { Button, IconButton } from "./Button";
 import { Icon, type IconName } from "./Icon";
 
@@ -30,6 +32,7 @@ export function Modal({
   footer?: React.ReactNode;
   size?: "sm" | "md" | "lg";
 }) {
+  const d = useDict();
   const ref = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
@@ -76,7 +79,7 @@ export function Modal({
             </p>
           ) : null}
         </div>
-        <IconButton icon="close" label="Close" size="sm" onClick={onClose} />
+        <IconButton icon="close" label={d.common.close} size="sm" onClick={onClose} />
       </div>
 
       {children ? <div className="p-5 pt-4">{children}</div> : <div className="h-1" />}
@@ -104,8 +107,8 @@ export function ConfirmDialog({
   onConfirm,
   title,
   description,
-  confirmLabel = "Confirm",
-  cancelLabel = "Back",
+  confirmLabel,
+  cancelLabel,
   tone = "danger",
   icon,
   busy = false,
@@ -126,6 +129,7 @@ export function ConfirmDialog({
   disabled?: boolean;
   children?: React.ReactNode;
 }) {
+  const d = useDict();
   return (
     <Modal
       open={open}
@@ -136,7 +140,7 @@ export function ConfirmDialog({
       footer={
         <>
           <Button variant="quiet" onClick={onClose} disabled={busy}>
-            {cancelLabel}
+            {cancelLabel ?? d.common.back}
           </Button>
           <Button
             variant={tone === "danger" ? "danger" : "primary"}
@@ -144,7 +148,7 @@ export function ConfirmDialog({
             disabled={disabled}
             onClick={onConfirm}
           >
-            {confirmLabel}
+            {confirmLabel ?? d.common.confirm}
           </Button>
         </>
       }

@@ -6,8 +6,10 @@ import { StatusBadge } from "@/components/ui/Badge";
 import { LinkButton } from "@/components/ui/Button";
 import { SectionHeader } from "@/components/ui/Card";
 import { DataTable, type Column } from "@/components/ui/DataTable";
+import type { Dict } from "@/lib/dict/en";
 import { formatDate, formatMoney } from "@/lib/format";
 import type { Payment } from "@/types";
+import { useDict } from "@/components/LocaleProvider";
 
 /**
  * The payment history for one enrolment.
@@ -17,10 +19,11 @@ import type { Payment } from "@/types";
  * Same table component, different columns - which is the whole argument for
  * the column factory.
  */
-const COLUMNS: Column<Payment>[] = [
+function columnsFor(d: Dict): Column<Payment>[] {
+  return [
   {
     key: "public_id",
-    header: "Reference",
+    header: d.payments.reference,
     lead: true,
     cell: (payment) => (
       <Link
@@ -33,7 +36,7 @@ const COLUMNS: Column<Payment>[] = [
   },
   {
     key: "paid_on",
-    header: "Paid on",
+    header: d.payments.paidOn,
     cell: (payment) => (
       <span className="tabular whitespace-nowrap text-ink-soft">
         {formatDate(payment.paid_on)}
@@ -42,7 +45,7 @@ const COLUMNS: Column<Payment>[] = [
   },
   {
     key: "method",
-    header: "Method",
+    header: d.payments.method,
     secondary: true,
     cell: (payment) => (
       <span className="capitalize text-ink-soft">
@@ -52,7 +55,7 @@ const COLUMNS: Column<Payment>[] = [
   },
   {
     key: "amount",
-    header: "Amount",
+    header: d.payments.amount,
     numeric: true,
     cell: (payment) => (
       <span className="font-medium text-ink">
@@ -62,12 +65,13 @@ const COLUMNS: Column<Payment>[] = [
   },
   {
     key: "status",
-    header: "Status",
+    header: d.columns.status,
     trail: true,
     width: "1%",
     cell: (payment) => <StatusBadge status={payment.status} />,
   },
-];
+  ];
+}
 
 export function EnrollmentPayments({
   payments,
@@ -78,32 +82,31 @@ export function EnrollmentPayments({
   enrollmentId: number | string;
   mayRecord: boolean;
 }) {
+  const d = useDict();
   return (
     <section>
       <SectionHeader
-        title="Payments"
-        description="Every entry is recorded first and approved by somebody else."
+        title={d.nav.payments}
+        description={d.enrollments.paymentsNote}
         action={
           mayRecord ? (
             <LinkButton
               href={`/payments/new?enrollment=${enrollmentId}`}
               size="sm"
               icon="plus"
-            >
-              Record a payment
-            </LinkButton>
+            >{d.payments.recordTitle}</LinkButton>
           ) : null
         }
       />
       <DataTable
-        caption="Payments for this enrolment"
-        columns={COLUMNS}
+        caption={d.enrollments.paymentsFor}
+        columns={columnsFor(d)}
         rows={payments}
         rowKey={(payment) => payment.public_id}
         rowHref={(payment) => `/payments/${payment.public_id}`}
         emptyIcon="wallet"
-        empty="Nothing recorded against this enrolment yet"
-        emptyDescription="Cash taken at the desk, a transfer or a cheque — each is recorded here and then approved."
+        empty={d.enrollments.noPayments}
+        emptyDescription={d.enrollments.noPaymentsBody}
       />
     </section>
   );

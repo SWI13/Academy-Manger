@@ -5,16 +5,21 @@ import { getJson } from "@/lib/django";
 import type { SearchParams } from "@/lib/list";
 import { can, cookieHeader, getSession } from "@/lib/session";
 import type { Enrollment } from "@/types";
+import { getDict } from "@/lib/i18n.server";
 
 import { PaymentForm } from "./PaymentForm";
 
-export const metadata = { title: "Record a payment" };
+export async function generateMetadata() {
+  const d = await getDict();
+  return { title: d.payments.recordTitle };
+}
 
 export default async function NewPaymentPage({
   searchParams,
 }: {
   searchParams: Promise<SearchParams>;
 }) {
+  const d = await getDict();
   const session = await getSession();
   // Checked here as well as hidden from the list page. The API refuses
   // regardless, but rendering a form nobody can submit is its own kind of
@@ -37,9 +42,9 @@ export default async function NewPaymentPage({
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        back={{ href: "/payments", label: "Payments" }}
-        title="Record a payment"
-        lede="Money that has arrived, against the enrolment it belongs to. Every entry starts pending and is approved by somebody else — you cannot approve one you recorded."
+        back={{ href: "/payments", label: d.nav.payments }}
+        title={d.payments.recordTitle}
+        lede={d.payments.recordLede}
       />
 
       <PaymentForm

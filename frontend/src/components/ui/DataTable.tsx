@@ -3,6 +3,8 @@
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 
+import { useDict } from "@/components/LocaleProvider";
+
 import { EmptyState } from "./EmptyState";
 import { Icon, type IconName } from "./Icon";
 
@@ -57,16 +59,21 @@ export function DataTable<T>({
   rows,
   rowKey,
   rowHref,
-  empty = "Nothing here yet.",
+  empty,
   emptyIcon = "layers",
   emptyDescription,
   caption,
 }: Props<T>) {
+  const d = useDict();
   const router = useRouter();
 
   if (!rows.length) {
     return (
-      <EmptyState icon={emptyIcon} title={empty} description={emptyDescription} />
+      <EmptyState
+        icon={emptyIcon}
+        title={empty ?? d.empty.nothing}
+        description={emptyDescription}
+      />
     );
   }
 
@@ -103,7 +110,7 @@ export function DataTable<T>({
                   scope="col"
                   style={column.width ? { width: column.width } : undefined}
                   className={`eyebrow whitespace-nowrap px-4 py-2.5 ${
-                    column.numeric ? "text-right" : "text-left"
+                    column.numeric ? "text-end" : "text-start"
                   } ${column.secondary ? "hidden lg:table-cell" : ""}`}
                 >
                   {column.header}
@@ -126,7 +133,7 @@ export function DataTable<T>({
                   <td
                     key={column.key}
                     className={`px-4 py-3 align-middle ${
-                      column.numeric ? "tabular text-right" : "text-left"
+                      column.numeric ? "tabular text-end" : "text-start"
                     } ${column.secondary ? "hidden lg:table-cell" : ""}`}
                   >
                     {column.cell(row)}

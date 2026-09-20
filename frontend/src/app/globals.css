@@ -645,6 +645,114 @@ h3 {
 }
 
 /* ==========================================================================
+   ARABIC, AND RIGHT TO LEFT
+   --------------------------------------------------------------------------
+   `dir="rtl"` on <html> mirrors the layout on its own, provided the markup
+   uses logical properties - which it does; every `left`/`right` utility in
+   the components was replaced with `start`/`end`. What it does not do is any
+   of the four things below, each of which has to be said out loud.
+   ========================================================================== */
+
+/*
+ * 1. The typeface.
+ *
+ * Neither Inter nor Saira contains a single Arabic glyph, so an Arabic page
+ * would fall back to whatever the operating system supplies. Redefining the
+ * two font variables here swaps the face for the entire interface in one
+ * place, because every component resolves its family through them.
+ */
+html[dir="rtl"] {
+  --font-body: var(--font-arabic);
+  --font-display-face: var(--font-arabic);
+}
+
+/*
+ * 2. No letter-spacing. This is not a preference.
+ *
+ * Arabic is a joined script: the letters of a word are connected, and adding
+ * space between them pulls the joins apart into something that reads as
+ * b-r-o-k-e-n. Every tracking utility in the interface - the tight headings,
+ * the wide uppercase eyebrows - has to stop at the language boundary.
+ *
+ * Two element selectors rather than !important: that is specificity 0,2,2
+ * against a utility class's 0,1,0, which wins cleanly and can still be
+ * overridden deliberately by anything more specific.
+ */
+html[dir="rtl"] body,
+html[dir="rtl"] body * {
+  letter-spacing: normal;
+}
+
+/*
+ * 3. Arabic has no capital letters.
+ *
+ * `text-transform: uppercase` does nothing to Arabic script, so the eyebrow
+ * labels lose the one thing that made them read as labels. They get their
+ * distinction from weight and colour instead.
+ */
+html[dir="rtl"] .eyebrow {
+  text-transform: none;
+  font-weight: 700;
+}
+
+/*
+ * 4. Anything with a direction baked into a gradient, an origin or a
+ *    keyframe. CSS mirrors layout, never these.
+ */
+html[dir="rtl"] .fx-rule {
+  background: linear-gradient(
+    270deg,
+    rgb(237 28 36 / 0.75),
+    rgb(237 28 36 / 0.1) 55%,
+    transparent
+  );
+}
+
+html[dir="rtl"] .animate-meter {
+  transform-origin: right;
+}
+
+/* The drawer comes in from the edge it is anchored to, which under RTL is
+   the right one. */
+@keyframes slide-from-right {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: none;
+  }
+}
+html[dir="rtl"] .animate-drawer {
+  animation-name: slide-from-right;
+}
+
+/*
+ * Numerals stay Western and stay left-to-right.
+ *
+ * `ar-DZ` already formats with 0-9, which is what an Algerian invoice and
+ * identity card use. But an identifier like STU-000042 or a code like
+ * C-2026-001 sitting inside an Arabic sentence is bidirectional text, and the
+ * algorithm will reorder a trailing hyphen or bracket if left to guess.
+ * Isolating them keeps a column of identifiers reading identically in all
+ * three languages.
+ */
+.ltr-nums {
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+html[dir="rtl"] .tabular,
+html[dir="rtl"] .font-mono {
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+/* ...but a right-to-left column of numbers should still sit against the edge
+   the rest of the column does. */
+html[dir="rtl"] td.tabular,
+html[dir="rtl"] th.tabular {
+  unicode-bidi: isolate;
+}
+
+/* ==========================================================================
    EFFECT TIERS
    --------------------------------------------------------------------------
    `data-fx="lite"` is set on <html> by a small script when the device says it
@@ -718,5 +826,397 @@ html[data-fx="lite"] .fx-soft {
   }
   .lift:hover {
     transform: none;
+  }
+}
+
+
+/* ===========================================================================
+ * PAPER
+ *
+ * The one part of this application that is not dark.
+ *
+ * Everything above is built on the premise that black is the ground. A sheet
+ * of A4 is not: it is white, it is read under an office light rather than on
+ * a screen, and half the ink in a dark interface disappears on a laser
+ * printer. So printed documents deliberately opt out of the design system and
+ * rebuild a small, plain one for paper - three greys, one rule weight, one
+ * family, and nothing that needs colour to be understood.
+ *
+ * `.sheet` is the whole document; `.sheet-page` is one side of A4. The pages
+ * are dealt out in `PrintDocument`, which measures the rows - see the note
+ * there about why page numbers cannot be done in CSS.
+ * ======================================================================== */
+.sheet {
+  --paper-ink: #101317;
+  --paper-ink-soft: #43505c;
+  --paper-ink-faint: #6b7885;
+  --paper-rule: #b9c3cc;
+  --paper-rule-soft: #e3e8ed;
+  --paper-band: #f2f5f8;
+
+  background: #e9edf1; /* the desk the paper sits on, on screen */
+  color: var(--paper-ink);
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: 10pt;
+  line-height: 1.45;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+@media screen {
+  .sheet {
+    /* Fixed rather than absolute: the page behind this is the dark shell's
+       body, and anything less than covering the viewport outright leaves a
+       band of black down the side of a sheet of paper. */
+    position: fixed;
+    inset: 0;
+    overflow-y: auto;
+    padding: 20px 16px 64px;
+  }
+  /* On screen each page is a card on a desk, so the reader sees where the
+     breaks fall before committing paper to it. */
+  .sheet-page {
+    margin: 0 auto 18px;
+    background: #fff;
+    padding: 14mm;
+    box-shadow: 0 2px 10px rgb(16 19 23 / 0.18);
+  }
+}
+
+.sheet-page {
+  display: flex;
+  flex-direction: column;
+}
+
+.sheet-body {
+  flex: 1 1 auto;
+}
+
+/* --- the masthead ------------------------------------------------------ */
+.sheet-masthead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16mm;
+  border-bottom: 1.5pt solid var(--paper-ink);
+  padding-bottom: 3mm;
+  margin-bottom: 5mm;
+}
+
+.sheet-identity {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.sheet-org-name {
+  font-family: var(--font-display), var(--font-body), system-ui, sans-serif;
+  font-size: 14pt;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+}
+
+.sheet-org-line {
+  font-size: 7.5pt;
+  color: var(--paper-ink-faint);
+  line-height: 1.35;
+}
+
+.sheet-title {
+  text-align: end;
+  min-width: 0;
+}
+
+.sheet-title h1 {
+  font-size: 15pt;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+.sheet-subtitle {
+  margin-top: 1.5mm;
+  font-size: 10pt;
+  color: var(--paper-ink-soft);
+}
+
+.sheet-filters {
+  margin-top: 1mm;
+  font-size: 8pt;
+  color: var(--paper-ink-soft);
+}
+
+.sheet-generated {
+  margin-top: 1mm;
+  font-size: 7.5pt;
+  color: var(--paper-ink-faint);
+}
+
+/* The one-line reminder at the top of a continuation page. A page four found
+   on a desk on its own should still say which report it came from. */
+.sheet-continued {
+  border-bottom: 0.5pt solid var(--paper-rule);
+  padding-bottom: 2mm;
+  margin-bottom: 4mm;
+  font-size: 8pt;
+  color: var(--paper-ink-faint);
+}
+
+/* --- tables ------------------------------------------------------------ */
+.sheet table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.sheet th {
+  border-bottom: 1pt solid var(--paper-rule);
+  color: var(--paper-ink-soft);
+  font-size: 7.5pt;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  padding: 1.6mm 1.5mm;
+  text-align: start;
+  text-transform: uppercase;
+}
+
+.sheet td {
+  border-bottom: 0.5pt solid var(--paper-rule-soft);
+  padding: 1.6mm 1.5mm;
+  vertical-align: top;
+}
+
+.sheet .num {
+  font-variant-numeric: tabular-nums;
+  text-align: end;
+  white-space: nowrap;
+}
+
+.sheet-muted {
+  color: var(--paper-ink-faint);
+}
+
+.sheet-sub {
+  display: block;
+  font-size: 7.5pt;
+  color: var(--paper-ink-faint);
+}
+
+.sheet-strong {
+  font-weight: 700;
+}
+
+/* A box a person writes in: the tick columns on a blank register. */
+.sheet-box {
+  display: inline-block;
+  width: 4mm;
+  height: 4mm;
+  border: 0.5pt solid var(--paper-rule);
+}
+
+/* --- totals, notes and the footer -------------------------------------- */
+.sheet-totals {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 4mm 10mm;
+  border-top: 1.5pt solid var(--paper-ink);
+  margin-top: 4mm;
+  padding-top: 3mm;
+}
+
+.sheet-totals > div {
+  display: flex;
+  align-items: baseline;
+  gap: 3mm;
+}
+
+.sheet-totals-label {
+  font-size: 9pt;
+  font-weight: 600;
+  color: var(--paper-ink-soft);
+}
+
+.sheet-totals-value {
+  font-family: var(--font-display), var(--font-body), system-ui, sans-serif;
+  font-size: 13pt;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.sheet-note {
+  margin-top: 3mm;
+  border-inline-start: 2pt solid var(--paper-ink);
+  padding-inline-start: 3mm;
+  font-size: 8pt;
+  color: var(--paper-ink-soft);
+}
+
+.sheet-section {
+  margin-top: 7mm;
+}
+
+.sheet-section > h2 {
+  border-bottom: 0.5pt solid var(--paper-rule);
+  padding-bottom: 1.5mm;
+  margin-bottom: 2.5mm;
+  font-size: 10.5pt;
+  font-weight: 700;
+}
+
+.sheet-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2mm 8mm;
+}
+
+.sheet-facts > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 6mm;
+  border-bottom: 0.5pt solid var(--paper-rule-soft);
+  padding-bottom: 1.2mm;
+}
+
+.sheet-facts dt {
+  color: var(--paper-ink-soft);
+}
+
+.sheet-facts dd {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.sheet-signature {
+  display: flex;
+  justify-content: space-between;
+  gap: 20mm;
+  margin-top: 12mm;
+}
+
+.sheet-signature > div {
+  flex: 1;
+  font-size: 8pt;
+  color: var(--paper-ink-faint);
+}
+
+.sheet-signature-line {
+  border-bottom: 0.5pt solid var(--paper-rule);
+  height: 12mm;
+  margin-bottom: 1.5mm;
+}
+
+.sheet-footer {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8mm;
+  border-top: 0.5pt solid var(--paper-rule);
+  margin-top: 4mm;
+  padding-top: 2mm;
+  font-size: 7.5pt;
+  color: var(--paper-ink-faint);
+}
+
+/* --- the bar above the paper, on screen only --------------------------- */
+.sheet-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 auto 16px;
+  max-width: 269mm;
+  font-size: 12px;
+  color: var(--paper-ink-soft);
+}
+
+.sheet-button,
+.sheet-button-quiet {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 5px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.sheet-button {
+  border: 1px solid var(--paper-rule);
+  background: #fff;
+  color: var(--paper-ink);
+}
+
+.sheet-button:hover {
+  background: var(--paper-band);
+}
+
+.sheet-button-quiet {
+  color: var(--paper-ink-soft);
+}
+
+.sheet-button-quiet:hover {
+  background: var(--paper-band);
+}
+
+/* --- print ------------------------------------------------------------- */
+@media print {
+  /* The size is set per document by PrintDocument, because a wide register
+     goes landscape and a student list does not. This is the fallback. */
+  @page {
+    size: A4;
+    margin: 14mm;
+  }
+
+  html,
+  body {
+    background: #fff !important;
+  }
+
+  /* Controls have no meaning on paper, and a "Print" button that appears in
+     the printout is the clearest possible sign nobody looked at one. */
+  .no-print {
+    display: none !important;
+  }
+
+  .sheet {
+    position: static;
+    background: #fff;
+    padding: 0;
+  }
+
+  /* The margin is `@page`'s job once we are actually printing; the padding
+     here is only the on-screen preview's way of showing it. */
+  .sheet-page {
+    width: auto !important;
+    min-height: 0 !important;
+    margin: 0;
+    padding: 0;
+    box-shadow: none;
+    break-after: page;
+  }
+
+  .sheet-page:last-child {
+    break-after: auto;
+  }
+
+  /* Belt and braces beside the measured pagination: no row is ever split,
+     and a header repeats if a browser breaks a table anyway. */
+  .sheet thead {
+    display: table-header-group;
+  }
+  .sheet tr,
+  .sheet .keep-together {
+    break-inside: avoid;
+  }
+
+  .sheet a {
+    color: inherit;
+    text-decoration: none;
   }
 }

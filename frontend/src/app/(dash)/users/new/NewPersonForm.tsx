@@ -18,8 +18,9 @@ import { useToast } from "@/components/ui/Toast";
 import { ApiFailure, api } from "@/lib/api";
 import { PRIOR_LEVELS, WILAYAS } from "@/lib/choices";
 import { manageableRoles } from "@/lib/manageable";
-import { ROLE_LABELS, type RoleCode } from "@/lib/permissions";
+import type { RoleCode } from "@/lib/permissions";
 import type { User } from "@/types";
+import { useDict, useFill } from "@/components/LocaleProvider";
 
 /**
  * Creating an account.
@@ -36,6 +37,8 @@ import type { User } from "@/types";
  * Fourteen inputs in one column is a form people abandon halfway down.
  */
 export function NewPersonForm() {
+  const d = useDict();
+  const t = useFill();
   const router = useRouter();
   const can = useCan();
   const toast = useToast();
@@ -76,8 +79,11 @@ export function NewPersonForm() {
       const created = await api.post<User>("/users", body);
       toast({
         tone: "ok",
-        title: "Account created",
-        description: `${created.full_name} is ${created.public_id}.`,
+        title: d.users.accountCreated,
+        description: t(d.phrases.createdAs, {
+          name: created.full_name,
+          id: created.public_id,
+        }),
       });
       router.push(`/users/${created.public_id}`);
       router.refresh();
@@ -96,26 +102,26 @@ export function NewPersonForm() {
     <form onSubmit={submit} className="flex max-w-3xl flex-col gap-5">
       <Card>
         <FieldSet
-          legend="Who they are"
-          description="A phone number or an email is how they are reached; the identifier is how they sign in."
+          legend={d.users.whoTheyAre}
+          description={d.users.contactHint}
         >
           <Select
-            label="Role"
+            label={d.users.role}
             required
             value={role}
             onChange={(event) => setRole(event.target.value as RoleCode)}
             options={roles.map((code) => ({
               value: code,
-              label: ROLE_LABELS[code],
+              label: d.roles[code],
             }))}
-            placeholder="Choose a role"
+            placeholder={d.users.chooseRole}
             error={errors.primary_role}
-            hint="Decides which dashboard they land on, and which fields below apply."
+            hint={d.users.roleHint}
             wrapperClassName="sm:col-span-2"
           />
 
           <Field
-            label="First name"
+            label={d.users.firstName}
             required
             autoComplete="off"
             value={values.first_name ?? ""}
@@ -123,7 +129,7 @@ export function NewPersonForm() {
             error={errors.first_name}
           />
           <Field
-            label="Last name"
+            label={d.users.lastName}
             required
             autoComplete="off"
             value={values.last_name ?? ""}
@@ -131,16 +137,16 @@ export function NewPersonForm() {
             error={errors.last_name}
           />
           <Field
-            label="Phone"
+            label={d.users.phone}
             icon="phone"
             autoComplete="off"
             value={values.phone ?? ""}
             onChange={(event) => set("phone", event.target.value)}
             error={errors.phone}
-            hint="Stored in international form. 0555 12 34 56 is fine."
+            hint={d.users.phoneHint}
           />
           <Field
-            label="Email"
+            label={d.users.email}
             type="email"
             icon="mail"
             autoComplete="off"
@@ -154,43 +160,43 @@ export function NewPersonForm() {
       {role === "STUDENT" ? (
         <Card className="animate-rise">
           <FieldSet
-            legend="Student record"
-            description="Everything here is optional and can be filled in later."
+            legend={d.users.studentRecord}
+            description={d.users.optionalLater}
           >
             <Field
-              label="Date of birth"
+              label={d.users.dateOfBirth}
               type="date"
               value={values.date_of_birth ?? ""}
               onChange={(event) => set("date_of_birth", event.target.value)}
               error={errors.date_of_birth}
               // Age is derived from this and never stored: a stored age is
               // wrong within a year.
-              hint="Age is worked out from this, not stored."
+              hint={d.users.dobHint}
             />
             <Select
-              label="Wilaya"
+              label={d.users.wilaya}
               options={WILAYAS}
               value={values.wilaya ?? ""}
               onChange={(event) => set("wilaya", event.target.value)}
               error={errors.wilaya}
-              placeholder="Not given"
+              placeholder={d.users.notGiven}
             />
             <Select
-              label="Prior level"
+              label={d.users.priorLevel}
               options={PRIOR_LEVELS}
               value={values.prior_level ?? ""}
               onChange={(event) => set("prior_level", event.target.value)}
               error={errors.prior_level}
-              placeholder="Not assessed"
+              placeholder={d.users.notAssessed}
             />
             <Field
-              label="Address"
+              label={d.users.address}
               value={values.address ?? ""}
               onChange={(event) => set("address", event.target.value)}
               error={errors.address}
             />
             <Field
-              label="Emergency contact"
+              label={d.users.emergencyContact}
               value={values.emergency_contact_name ?? ""}
               onChange={(event) =>
                 set("emergency_contact_name", event.target.value)
@@ -198,7 +204,7 @@ export function NewPersonForm() {
               error={errors.emergency_contact_name}
             />
             <Field
-              label="Emergency phone"
+              label={d.users.emergencyPhone}
               icon="phone"
               value={values.emergency_contact_phone ?? ""}
               onChange={(event) =>
@@ -212,22 +218,22 @@ export function NewPersonForm() {
 
       {role === "PROFESSOR" ? (
         <Card className="animate-rise">
-          <FieldSet legend="Professor record">
+          <FieldSet legend={d.users.professorRecord}>
             <Field
-              label="Specialisation"
+              label={d.users.specialisation}
               value={values.specialisation ?? ""}
               onChange={(event) => set("specialisation", event.target.value)}
               error={errors.specialisation}
             />
             <Field
-              label="Hired on"
+              label={d.users.hiredOn}
               type="date"
               value={values.hired_at ?? ""}
               onChange={(event) => set("hired_at", event.target.value)}
               error={errors.hired_at}
             />
             <Field
-              label="Qualifications"
+              label={d.users.qualifications}
               value={values.qualifications ?? ""}
               onChange={(event) => set("qualifications", event.target.value)}
               error={errors.qualifications}
@@ -252,9 +258,7 @@ export function NewPersonForm() {
           icon="user-plus"
           busy={busy}
           disabled={!role}
-        >
-          Create account
-        </Button>
+        >{d.users.createAccount}</Button>
       </FormActions>
     </form>
   );

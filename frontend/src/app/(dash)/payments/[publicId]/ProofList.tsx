@@ -12,6 +12,7 @@ import { useToast } from "@/components/ui/Toast";
 import { ApiFailure, api } from "@/lib/api";
 import { formatDateTime } from "@/lib/format";
 import type { PaymentProof } from "@/types";
+import { useDict, useFill } from "@/components/LocaleProvider";
 
 /**
  * Bank slips and receipts.
@@ -54,6 +55,8 @@ export function ProofList({
   proofs: PaymentProof[];
   publicId: string;
 }) {
+  const d = useDict();
+  const t = useFill();
   const router = useRouter();
   const can = useCan();
   const toast = useToast();
@@ -77,7 +80,7 @@ export function ProofList({
       setError(
         failure instanceof ApiFailure
           ? failure.message
-          : "Could not prepare the download.",
+          : d.payments.downloadFailed,
       );
     } finally {
       setBusy(null);
@@ -92,7 +95,7 @@ export function ProofList({
     // ceiling is bound into the signature.
     if (file.size > MAX_BYTES) {
       setError(
-        `${readableSize(file.size)} is over the 10 MB limit. A photo of a slip is usually well under it.`,
+        t(d.phrases.overSizeLimit, { size: readableSize(file.size) }),
       );
       return;
     }
@@ -131,8 +134,8 @@ export function ProofList({
 
       toast({
         tone: "ok",
-        title: "Proof attached",
-        description: "It is scanned before anyone can open it.",
+        title: d.payments.proofAttached,
+        description: d.payments.proofScanNote,
       });
       router.refresh();
     } catch (failure) {
@@ -141,7 +144,7 @@ export function ProofList({
           ? failure.message
           : failure instanceof Error
             ? failure.message
-            : "The upload did not complete.",
+            : d.payments.uploadIncomplete,
       );
     } finally {
       setUploading(false);
@@ -177,9 +180,7 @@ export function ProofList({
 
               <div className="flex shrink-0 items-center gap-2">
                 {proof.is_viewable ? (
-                  <Badge tone="ok" size="sm">
-                    Scanned
-                  </Badge>
+                  <Badge tone="ok" size="sm">{d.payments.scanned}</Badge>
                 ) : (
                   <StatusBadge status={proof.scan_status} size="sm" />
                 )}
@@ -190,7 +191,7 @@ export function ProofList({
                   title={
                     proof.is_viewable
                       ? undefined
-                      : "Still being checked. A file is not handed out before it is scanned."
+                      : d.payments.scanning
                   }
                   onClick={() => open(proof)}
                 >
@@ -201,9 +202,7 @@ export function ProofList({
           ))}
         </ul>
       ) : (
-        <p className="rounded-lg border border-dashed border-rule px-3 py-6 text-center text-[13px] text-ink-soft">
-          No proof attached.
-        </p>
+        <p className="rounded-lg border border-dashed border-rule px-3 py-6 text-center text-[13px] text-ink-soft">{d.payments.noProof}</p>
       )}
 
       {mayUpload ? (
@@ -224,7 +223,7 @@ export function ProofList({
             busy={uploading}
             onClick={() => input.current?.click()}
           >
-            {uploading ? "Uploading…" : "Attach a proof"}
+            {uploading ? d.payments.uploading : d.payments.attachProof}
           </Button>
           <p className="text-xs leading-relaxed text-ink-faint">
             JPEG, PNG or PDF, up to 10 MB. The file goes straight to private

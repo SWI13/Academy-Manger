@@ -6,11 +6,14 @@ import { Card, CardHeader } from "@/components/ui/Card";
 import { DescriptionList } from "@/components/ui/DescriptionList";
 import { Icon } from "@/components/ui/Icon";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { PrintButton } from "@/components/ui/PrintButton";
 import { Timeline, type TimelineEntry } from "@/components/ui/Timeline";
 import { getJson } from "@/lib/django";
 import { formatDate, formatDateTime, formatMoney } from "@/lib/format";
 import { cookieHeader } from "@/lib/session";
 import type { Payment } from "@/types";
+import type { Dict } from "@/lib/dict/en";
+import { getDict } from "@/lib/i18n.server";
 
 import { ApprovalPanel } from "./ApprovalPanel";
 import { ProofList } from "./ProofList";
@@ -22,6 +25,7 @@ export async function generateMetadata({ params }: Props) {
 }
 
 export default async function PaymentPage({ params }: Props) {
+  const d = await getDict();
   const { publicId } = await params;
   const payment = await getJson<Payment>(
     `/api/v1/payments/${publicId}/`,
@@ -37,7 +41,7 @@ export default async function PaymentPage({ params }: Props) {
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        back={{ href: "/payments", label: "Payments" }}
+        back={{ href: "/payments", label: d.nav.payments }}
         title={<span className="tabular">{payment.public_id}</span>}
         badge={<StatusBadge status={payment.status} />}
         eyebrow={
@@ -48,6 +52,12 @@ export default async function PaymentPage({ params }: Props) {
             </span>
           </>
         }
+        actions={
+          <PrintButton
+            href={`/print/receipt/${payment.public_id}`}
+            label={d.print.receiptTitle}
+          />
+        }
       />
 
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_22rem]">
@@ -56,7 +66,7 @@ export default async function PaymentPage({ params }: Props) {
           <Card>
             <div className="flex flex-wrap items-end justify-between gap-4">
               <div>
-                <p className="eyebrow">Amount</p>
+                <p className="eyebrow">{d.payments.amount}</p>
                 <p
                   className={`tabular mt-2 text-4xl font-semibold tracking-tight ${
                     payment.status === "APPROVED"
@@ -70,12 +80,12 @@ export default async function PaymentPage({ params }: Props) {
                 </p>
                 <p className="mt-2 text-sm text-ink-soft">
                   {payment.status === "PENDING"
-                    ? "Recorded, not yet approved. This is not counted as paid."
+                    ? d.payments.statePending
                     : payment.status === "APPROVED"
-                      ? "Approved and counted against the balance."
+                      ? d.payments.stateApproved
                       : payment.status === "REJECTED"
-                        ? "Rejected. Nothing was counted."
-                        : "Cancelled before any decision was made."}
+                        ? d.payments.stateRejected
+                        : d.payments.stateCancelled}
                 </p>
               </div>
 
@@ -83,7 +93,7 @@ export default async function PaymentPage({ params }: Props) {
                 href={`/courses/${payment.course_public_id}`}
                 className="group min-w-0 rounded-lg border border-rule bg-black/30 px-3.5 py-2.5 transition-colors hover:border-rule-strong"
               >
-                <span className="eyebrow block">Course</span>
+                <span className="eyebrow block">{d.filters.course}</span>
                 <span className="mt-1 block truncate text-sm font-medium text-ink group-hover:text-accent">
                   {payment.course_title}
                 </span>
@@ -95,11 +105,11 @@ export default async function PaymentPage({ params }: Props) {
           </Card>
 
           <Card>
-            <CardHeader title="Details" icon="receipt" divider className="mb-5" />
+            <CardHeader title={d.payments.details} icon="receipt" divider className="mb-5" />
             <DescriptionList
               items={[
                 {
-                  label: "Student",
+                  label: d.filters.student,
                   value: (
                     <>
                       {payment.student_name}{" "}
@@ -110,13 +120,13 @@ export default async function PaymentPage({ params }: Props) {
                   ),
                 },
                 {
-                  label: "Paid on",
+                  label: d.payments.paidOn,
                   value: (
                     <span className="tabular">{formatDate(payment.paid_on)}</span>
                   ),
                 },
                 {
-                  label: "Method",
+                  label: d.payments.method,
                   value: (
                     <span className="capitalize">
                       {payment.method.replace(/_/g, " ").toLowerCase()}
@@ -124,18 +134,18 @@ export default async function PaymentPage({ params }: Props) {
                   ),
                 },
                 {
-                  label: "Currency",
+                  label: d.payments.currency,
                   value: <span className="tabular">{payment.currency}</span>,
                 },
                 payment.rejection_reason
                   ? {
-                      label: "Reason for rejection",
+                      label: d.payments.reasonForRejection,
                       value: payment.rejection_reason,
                       wide: true,
                     }
                   : null,
                 payment.notes
-                  ? { label: "Notes", value: payment.notes, wide: true }
+                  ? { label: d.payments.notes, value: payment.notes, wide: true }
                   : null,
               ]}
             />
@@ -147,8 +157,8 @@ export default async function PaymentPage({ params }: Props) {
         {/* --- the side column: what happened, and the evidence -------- */}
         <div className="flex flex-col gap-5">
           <Card>
-            <CardHeader title="History" icon="clock" divider className="mb-5" />
-            <Timeline entries={historyOf(payment)} />
+            <CardHeader title={d.payments.history} icon="clock" divider className="mb-5" />
+            <Timeline entries={historyOf(payment, d)} />
             <p className="mt-5 border-t border-rule pt-4 text-xs leading-relaxed text-ink-faint">
               All three outcomes are final. There is no un-approve: a correction
               after the fact is a new record, so the ledger keeps both.
@@ -157,12 +167,12 @@ export default async function PaymentPage({ params }: Props) {
 
           <Card>
             <CardHeader
-              title="Proof"
+              title={d.payments.proof}
               icon="file"
               description={
                 payment.proofs.length
                   ? undefined
-                  : "Cash taken at the desk normally has none."
+                  : d.payments.noReferenceNote
               }
               divider
               className="mb-4"
@@ -183,13 +193,13 @@ export default async function PaymentPage({ params }: Props) {
  * way to show a record that is waiting for a person rather than one that is
  * finished.
  */
-function historyOf(payment: Payment): TimelineEntry[] {
+function historyOf(payment: Payment, d: Dict): TimelineEntry[] {
   const entries: TimelineEntry[] = [
     {
       id: "recorded",
       icon: "plus",
       tone: "info",
-      title: "Recorded",
+      title: d.grades.recorded,
       meta: formatDateTime(payment.created_at),
       body: payment.created_by_public_id ? (
         <span className="tabular">by {payment.created_by_public_id}</span>
@@ -234,9 +244,7 @@ function historyOf(payment: Payment): TimelineEntry[] {
       title: "Awaiting approval",
       body: (
         <span className="inline-flex items-center gap-1.5">
-          <Icon name="lock" size={13} />
-          Not the person who recorded it
-        </span>
+          <Icon name="lock" size={13} />{d.payments.notRecorder}</span>
       ),
       future: true,
     });

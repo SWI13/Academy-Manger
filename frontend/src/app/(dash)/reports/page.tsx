@@ -4,17 +4,23 @@ import { Card, SectionHeader } from "@/components/ui/Card";
 import { EmptyState, ErrorState } from "@/components/ui/EmptyState";
 import { Icon, type IconName } from "@/components/ui/Icon";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { PrintButton } from "@/components/ui/PrintButton";
 import { StatTile } from "@/components/ui/StatTile";
 import { Toolbar } from "@/components/ui/Toolbar";
 import { getJson } from "@/lib/django";
 import { formatMoney, formatNumber } from "@/lib/format";
 import type { SearchParams } from "@/lib/list";
 import { can, cookieHeader, getSession } from "@/lib/session";
+import type { Dict } from "@/lib/dict/en";
+import { getDict } from "@/lib/i18n.server";
 
 import { ExportPanel } from "./ExportPanel";
 import { ReportTable } from "./ReportTable";
 
-export const metadata = { title: "Reports" };
+export async function generateMetadata() {
+  const d = await getDict();
+  return { title: d.nav.reports };
+}
 
 type ReportResult = {
   report: string;
@@ -30,29 +36,31 @@ type ReportResult = {
  * reason reception and professors can reach a report at all: the enrolment
  * report carries no money, not even a course price.
  */
-const REPORTS = [
+function reportList(d: Dict) {
+  return [
   {
     name: "enrollments",
-    label: "Enrolments",
+    label: d.reports.enrollmentsTitle,
     icon: "graduation" as IconName,
     needs: "report.view_operational" as const,
-    blurb: "Head-count per course, by status. No money in it at all.",
+    blurb: d.reports.enrollmentsNote,
   },
   {
     name: "revenue",
-    label: "Revenue",
+    label: d.reports.revenueTitle,
     icon: "trend-up" as IconName,
     needs: "report.view_financial" as const,
-    blurb: "Money actually collected, by course. Approved payments only.",
+    blurb: d.reports.revenueNote,
   },
   {
     name: "outstanding",
-    label: "Outstanding",
+    label: d.reports.outstandingTitle,
     icon: "receipt" as IconName,
     needs: "report.view_financial" as const,
-    blurb: "What each live enrolment still owes.",
-  },
-];
+      blurb: d.reports.outstandingNote,
+    },
+  ];
+}
 
 const MONEY_TOTALS = new Set([
   "collected_minor",
@@ -66,17 +74,18 @@ export default async function ReportsPage({
 }: {
   searchParams: Promise<SearchParams>;
 }) {
+  const d = await getDict();
   const params = await searchParams;
   const session = await getSession();
   const cookie = await cookieHeader();
 
-  const available = REPORTS.filter((report) => can(session, report.needs));
+  const available = reportList(d).filter((report) => can(session, report.needs));
   if (!available.length) {
     return (
       <EmptyState
         icon="activity"
-        title="No reports for your role"
-        description="Reading a report is its own permission, granted separately from the screens the figures come from."
+        title={d.reports.noneForRole}
+        description={d.reports.noneForRoleBody}
       />
     );
   }
@@ -93,6 +102,11 @@ export default async function ReportsPage({
     if (value) filters[key] = value;
   }
 
+  // The two whole-institute documents carry income against expenditure, so
+  // they follow the same permission the revenue report does rather than the
+  // operational one reception and professors hold.
+  const seesFinancial = can(session, "report.view_financial");
+
   const query = new URLSearchParams(filters).toString();
   const result = await getJson<ReportResult>(
     `/api/v1/reports/${chosen.name}/${query ? `?${query}` : ""}`,
@@ -102,13 +116,34 @@ export default async function ReportsPage({
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        title="Reports"
-        lede="Every figure is read from the rows on each request — nothing is cached and nothing is stored, so the totals reconcile against the ledger by construction."
+        title={d.nav.reports}
+        lede={d.reports.lede}
+        actions={
+          seesFinancial ? (
+            <>
+              {/* The two documents that describe the whole institute rather
+                  than one of its collections. Behind report.view_financial,
+                  the same line the revenue report draws. */}
+              <PrintButton
+                href="/print/financial"
+                params={params}
+                filters={["from", "to"]}
+                label={d.print.financialSummary}
+              />
+              <PrintButton
+                href="/print/management"
+                params={params}
+                filters={["year", "month"]}
+                label={d.print.managementReport}
+              />
+            </>
+          ) : null
+        }
       />
 
       {/* --- which report ------------------------------------------- */}
       <nav
-        aria-label="Reports"
+        aria-label={d.nav.reports}
         className="scroll-slim -mx-1 flex gap-1 overflow-x-auto border-b border-rule px-1"
       >
         {available.map((report) => {
@@ -135,15 +170,15 @@ export default async function ReportsPage({
 
       <Toolbar
         filters={[
-          { param: "from", label: "From" },
-          { param: "to", label: "To" },
-          { param: "course", label: "Course", placeholder: "C-2026-001" },
+          { param: "from", label: d.filters.from },
+          { param: "to", label: d.filters.to },
+          { param: "course", label: d.filters.course, placeholder: "C-2026-001" },
           ...(chosen.name === "outstanding"
             ? [
                 {
                   param: "unpaid_only",
                   label: "Show",
-                  options: [{ value: "true", label: "Unsettled only" }],
+                  options: [{ value: "true", label: d.reports.unsettledOnly }],
                 },
               ]
             : []),
@@ -152,12 +187,12 @@ export default async function ReportsPage({
 
       {!result ? (
         <ErrorState
-          title="That report could not be run"
-          description="The query did not come back. Narrowing the date range and trying again usually settles it."
+          title={d.reports.errorTitle}
+          description={d.reports.errorBody}
         />
       ) : (
         <>
-          <section aria-label="Totals">
+          <section aria-label={d.reports.totals}>
             <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
               {Object.entries(result.totals).map(([key, value]) => (
                 <StatTile
@@ -182,7 +217,7 @@ export default async function ReportsPage({
 
           <section>
             <SectionHeader
-              title="Rows"
+              title={d.reports.rows}
               description={`${formatNumber(result.rows.length)} ${
                 result.rows.length === 1 ? "row" : "rows"
               } for these filters`}

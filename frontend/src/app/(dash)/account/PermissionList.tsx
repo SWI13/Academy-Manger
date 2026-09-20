@@ -1,5 +1,7 @@
 import { Icon } from "@/components/ui/Icon";
+import type { Dict } from "@/lib/dict/en";
 import type { Permission } from "@/lib/permissions";
+import { getDict } from "@/lib/i18n.server";
 
 /**
  * What this account may do, in the words a person would use.
@@ -12,112 +14,121 @@ import type { Permission } from "@/lib/permissions";
  * This is a description of the session, not a control over it. Granting and
  * revoking happen on a person's own page and only for an owner.
  */
-const GROUPS: { title: string; items: [Permission, string][] }[] = [
+const GROUPS: { title: keyof Dict["perms"]; items: Permission[] }[] = [
   {
-    title: "Users & access",
+    title: "groupUsers",
     items: [
-      ["user.view", "See people"],
-      ["user.create", "Create accounts"],
-      ["user.update", "Edit people"],
-      ["user.deactivate", "Deactivate accounts"],
-      ["user.reset_password", "Reset passwords"],
-      ["user.assign_role", "Assign roles"],
-      ["role.manage", "Manage roles and permissions"],
+      "user.view",
+      "user.create",
+      "user.update",
+      "user.deactivate",
+      "user.reset_password",
+      "user.assign_role",
+      "role.manage",
     ],
   },
   {
-    title: "Catalogue",
+    title: "groupCatalogue",
     items: [
-      ["course.view", "See courses"],
-      ["course.create", "Create courses"],
-      ["course.update", "Edit courses"],
-      ["course.archive", "Archive courses"],
-      ["course.assign_professor", "Assign professors"],
-      ["schedule.view", "See the schedule"],
-      ["schedule.manage", "Manage the schedule"],
+      "course.view",
+      "course.create",
+      "course.update",
+      "course.archive",
+      "course.assign_professor",
+      "schedule.view",
+      "schedule.manage",
     ],
   },
   {
-    title: "Enrolment",
+    title: "groupEnrollment",
     items: [
-      ["enrollment.view", "See enrolments"],
-      ["enrollment.create", "Enrol students"],
-      ["enrollment.update", "Edit enrolments"],
-      ["enrollment.cancel", "Cancel enrolments"],
+      "enrollment.view",
+      "enrollment.create",
+      "enrollment.update",
+      "enrollment.cancel",
+      "assessment.view",
+      "assessment.manage",
+      "score.view",
+      "score.enter",
+      "score.publish",
     ],
   },
   {
-    title: "Grades",
+    title: "groupAttendance",
+    items: ["attendance.view", "attendance.record"],
+  },
+  {
+    title: "groupMoney",
     items: [
-      ["assessment.view", "See assessments"],
-      ["assessment.manage", "Create and edit assessments"],
-      ["score.view", "See marks"],
-      ["score.enter", "Enter and correct marks"],
-      ["score.publish", "Publish marks to students"],
+      "payment.view",
+      "payment.create",
+      "payment.approve",
+      "payment.reject",
+      "payment.cancel",
+      "proof.upload",
+      "proof.view",
     ],
   },
   {
-    title: "Money",
+    title: "groupLogistics",
     items: [
-      ["payment.view", "See payments"],
-      ["payment.create", "Record payments"],
-      ["payment.approve", "Approve payments"],
-      ["payment.reject", "Reject payments"],
-      ["payment.cancel", "Cancel pending payments"],
-      ["proof.upload", "Attach payment proofs"],
-      ["proof.view", "Open payment proofs"],
+      "logistics.view",
+      "logistics.manage",
+      "expense.view",
+      "expense.manage",
     ],
   },
   {
-    title: "Engagement",
+    title: "groupEngagement",
     items: [
-      ["review.create", "Write a review"],
-      ["review.view", "See reviews"],
-      ["review.moderate", "Moderate reviews"],
-      ["notification.send", "Send notifications"],
+      "review.create",
+      "review.view",
+      "review.moderate",
+      "notification.send",
     ],
   },
   {
-    title: "Oversight",
+    title: "groupOversight",
     items: [
-      ["report.view_operational", "Run operational reports"],
-      ["report.view_financial", "Run financial reports"],
-      ["report.export", "Export reports"],
-      ["audit.view", "Read the audit log"],
-      ["settings.manage", "Manage system settings"],
+      "report.view_operational",
+      "report.view_financial",
+      "report.export",
+      "audit.view",
+      "settings.manage",
     ],
   },
 ];
 
-export function PermissionList({
+export async function PermissionList({
   permissions,
 }: {
   permissions: Permission[];
 }) {
+  const d = await getDict();
   const held = new Set<string>(permissions);
 
   const groups = GROUPS.map((group) => ({
     ...group,
-    items: group.items.filter(([code]) => held.has(code)),
+    items: group.items.filter((code) => held.has(code)),
   })).filter((group) => group.items.length);
 
   // Anything the catalogue grew that this list has not caught up with.
-  const known = new Set(GROUPS.flatMap((group) => group.items.map(([code]) => code)));
+  const known = new Set(GROUPS.flatMap((group) => group.items));
   const extra = permissions.filter((code) => !known.has(code));
 
   return (
     <div className="grid gap-x-8 gap-y-6 sm:grid-cols-2 lg:grid-cols-3">
       {groups.map((group) => (
         <div key={group.title}>
-          <p className="eyebrow">{group.title}</p>
+          <p className="eyebrow">{d.perms[group.title]}</p>
           <ul className="mt-2.5 flex flex-col gap-1.5">
-            {group.items.map(([code, label]) => (
+            {group.items.map((code) => (
               <li
                 key={code}
                 className="flex items-start gap-2 text-[13px] text-ink-soft"
               >
                 <Icon name="check" size={14} className="mt-0.5 shrink-0 text-ok" />
-                {label}
+                {d.perms[code] ?? code}
               </li>
             ))}
           </ul>
@@ -126,7 +137,7 @@ export function PermissionList({
 
       {extra.length ? (
         <div>
-          <p className="eyebrow">Also</p>
+          <p className="eyebrow">{d.common.more}</p>
           <ul className="mt-2.5 flex flex-col gap-1.5">
             {extra.map((code) => (
               <li

@@ -15,6 +15,7 @@ import { useToast } from "@/components/ui/Toast";
 import { ApiFailure, api } from "@/lib/api";
 import { formatDate } from "@/lib/format";
 import type { Review } from "@/types";
+import { useDict } from "@/components/LocaleProvider";
 
 /**
  * One review, and whatever this reader is allowed to do with it.
@@ -30,6 +31,7 @@ import type { Review } from "@/types";
  * confirmation on every button is a confirmation nobody reads.
  */
 export function ReviewCard({ review }: { review: Review }) {
+  const d = useDict();
   const router = useRouter();
   const can = useCan();
   const session = useSession();
@@ -59,18 +61,18 @@ export function ReviewCard({ review }: { review: Review }) {
         tone: status === "APPROVED" ? "ok" : "info",
         title:
           status === "APPROVED"
-            ? "Review approved"
+            ? d.reviews.approved
             : status === "HIDDEN"
-              ? "Review hidden"
-              : "Review rejected",
-        description: "The row, the decision and who made it are all kept.",
+              ? d.reviews.hidden
+              : d.reviews.rejected,
+        description: d.reviews.keptNote,
       });
       router.refresh();
     } catch (failure) {
       setError(
         failure instanceof ApiFailure
           ? failure.message
-          : "Could not reach the server.",
+          : d.ui.serverUnreachable,
       );
     } finally {
       setBusy(null);
@@ -121,19 +123,17 @@ export function ReviewCard({ review }: { review: Review }) {
       </header>
 
       {review.comment ? (
-        <blockquote className="mt-4 border-l-2 border-rule pl-3.5 text-sm leading-relaxed text-ink">
+        <blockquote className="mt-4 border-s-2 border-rule ps-3.5 text-sm leading-relaxed text-ink">
           {review.comment}
         </blockquote>
       ) : (
-        <p className="mt-4 text-sm italic text-ink-faint">No comment left.</p>
+        <p className="mt-4 text-sm italic text-ink-faint">{d.reviews.noComment}</p>
       )}
 
       {review.admin_response ? (
         <div className="mt-4 rounded-lg border border-accent-line bg-accent-soft px-3.5 py-3">
           <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.055em] text-accent">
-            <Icon name="mail" size={13} />
-            Reply from the institute
-          </p>
+            <Icon name="mail" size={13} />{d.reviews.replyFromInstitute}</p>
           <p className="mt-1.5 text-sm leading-relaxed text-ink">
             {review.admin_response}
           </p>
@@ -153,12 +153,12 @@ export function ReviewCard({ review }: { review: Review }) {
           {open ? (
             <div className="flex flex-col gap-3">
               <TextArea
-                label="Public reply"
+                label={d.reviews.publicReply}
                 optional
                 rows={2}
                 value={response}
                 onChange={(event) => setResponse(event.target.value)}
-                placeholder="Published alongside the review if you approve it."
+                placeholder={d.reviews.publicReplyNote}
               />
               <div className="flex flex-wrap gap-2">
                 <Button
@@ -167,9 +167,7 @@ export function ReviewCard({ review }: { review: Review }) {
                   icon="check"
                   busy={busy === "APPROVED"}
                   onClick={() => moderate("APPROVED")}
-                >
-                  Approve
-                </Button>
+                >{d.payments.approve}</Button>
                 <Button
                   size="sm"
                   icon="eye"
@@ -183,9 +181,7 @@ export function ReviewCard({ review }: { review: Review }) {
                   size="sm"
                   icon="close"
                   onClick={() => setRejecting(true)}
-                >
-                  Reject
-                </Button>
+                >{d.payments.reject}</Button>
                 <Button variant="quiet" size="sm" onClick={() => setOpen(false)}>
                   Back
                 </Button>
@@ -198,7 +194,7 @@ export function ReviewCard({ review }: { review: Review }) {
             </div>
           ) : (
             <Button size="sm" icon="shield" onClick={() => setOpen(true)}>
-              {review.status === "PENDING" ? "Moderate" : "Change decision"}
+              {review.status === "PENDING" ? d.reviews.moderate : d.reviews.changeDecision}
             </Button>
           )}
 
@@ -217,9 +213,9 @@ export function ReviewCard({ review }: { review: Review }) {
         busy={busy === "REJECTED"}
         tone="danger"
         icon="close"
-        title="Reject this review?"
-        confirmLabel="Reject review"
-        description="It stays in the record with your decision against it, and never appears publicly."
+        title={d.reviews.rejectTitle}
+        confirmLabel={d.reviews.rejectAction}
+        description={d.reviews.rejectBody}
       >
         <blockquote className="rounded-lg border border-rule bg-black/30 p-3 text-sm leading-relaxed text-ink-soft">
           {review.comment || "No comment left."}

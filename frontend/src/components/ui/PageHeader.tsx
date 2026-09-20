@@ -14,7 +14,7 @@ export function BackLink({ href, label }: { href: string; label: string }) {
   return (
     <Link
       href={href}
-      className="group -ml-1 inline-flex w-fit items-center gap-1.5 rounded-md px-1 py-0.5 text-sm text-ink-soft transition-colors hover:text-ink"
+      className="group -ms-1 inline-flex w-fit items-center gap-1.5 rounded-md px-1 py-0.5 text-sm text-ink-soft transition-colors hover:text-ink"
     >
       <Icon
         name="arrow-left"
@@ -63,7 +63,7 @@ export function PageHeader({
       {back ? (
         <Link
           href={back.href}
-          className="group -ml-1 inline-flex w-fit items-center gap-1.5 rounded-md px-1 py-0.5 text-sm text-ink-soft transition-colors hover:text-ink"
+          className="group -ms-1 inline-flex w-fit items-center gap-1.5 rounded-md px-1 py-0.5 text-sm text-ink-soft transition-colors hover:text-ink"
         >
           <Icon
             name="arrow-left"

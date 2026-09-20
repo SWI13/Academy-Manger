@@ -53,7 +53,7 @@ export function Vfx({ level = 2, fixed = false, className = "" }: Props) {
           {/* One pool of red, upper right, behind the page title. `fx-soft`
               marks it as a blur that a modest device may drop. */}
           <div
-            className={`fx-glow fx-soft absolute -right-40 -top-48 size-[34rem] rounded-full blur-3xl ${
+            className={`fx-glow fx-soft absolute -end-40 -top-48 size-[34rem] rounded-full blur-3xl ${
               level === 3 ? "animate-drift" : ""
             }`}
           />
@@ -64,10 +64,10 @@ export function Vfx({ level = 2, fixed = false, className = "" }: Props) {
         <>
           {/* A second, cooler pool low on the opposite side, so the field has
               a direction to it rather than one hot corner. */}
-          <div className="fx-glow-white fx-soft animate-drift-slow absolute -bottom-56 -left-40 size-[30rem] rounded-full blur-3xl" />
+          <div className="fx-glow-white fx-soft animate-drift-slow absolute -bottom-56 -start-40 size-[30rem] rounded-full blur-3xl" />
 
           {/* The beam. One diagonal band of light crossing the panel. */}
-          <div className="animate-beam absolute -inset-y-1/4 left-0 w-40 bg-gradient-to-r from-transparent via-white/[0.07] to-transparent" />
+          <div className="animate-beam absolute -inset-y-1/4 start-0 w-40 bg-gradient-to-r from-transparent via-white/[0.07] to-transparent" />
         </>
       ) : null}
 

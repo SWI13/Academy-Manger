@@ -3,6 +3,7 @@ import Link from "next/link";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Icon } from "@/components/ui/Icon";
 import type { Schedule } from "@/types";
+import { getDict } from "@/lib/i18n.server";
 
 /**
  * The week, as a time grid.
@@ -61,19 +62,20 @@ function tintFor(courseId: string): string {
   return TINTS[hash % TINTS.length];
 }
 
-export function WeekGrid({
+export async function WeekGrid({
   slots,
   showCourse = true,
 }: {
   slots: Schedule[];
   showCourse?: boolean;
 }) {
+  const d = await getDict();
   if (!slots.length) {
     return (
       <EmptyState
         icon="calendar"
-        title="No classes scheduled"
-        description="Your weekly schedule will appear here when a course is assigned."
+        title={d.schedules.emptyTitle}
+        description={d.schedules.emptyBody}
       />
     );
   }
@@ -106,7 +108,7 @@ export function WeekGrid({
           {DAYS.map((day) => (
             <div
               key={day.index}
-              className="border-l border-rule px-2 py-2.5 text-center"
+              className="border-s border-rule px-2 py-2.5 text-center"
             >
               <p className="eyebrow">
                 <span className="lg:hidden">{day.short}</span>
@@ -129,7 +131,7 @@ export function WeekGrid({
             {hours.map((hour) => (
               <span
                 key={hour}
-                className="tabular absolute right-2 -translate-y-1/2 text-[11px] text-ink-faint"
+                className="tabular absolute end-2 -translate-y-1/2 text-[11px] text-ink-faint"
                 style={{ top: ((hour - from) / 60) * ROW_HEIGHT }}
               >
                 {String(Math.floor(hour / 60)).padStart(2, "0")}:00
@@ -138,7 +140,7 @@ export function WeekGrid({
           </div>
 
           {DAYS.map((day) => (
-            <div key={day.index} className="relative border-l border-rule">
+            <div key={day.index} className="relative border-s border-rule">
               {hours.slice(0, -1).map((hour) => (
                 <span
                   key={hour}
@@ -221,13 +223,14 @@ export function WeekGrid({
  * The days are the same order and the slots the same rows; only the shape
  * changes.
  */
-export function WeekList({
+export async function WeekList({
   slots,
   showCourse = true,
 }: {
   slots: Schedule[];
   showCourse?: boolean;
 }) {
+  const d = await getDict();
   if (!slots.length) return null;
 
   const byDay = new Map<number, Schedule[]>();
@@ -279,7 +282,7 @@ export function WeekList({
                         {slot.course_title}
                       </Link>
                     ) : (
-                      <p className="text-sm font-medium text-ink">Class</p>
+                      <p className="text-sm font-medium text-ink">{d.schedules.session}</p>
                     )}
                     {slot.room ? (
                       <p className="flex items-center gap-1 truncate text-xs text-ink-faint">

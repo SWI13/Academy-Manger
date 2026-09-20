@@ -1,5 +1,6 @@
 import { EmptyState } from "@/components/ui/EmptyState";
 import { formatMoney, formatNumber } from "@/lib/format";
+import { getDict } from "@/lib/i18n.server";
 
 /**
  * A report's rows, whatever shape they are.
@@ -27,13 +28,14 @@ function render(key: string, value: unknown, currency: string) {
   return String(value);
 }
 
-export function ReportTable({ rows }: { rows: Record<string, unknown>[] }) {
+export async function ReportTable({ rows }: { rows: Record<string, unknown>[] }) {
+  const d = await getDict();
   if (!rows.length) {
     return (
       <EmptyState
         icon="activity"
-        title="Nothing matches these filters"
-        description="Widen the date range, or clear the course, to see more rows."
+        title={d.reports.emptyTitle}
+        description={d.reports.emptyBody}
       />
     );
   }
@@ -53,7 +55,7 @@ export function ReportTable({ rows }: { rows: Record<string, unknown>[] }) {
                 key={key}
                 scope="col"
                 className={`eyebrow whitespace-nowrap px-4 py-2.5 ${
-                  typeof rows[0][key] === "number" ? "text-right" : "text-left"
+                  typeof rows[0][key] === "number" ? "text-end" : "text-start"
                 }`}
               >
                 {heading(key)}
@@ -72,8 +74,8 @@ export function ReportTable({ rows }: { rows: Record<string, unknown>[] }) {
                   key={key}
                   className={`whitespace-nowrap px-4 py-3 ${
                     typeof row[key] === "number"
-                      ? "tabular text-right text-ink"
-                      : "text-left text-ink-soft"
+                      ? "tabular text-end text-ink"
+                      : "text-start text-ink-soft"
                   }`}
                 >
                   {render(key, row[key], String(row.currency ?? "DZD"))}

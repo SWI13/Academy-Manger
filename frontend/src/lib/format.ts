@@ -41,6 +41,30 @@ export function formatMoney(
   }
 }
 
+/**
+ * The days of the week, in the reader's language.
+ *
+ * Indexed the way Django's `weekday()` counts them - Monday is 0 - because
+ * that is what the schedule rows carry. 5 January 1970 was a Monday, which
+ * makes the arithmetic below a lookup rather than a table.
+ */
+export function weekdayName(
+  index: number,
+  locale = "fr-DZ",
+  style: "long" | "short" = "long",
+): string {
+  const monday = Date.UTC(1970, 0, 5);
+  const day = new Date(monday + index * 86400000);
+  try {
+    return new Intl.DateTimeFormat(locale, {
+      weekday: style,
+      timeZone: "UTC",
+    }).format(day);
+  } catch {
+    return String(index);
+  }
+}
+
 export function formatDate(
   value: string | null | undefined,
   locale = "fr-DZ",

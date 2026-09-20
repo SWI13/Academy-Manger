@@ -8,6 +8,7 @@ from drf_spectacular.utils import OpenApiParameter, extend_schema, extend_schema
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+from apps.core.printing import PrintableMixin, print_response_serializer, print_schema
 from apps.core.viewsets import ScopedModelViewSet
 from apps.courses.scoping import scope_schedules
 from apps.enrollments.models import Enrollment, EnrollmentStatus
@@ -16,6 +17,8 @@ from .models import Schedule, ScheduleStatus
 from .serializers import NextSessionSerializer, ScheduleSerializer, ScheduleWriteSerializer
 
 logger = logging.getLogger(__name__)
+
+SchedulePrintSerializer = print_response_serializer(ScheduleSerializer, "SchedulePrint")
 
 
 @extend_schema_view(
@@ -27,10 +30,21 @@ logger = logging.getLogger(__name__)
         ],
     )
 )
-class ScheduleViewSet(ScopedModelViewSet):
+@print_schema(SchedulePrintSerializer)
+class ScheduleViewSet(PrintableMixin, ScopedModelViewSet):
+    """
+    The weekly pattern: "Monday 17:00-19:00 in Room A-102".
+
+    A recurring slot rather than dated sessions (architecture D-3), resolved
+    into concrete dates on demand. A register for one particular day is an
+    attendance session, not a schedule row.
+    """
+
     queryset = Schedule.objects.all().select_related("course", "professor")
 
     required_permissions = {
+        # Printing is exactly as wide a door as reading, never wider.
+        "printable": "schedule.view",
         "list": "schedule.view",
         "retrieve": "schedule.view",
         "create": "schedule.manage",

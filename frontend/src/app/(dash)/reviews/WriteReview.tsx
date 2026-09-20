@@ -10,6 +10,7 @@ import { Icon } from "@/components/ui/Icon";
 import { useToast } from "@/components/ui/Toast";
 import { ApiFailure, api } from "@/lib/api";
 import type { Enrollment } from "@/types";
+import { useDict, useFill } from "@/components/LocaleProvider";
 
 /**
  * Writing a review, for the courses that can actually be reviewed.
@@ -30,6 +31,8 @@ import type { Enrollment } from "@/types";
  * you can review" right up until it does not.
  */
 export function WriteReview({ options }: { options: Enrollment[] }) {
+  const d = useDict();
+  const t = useFill();
   const router = useRouter();
   const toast = useToast();
   const [enrollment, setEnrollment] = useState("");
@@ -64,7 +67,7 @@ export function WriteReview({ options }: { options: Enrollment[] }) {
       setEnrollment("");
       toast({
         tone: "ok",
-        title: "Review submitted",
+        title: d.reviews.submitted,
         description: "A moderator reads it before anyone else sees it.",
       });
       // The server recomputes which enrolments are still reviewable, so the
@@ -74,7 +77,7 @@ export function WriteReview({ options }: { options: Enrollment[] }) {
       setError(
         failure instanceof ApiFailure
           ? failure.message
-          : "Could not reach the server.",
+          : d.ui.serverUnreachable,
       );
     } finally {
       setBusy(false);
@@ -85,19 +88,19 @@ export function WriteReview({ options }: { options: Enrollment[] }) {
     <Card as="div">
       <form onSubmit={submit} className="flex flex-col gap-4">
         <CardHeader
-          title="Review a course"
+          title={d.reviews.writeTitle}
           icon="star"
-          description="Your professor never learns who wrote it."
+          description={d.reviews.writeNote}
           divider
         />
 
         <div className="grid gap-4 sm:grid-cols-2">
           <Select
-            label="Course"
+            label={d.filters.course}
             required
             value={enrollment}
             onChange={(event) => setEnrollment(event.target.value)}
-            placeholder="Choose one"
+            placeholder={d.ui.chooseOne}
             options={options.map((row) => ({
               value: String(row.id),
               label: `${row.course_title} (${row.course_public_id})`,
@@ -105,10 +108,10 @@ export function WriteReview({ options }: { options: Enrollment[] }) {
           />
 
           <div className="flex min-w-0 flex-col gap-1.5">
-            <span className="text-[13px] font-medium text-ink">Rating</span>
+            <span className="text-[13px] font-medium text-ink">{d.reviews.rating}</span>
             <div
               role="radiogroup"
-              aria-label="Rating"
+              aria-label={d.reviews.rating}
               className="flex h-9 items-center gap-1"
             >
               {[1, 2, 3, 4, 5].map((star) => (
@@ -117,7 +120,7 @@ export function WriteReview({ options }: { options: Enrollment[] }) {
                   type="button"
                   role="radio"
                   aria-checked={rating === star}
-                  aria-label={`${star} out of 5`}
+                  aria-label={t(d.phrases.outOfFive, { count: star })}
                   onClick={() => setRating(star)}
                   className="rounded p-0.5 transition-transform hover:scale-110"
                 >
@@ -135,20 +138,20 @@ export function WriteReview({ options }: { options: Enrollment[] }) {
                   </svg>
                 </button>
               ))}
-              <span className="tabular ml-1.5 text-sm text-ink-soft">
+              <span className="tabular ms-1.5 text-sm text-ink-soft">
                 {rating}/5
               </span>
             </div>
           </div>
 
           <TextArea
-            label="Comment"
+            label={d.grades.comment}
             optional
             rows={3}
             maxLength={4000}
             value={comment}
             onChange={(event) => setComment(event.target.value)}
-            placeholder="What was good, what could be better."
+            placeholder={d.reviews.commentPlaceholder}
             wrapperClassName="sm:col-span-2"
           />
         </div>
@@ -162,9 +165,7 @@ export function WriteReview({ options }: { options: Enrollment[] }) {
             icon="check"
             busy={busy}
             disabled={!enrollment}
-          >
-            Submit review
-          </Button>
+          >{d.reviews.submit}</Button>
           <p className="text-[13px] text-ink-faint">
             It is read by a moderator before anyone else sees it. You can change
             it until then.

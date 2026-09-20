@@ -14,6 +14,7 @@ from rest_framework.views import APIView
 from apps.audit.models import AuditAction
 from apps.audit.services import record
 from apps.core import storage
+from apps.core.printing import PrintableMixin, print_response_serializer, print_schema
 from apps.core.viewsets import ScopedModelViewSet
 from apps.courses.scoping import scope_enrollments
 from apps.enrollments.models import Enrollment
@@ -36,6 +37,8 @@ from .services import TransitionError, approve, cancel, enrollment_balance, reje
 
 logger = logging.getLogger(__name__)
 
+PaymentPrintSerializer = print_response_serializer(PaymentSerializer, "PaymentPrint")
+
 
 def _transition_error(exc: TransitionError):
     return Response(
@@ -56,7 +59,8 @@ def _transition_error(exc: TransitionError):
         ],
     )
 )
-class PaymentViewSet(ScopedModelViewSet):
+@print_schema(PaymentPrintSerializer)
+class PaymentViewSet(PrintableMixin, ScopedModelViewSet):
     """
     No PATCH and no DELETE.
 
@@ -83,6 +87,8 @@ class PaymentViewSet(ScopedModelViewSet):
     http_method_names = ["get", "post", "patch", "delete", "head", "options"]
 
     required_permissions = {
+        # Printing is exactly as wide a door as reading, never wider.
+        "printable": "payment.view",
         "list": "payment.view",
         "retrieve": "payment.view",
         "create": "payment.create",
@@ -147,6 +153,12 @@ class PaymentViewSet(ScopedModelViewSet):
             queryset = queryset.filter(paid_on__lte=end)
 
         return queryset
+
+    def get_print_queryset(self):
+        # Ascending on paper. An income report anybody can follow down the
+        # page runs the way the period ran, which is the opposite of a screen
+        # where the newest receipt belongs at the top.
+        return self.filter_queryset(self.get_queryset()).order_by("paid_on", "created_at")
 
     def scope_queryset(self, queryset, user):
         return scope_payments(queryset, user)

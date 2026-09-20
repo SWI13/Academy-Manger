@@ -9,6 +9,7 @@ import { getJson } from "@/lib/django";
 import { formatDate, formatMoney } from "@/lib/format";
 import { can, cookieHeader, getSession } from "@/lib/session";
 import type { Enrollment, Payment } from "@/types";
+import { getDict } from "@/lib/i18n.server";
 
 import { BalanceCard, type Balance } from "./BalanceCard";
 import { EnrollmentPayments } from "./EnrollmentPayments";
@@ -20,6 +21,7 @@ export async function generateMetadata({ params }: Props) {
 }
 
 export default async function EnrollmentPage({ params }: Props) {
+  const d = await getDict();
   const { id } = await params;
   const cookie = await cookieHeader();
 
@@ -52,7 +54,7 @@ export default async function EnrollmentPage({ params }: Props) {
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        back={{ href: "/enrollments", label: "Enrolments" }}
+        back={{ href: "/enrollments", label: d.nav.enrollments }}
         title={student.full_name}
         eyebrow={
           <span className="tabular">
@@ -66,13 +68,9 @@ export default async function EnrollmentPage({ params }: Props) {
             <LinkButton
               href={`/courses/${enrollment.course_public_id}`}
               icon="book"
-            >
-              Course
-            </LinkButton>
+            >{d.filters.course}</LinkButton>
             {can(session, "user.view") ? (
-              <LinkButton href={`/users/${student.public_id}`} icon="user">
-                Profile
-              </LinkButton>
+              <LinkButton href={`/users/${student.public_id}`} icon="user">{d.enrollments.profile}</LinkButton>
             ) : null}
           </>
         }
@@ -80,8 +78,8 @@ export default async function EnrollmentPage({ params }: Props) {
 
       <Card>
         <CardHeader
-          title="Enrolment"
-          description="One student, one course — and everything attached to that pairing."
+          title={d.payments.enrollment}
+          description={d.enrollments.detailLede}
           icon="graduation"
           divider
           className="mb-5"
@@ -89,7 +87,7 @@ export default async function EnrollmentPage({ params }: Props) {
         <DescriptionList
           items={[
             {
-              label: "Enrolled",
+              label: d.enrollments.enrolled,
               value: (
                 <span className="tabular">{formatDate(enrollment.enrolled_at)}</span>
               ),
@@ -97,16 +95,16 @@ export default async function EnrollmentPage({ params }: Props) {
             student.age !== null && student.age !== undefined
               ? { label: "Age", value: String(student.age) }
               : null,
-            student.wilaya ? { label: "Wilaya", value: student.wilaya } : null,
+            student.wilaya ? { label: d.users.wilaya, value: student.wilaya } : null,
             student.prior_level
-              ? { label: "Prior level", value: student.prior_level }
+              ? { label: d.users.priorLevel, value: student.prior_level }
               : null,
             student.phone
-              ? { label: "Phone", value: <span className="tabular">{student.phone}</span> }
+              ? { label: d.users.phone, value: <span className="tabular">{student.phone}</span> }
               : null,
             showsMoney
               ? {
-                  label: "Price agreed at enrolment",
+                  label: d.enrollments.priceAgreed,
                   value: (
                     <span className="tabular font-medium">
                       {formatMoney(
@@ -118,7 +116,7 @@ export default async function EnrollmentPage({ params }: Props) {
                 }
               : null,
             enrollment.notes
-              ? { label: "Notes", value: enrollment.notes, wide: true }
+              ? { label: d.payments.notes, value: enrollment.notes, wide: true }
               : null,
           ]}
         />

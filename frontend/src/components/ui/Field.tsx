@@ -1,5 +1,7 @@
 "use client";
 
+import { useDict } from "@/components/LocaleProvider";
+
 import type {
   InputHTMLAttributes,
   ReactNode,
@@ -53,6 +55,7 @@ function Shell({
   children: ReactNode;
   className?: string;
 }) {
+  const d = useDict();
   return (
     <div className={`flex min-w-0 flex-col gap-1.5 ${className}`}>
       <label
@@ -66,7 +69,7 @@ function Shell({
           </span>
         ) : null}
         {optional ? (
-          <span className="text-xs font-normal text-ink-faint">optional</span>
+          <span className="text-xs font-normal text-ink-faint">{d.common.optional}</span>
         ) : null}
       </label>
 
@@ -130,7 +133,7 @@ export function Field({
           <Icon
             name={icon}
             size={16}
-            className="pointer-events-none absolute left-3 text-ink-faint"
+            className="pointer-events-none absolute start-3 text-ink-faint"
           />
         ) : null}
         <input
@@ -140,12 +143,12 @@ export function Field({
           aria-describedby={
             error ? `${id}-error` : hint ? `${id}-hint` : undefined
           }
-          className={`${CONTROL} ${ring(error)} h-9 ${icon ? "pl-9" : ""} ${
-            suffix ? "pr-14" : ""
+          className={`${CONTROL} ${ring(error)} h-9 ${icon ? "ps-9" : ""} ${
+            suffix ? "pe-14" : ""
           } ${className}`}
         />
         {suffix ? (
-          <span className="tabular pointer-events-none absolute right-3 text-xs font-medium text-ink-faint">
+          <span className="tabular pointer-events-none absolute end-3 text-xs font-medium text-ink-faint">
             {suffix}
           </span>
         ) : null}
@@ -196,7 +199,7 @@ export function Select({
           aria-describedby={
             error ? `${id}-error` : hint ? `${id}-hint` : undefined
           }
-          className={`${CONTROL} ${ring(error)} h-9 appearance-none pr-9 ${className}`}
+          className={`${CONTROL} ${ring(error)} h-9 appearance-none pe-9 ${className}`}
         >
           <option value="">{placeholder}</option>
           {options.map((option) => (
@@ -208,7 +211,7 @@ export function Select({
         <Icon
           name="chevron-down"
           size={15}
-          className="pointer-events-none absolute right-3 text-ink-faint"
+          className="pointer-events-none absolute end-3 text-ink-faint"
         />
       </div>
     </Shell>

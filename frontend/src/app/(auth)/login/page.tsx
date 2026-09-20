@@ -1,13 +1,18 @@
 import { redirect } from "next/navigation";
 
 import { Icon, type IconName } from "@/components/ui/Icon";
+import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
 import { Logo } from "@/components/ui/Logo";
 import { Vfx } from "@/components/ui/Vfx";
+import type { Dict } from "@/lib/dict/en";
+import { getDict } from "@/lib/i18n.server";
 import { getSession } from "@/lib/session";
 
 import { LoginForm } from "./LoginForm";
 
-export const metadata = { title: "Sign in" };
+export async function generateMetadata() {
+  return { title: (await getDict()).login.title };
+}
 
 /**
  * The only page anyone reaches without a session, and the only one running
@@ -26,39 +31,42 @@ export const metadata = { title: "Sign in" };
  */
 
 /** The trades, as they appear on the official extended lockup. */
-const DISCIPLINES: { icon: IconName; label: string }[] = [
-  { icon: "wrench", label: "Mechanics" },
-  { icon: "code", label: "IT & Coding" },
-  { icon: "bolt", label: "Electrical" },
-  { icon: "car", label: "Automotive" },
-  { icon: "network", label: "Networking" },
+const DISCIPLINES: { icon: IconName; key: keyof Dict["login"]["trades"] }[] = [
+  { icon: "wrench", key: "mechanics" },
+  { icon: "code", key: "it" },
+  { icon: "bolt", key: "electrical" },
+  { icon: "car", key: "automotive" },
+  { icon: "network", key: "networking" },
 ];
 
-const PRINCIPLES: { icon: IconName; title: string; body: string }[] = [
-  {
-    icon: "shield",
-    title: "Permissions, not hidden buttons",
-    body: "Five roles share one set of screens. What differs is which columns arrive — an instructor's roster carries no price, because the price is never sent.",
-  },
-  {
-    icon: "wallet",
-    title: "Recorded by one, approved by another",
-    body: "Whoever takes a payment cannot be the one who confirms it arrived. Approved entries are final; a correction is a new record, never an edit.",
-  },
-  {
-    icon: "clock",
-    title: "Nothing is deleted",
-    body: "Accounts are deactivated, enrolments cancelled, reviews hidden. The trail of who did what, and when, survives all of it.",
-  },
+const PRINCIPLES: {
+  icon: IconName;
+  title: keyof Dict["login"]["principles"];
+  body: keyof Dict["login"]["principles"];
+}[] = [
+  { icon: "shield", title: "permissionsTitle", body: "permissionsBody" },
+  { icon: "wallet", title: "moneyTitle", body: "moneyBody" },
+  { icon: "clock", title: "trailTitle", body: "trailBody" },
 ];
 
 export default async function LoginPage() {
   // Already signed in? There is nothing to do here.
   if (await getSession()) redirect("/dashboard");
 
+  const d = await getDict();
+
   return (
     <main className="relative isolate flex min-h-svh flex-col overflow-hidden lg:flex-row">
       <Vfx level={3} />
+
+      {/*
+        The one control on this page that is not the form. Somebody who cannot
+        read the language currently on screen needs to change it *before* they
+        sign in, not from a menu inside the application.
+      */}
+      <div className="absolute end-4 top-4 z-10 sm:end-6 sm:top-6">
+        <LanguageSwitcher variant="bare" />
+      </div>
 
       {/* ================= the academy =============================== */}
       <section className="relative flex flex-col justify-between gap-10 px-6 pb-8 pt-10 sm:px-10 lg:w-[54%] lg:px-16 lg:py-16">
@@ -86,7 +94,7 @@ export default async function LoginPage() {
         {/* --- the claim ----------------------------------------------- */}
         <div className="hidden lg:block">
           <h1 className="animate-step max-w-xl text-[38px] font-semibold leading-[1.15] text-white">
-            Every figure on your screen is one the server decided you may see.
+            {d.login.claim}
           </h1>
 
           <span
@@ -109,9 +117,11 @@ export default async function LoginPage() {
                   <Icon name={point.icon} size={18} />
                 </span>
                 <div>
-                  <p className="text-sm font-semibold text-ink">{point.title}</p>
+                  <p className="text-sm font-semibold text-ink">
+                    {d.login.principles[point.title]}
+                  </p>
                   <p className="mt-1 text-[13px] leading-relaxed text-ink-soft">
-                    {point.body}
+                    {d.login.principles[point.body]}
                   </p>
                 </div>
               </li>
@@ -128,18 +138,18 @@ export default async function LoginPage() {
           <ul className="flex flex-wrap items-center gap-x-5 gap-y-3 lg:gap-x-7">
             {DISCIPLINES.map((trade, index) => (
               <li
-                key={trade.label}
+                key={trade.key}
                 className="animate-step flex items-center gap-2 text-ink-faint"
                 style={{ "--step": index } as React.CSSProperties}
               >
                 <Icon name={trade.icon} size={16} className="text-accent" />
-                <span className="eyebrow text-ink-soft">{trade.label}</span>
+                <span className="eyebrow text-ink-soft">
+                  {d.login.trades[trade.key]}
+                </span>
               </li>
             ))}
           </ul>
-          <p className="eyebrow mt-5 text-ink-faint">
-            Skills today, success tomorrow
-          </p>
+          <p className="eyebrow mt-5 text-ink-faint">{d.login.tagline}</p>
         </div>
       </section>
 
@@ -148,11 +158,10 @@ export default async function LoginPage() {
         <div className="glass-strong fx-brackets relative w-full max-w-[26rem] rounded-xl border border-rule p-6 sm:p-8">
           <header className="mb-7">
             <h2 className="text-[30px] font-semibold leading-none text-white">
-              Sign in
+              {d.login.title}
             </h2>
             <p className="mt-3 text-[14.5px] leading-relaxed text-ink-soft">
-              Your identifier is the one printed on your card. Accounts are
-              issued by the academy — there is no public registration.
+              {d.login.lede}
             </p>
           </header>
 
@@ -161,8 +170,7 @@ export default async function LoginPage() {
           <div className="mt-7 border-t border-rule pt-5">
             <p className="flex items-start gap-2.5 text-[13px] leading-relaxed text-ink-faint">
               <Icon name="key" size={15} className="mt-0.5 shrink-0" />
-              Lost your password? Ask reception to reset it — they can issue a
-              new one, but nobody can read your old one.
+              {d.login.lostPassword}
             </p>
           </div>
         </div>

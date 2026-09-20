@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { useDict } from "@/components/LocaleProvider";
 import { Avatar } from "@/components/ui/Avatar";
 import {
   Dropdown,
@@ -12,7 +13,7 @@ import {
 } from "@/components/ui/Dropdown";
 import { Icon } from "@/components/ui/Icon";
 import { api } from "@/lib/api";
-import { ROLE_LABELS, type RoleCode } from "@/lib/permissions";
+import type { RoleCode } from "@/lib/permissions";
 
 type Props = {
   fullName: string;
@@ -21,6 +22,7 @@ type Props = {
 };
 
 export function UserMenu({ fullName, publicId, role }: Props) {
+  const d = useDict();
   const router = useRouter();
   const [busy, setBusy] = useState(false);
 
@@ -40,7 +42,7 @@ export function UserMenu({ fullName, publicId, role }: Props) {
 
   return (
     <Dropdown
-      label="Account"
+      label={d.shell.accountMenu}
       trigger={({ open, onClick, id, ref }) => (
         <button
           ref={ref}
@@ -49,15 +51,15 @@ export function UserMenu({ fullName, publicId, role }: Props) {
           onClick={onClick}
           aria-haspopup="menu"
           aria-expanded={open}
-          className="flex items-center gap-2 rounded-lg p-1 pr-1.5 transition-colors hover:bg-white/[0.06]"
+          className="flex items-center gap-2 rounded-lg p-1 pe-1.5 transition-colors hover:bg-white/[0.06]"
         >
           <Avatar name={fullName} seed={publicId} size="sm" />
-          <span className="hidden min-w-0 text-left sm:block">
+          <span className="hidden min-w-0 text-start sm:block">
             <span className="block max-w-36 truncate text-[13px] font-medium leading-tight text-ink">
               {fullName}
             </span>
             <span className="block text-[11px] leading-tight text-ink-faint">
-              {ROLE_LABELS[role]}
+              {d.roles[role]}
             </span>
           </span>
           <Icon
@@ -75,7 +77,7 @@ export function UserMenu({ fullName, publicId, role }: Props) {
         <div className="min-w-0">
           <p className="truncate text-sm font-medium text-ink">{fullName}</p>
           <p className="tabular truncate text-xs text-ink-faint">
-            {publicId} · {ROLE_LABELS[role]}
+            {publicId} · {d.roles[role]}
           </p>
         </div>
       </div>
@@ -86,25 +88,25 @@ export function UserMenu({ fullName, publicId, role }: Props) {
         href="/account"
         role="menuitem"
         data-menu-item
-        className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-sm text-ink-soft transition-colors hover:bg-white/[0.06] hover:text-ink"
+        className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-start text-sm text-ink-soft transition-colors hover:bg-white/[0.06] hover:text-ink"
       >
         <Icon name="user" size={16} />
-        Your account
+        {d.shell.yourAccount}
       </Link>
       <Link
         href="/notifications"
         role="menuitem"
         data-menu-item
-        className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-sm text-ink-soft transition-colors hover:bg-white/[0.06] hover:text-ink"
+        className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-start text-sm text-ink-soft transition-colors hover:bg-white/[0.06] hover:text-ink"
       >
         <Icon name="bell" size={16} />
-        Notifications
+        {d.shell.notifications}
       </Link>
 
       <MenuSeparator />
 
       <MenuItem icon="logout" tone="danger" onClick={signOut} disabled={busy}>
-        {busy ? "Signing out…" : "Sign out"}
+        {busy ? d.shell.signingOut : d.shell.signOut}
       </MenuItem>
     </Dropdown>
   );

@@ -7,6 +7,8 @@ import { StatusBadge } from "@/components/ui/Badge";
 import type { Column } from "@/components/ui/DataTable";
 import { Icon } from "@/components/ui/Icon";
 import { formatDate, formatMoney } from "@/lib/format";
+import type { Dict } from "@/lib/dict/en";
+import { fill } from "@/lib/i18n";
 import type { Permission } from "@/lib/permissions";
 import type { Payment } from "@/types";
 
@@ -24,6 +26,7 @@ import type { Payment } from "@/types";
  */
 export function paymentColumns(
   can: (permission: Permission) => boolean,
+  d: Dict,
 ): Column<Payment>[] {
   const seesEveryone = can("payment.create");
 
@@ -35,7 +38,7 @@ export function paymentColumns(
   if (seesEveryone) {
     columns.push({
       key: "student",
-      header: "Student",
+      header: d.filters.student,
       lead: true,
       cell: (payment) => (
         <PersonCell
@@ -48,7 +51,7 @@ export function paymentColumns(
 
   columns.push({
     key: "public_id",
-    header: "Reference",
+    header: d.payments.reference,
     lead: !seesEveryone,
     cell: (payment) => (
       <Link
@@ -60,7 +63,7 @@ export function paymentColumns(
           <Icon
             name="file"
             size={13}
-            title={`${payment.proofs.length} proof attached`}
+            title={fill(d.phrases.proofsAttached, { count: payment.proofs.length })}
             className="text-ink-faint"
           />
         ) : null}
@@ -71,7 +74,7 @@ export function paymentColumns(
   columns.push(
     {
       key: "course",
-      header: "Course",
+      header: d.filters.course,
       secondary: true,
       cell: (payment) => (
         <div className="min-w-0">
@@ -84,7 +87,7 @@ export function paymentColumns(
     },
     {
       key: "amount",
-      header: "Amount",
+      header: d.payments.amount,
       numeric: true,
       cell: (payment) => (
         // Pending money is amber wherever it appears. A ledger that renders a
@@ -105,7 +108,7 @@ export function paymentColumns(
     },
     {
       key: "paid_on",
-      header: "Paid on",
+      header: d.payments.paidOn,
       secondary: true,
       cell: (payment) => (
         <span className="tabular whitespace-nowrap text-ink-soft">
@@ -115,7 +118,7 @@ export function paymentColumns(
     },
     {
       key: "method",
-      header: "Method",
+      header: d.payments.method,
       secondary: true,
       cell: (payment) => (
         <span className="capitalize text-ink-soft">
@@ -125,7 +128,7 @@ export function paymentColumns(
     },
     {
       key: "status",
-      header: "Status",
+      header: d.columns.status,
       trail: true,
       width: "1%",
       cell: (payment) => <StatusBadge status={payment.status} />,
@@ -138,7 +141,7 @@ export function paymentColumns(
   if (can("payment.approve")) {
     columns.push({
       key: "handled",
-      header: "Recorded / decided",
+      header: d.payments.recordedDecided,
       secondary: true,
       cell: (payment) => (
         <div className="tabular text-xs">

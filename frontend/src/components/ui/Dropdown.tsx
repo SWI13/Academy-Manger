@@ -87,7 +87,7 @@ export function Dropdown({
           aria-labelledby={id}
           onClick={() => setOpen(false)}
           className={`animate-pop absolute top-[calc(100%+6px)] z-50 min-w-56 overflow-hidden rounded-xl border border-rule glass-strong p-1 ${
-            align === "end" ? "right-0" : "left-0"
+            align === "end" ? "end-0" : "start-0"
           }`}
         >
           {children}
@@ -118,7 +118,7 @@ export function MenuItem({
       data-menu-item
       disabled={disabled}
       onClick={onClick}
-      className={`flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-sm transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+      className={`flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-start text-sm transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
         tone === "danger"
           ? "text-bad hover:bg-bad-wash"
           : "text-ink-soft hover:bg-white/[0.06] hover:text-ink"

@@ -13,6 +13,7 @@ import { useToast } from "@/components/ui/Toast";
 import { ApiFailure, api } from "@/lib/api";
 import { formatDateTime } from "@/lib/format";
 import type { Assessment } from "@/types";
+import { useDict } from "@/components/LocaleProvider";
 
 /**
  * Releasing marks to students.
@@ -35,6 +36,7 @@ export function PublishPanel({
   assessment: Assessment;
   unmarked: number;
 }) {
+  const d = useDict();
   const router = useRouter();
   const can = useCan();
   const toast = useToast();
@@ -48,9 +50,7 @@ export function PublishPanel({
     return (
       <Card className="border-ok-line bg-ok-wash">
         <div className="flex flex-wrap items-center gap-3">
-          <Badge tone="ok" dot>
-            Published
-          </Badge>
+          <Badge tone="ok" dot>{d.courses.published}</Badge>
           <p className="text-sm text-ink-soft">
             Released {formatDateTime(assessment.published_at)}. Students can see
             their own mark.
@@ -72,15 +72,15 @@ export function PublishPanel({
       setAsking(false);
       toast({
         tone: "ok",
-        title: "Marks published",
-        description: "Everyone with a mark has been notified.",
+        title: d.audit.actions.marksPublished,
+        description: d.grades.marksPublishedNote,
       });
       router.refresh();
     } catch (failure) {
       setError(
         failure instanceof ApiFailure
           ? failure.message
-          : "Could not reach the server.",
+          : d.ui.serverUnreachable,
       );
     } finally {
       setBusy(false);
@@ -90,9 +90,9 @@ export function PublishPanel({
   return (
     <Card>
       <CardHeader
-        title="Not published"
+        title={d.courses.notPublished}
         icon="lock"
-        description="Students cannot see these marks yet. Publishing notifies everyone who has one."
+        description={d.grades.notPublishedNote}
         divider
         className="mb-4"
       />
@@ -106,9 +106,7 @@ export function PublishPanel({
       ) : null}
 
       <div className="mt-4 flex flex-wrap items-center gap-3">
-        <Button variant="primary" icon="check-circle" onClick={() => setAsking(true)}>
-          Publish marks
-        </Button>
+        <Button variant="primary" icon="check-circle" onClick={() => setAsking(true)}>{d.grades.publishAction}</Button>
       </div>
 
       {error ? <div className="mt-4">{<FormError>{error}</FormError>}</div> : null}
@@ -125,9 +123,9 @@ export function PublishPanel({
         busy={busy}
         tone="primary"
         icon="check-circle"
-        title="Publish these marks?"
-        confirmLabel="Publish marks"
-        description="Every student with a mark is notified. This cannot be undone — a wrong mark is corrected, not hidden."
+        title={d.grades.publishTitle}
+        confirmLabel={d.grades.publishAction}
+        description={d.grades.publishBody}
       >
         {unmarked > 0 ? (
           <Note tone="warn">
@@ -136,7 +134,7 @@ export function PublishPanel({
             and they will see it straight away.
           </Note>
         ) : (
-          <Note tone="ok">Every student on the roster has a mark.</Note>
+          <Note tone="ok">{d.grades.publishedNote}</Note>
         )}
       </ConfirmDialog>
     </Card>

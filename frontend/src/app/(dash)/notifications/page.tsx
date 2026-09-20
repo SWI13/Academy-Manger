@@ -4,10 +4,14 @@ import { getJson } from "@/lib/django";
 import type { SearchParams } from "@/lib/list";
 import { cookieHeader } from "@/lib/session";
 import type { Notification } from "@/types";
+import { getDict } from "@/lib/i18n.server";
 
 import { NotificationList } from "./NotificationList";
 
-export const metadata = { title: "Notifications" };
+export async function generateMetadata() {
+  const d = await getDict();
+  return { title: d.nav.notifications };
+}
 
 /**
  * Everything addressed to this person, and nothing else.
@@ -23,6 +27,7 @@ export default async function NotificationsPage({
 }: {
   searchParams: Promise<SearchParams>;
 }) {
+  const d = await getDict();
   const params = await searchParams;
   const unreadOnly =
     (Array.isArray(params.unread) ? params.unread[0] : params.unread) === "true";
@@ -33,14 +38,14 @@ export default async function NotificationsPage({
   );
 
   if (!page) {
-    return <ErrorState title="Notifications could not be loaded" />;
+    return <ErrorState title={d.notifications.errorTitle} />;
   }
 
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        title="Notifications"
-        lede="Told to you and nobody else — an enrolment made in your name, a mark released, a payment decided."
+        title={d.nav.notifications}
+        lede={d.notifications.lede}
       />
 
       <NotificationList

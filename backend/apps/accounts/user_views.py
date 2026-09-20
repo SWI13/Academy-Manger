@@ -18,6 +18,7 @@ from rest_framework.response import Response
 from apps.audit.models import AuditAction
 from apps.audit.services import diff, record
 from apps.core.enums import UserStatus
+from apps.core.printing import PrintableMixin, print_response_serializer, print_schema
 from apps.core.viewsets import ScopedModelViewSet
 from apps.rbac.models import Role
 from apps.rbac.services import assign_role, revoke_role
@@ -32,6 +33,8 @@ from .user_serializers import (
 )
 
 logger = logging.getLogger(__name__)
+
+UserPrintSerializer = print_response_serializer(UserSerializer, "UserPrint")
 User = get_user_model()
 
 
@@ -48,7 +51,8 @@ User = get_user_model()
     create=extend_schema(summary="Create a user"),
     partial_update=extend_schema(summary="Edit a user"),
 )
-class UserViewSet(ScopedModelViewSet):
+@print_schema(UserPrintSerializer)
+class UserViewSet(PrintableMixin, ScopedModelViewSet):
     """
     No destroy(). A user is deactivated, never deleted - their enrolments,
     payments and marks have to remain attributable.
@@ -59,6 +63,8 @@ class UserViewSet(ScopedModelViewSet):
     lookup_value_regex = "[A-Za-z]+-[0-9]+"
 
     required_permissions = {
+        # Printing is exactly as wide a door as reading, never wider.
+        "printable": "user.view",
         "list": "user.view",
         "retrieve": "user.view",
         "create": "user.create",

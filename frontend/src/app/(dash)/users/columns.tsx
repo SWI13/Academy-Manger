@@ -6,7 +6,8 @@ import { PersonCell } from "@/components/ui/Avatar";
 import { Badge, StatusBadge } from "@/components/ui/Badge";
 import type { Column } from "@/components/ui/DataTable";
 import { formatDate } from "@/lib/format";
-import { ROLE_LABELS, type Permission, type RoleCode } from "@/lib/permissions";
+import type { Dict } from "@/lib/dict/en";
+import type { Permission, RoleCode } from "@/lib/permissions";
 import type { User } from "@/types";
 
 /**
@@ -20,11 +21,12 @@ import type { User } from "@/types";
  */
 export function userColumns(
   can: (permission: Permission) => boolean,
+  d: Dict,
 ): Column<User>[] {
   const columns: Column<User>[] = [
     {
       key: "name",
-      header: "Name",
+      header: d.columns.name,
       lead: true,
       cell: (user) => (
         <Link href={`/users/${user.public_id}`} className="block min-w-0">
@@ -34,17 +36,17 @@ export function userColumns(
     },
     {
       key: "role",
-      header: "Role",
+      header: d.users.role,
       cell: (user) => {
         const extra = user.roles.filter((code) => code !== user.primary_role);
         return (
           <div className="flex flex-wrap items-center gap-1.5">
             <Badge tone="neutral" size="sm">
-              {ROLE_LABELS[user.primary_role as RoleCode] ?? user.primary_role}
+              {d.roles[user.primary_role as RoleCode] ?? user.primary_role}
             </Badge>
             {extra.map((code) => (
               <Badge key={code} tone="info" size="sm">
-                {ROLE_LABELS[code as RoleCode] ?? code}
+                {d.roles[code as RoleCode] ?? code}
               </Badge>
             ))}
           </div>
@@ -53,7 +55,7 @@ export function userColumns(
     },
     {
       key: "contact",
-      header: "Contact",
+      header: d.columns.contact,
       secondary: true,
       cell: (user) => (
         <div className="text-ink-soft">
@@ -71,7 +73,7 @@ export function userColumns(
   if (can("user.deactivate")) {
     columns.push({
       key: "last_login",
-      header: "Last seen",
+      header: d.users.lastSeen,
       secondary: true,
       cell: (user) =>
         user.last_login ? (
@@ -86,7 +88,7 @@ export function userColumns(
 
   columns.push({
     key: "status",
-    header: "Status",
+    header: d.columns.status,
     trail: true,
     width: "1%",
     cell: (user) => <StatusBadge status={user.status} />,

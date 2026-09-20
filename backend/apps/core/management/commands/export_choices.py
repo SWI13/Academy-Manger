@@ -19,6 +19,7 @@ from django.core.management.base import BaseCommand, CommandError
 from apps.core.wilayas import Wilaya
 from apps.courses.models import AssignmentRole, CourseStatus
 from apps.enrollments.models import EnrollmentStatus
+from apps.logistics.models import ItemCondition, ItemStatus
 from apps.payments.models import PaymentMethod
 from apps.students.models import PriorLevel
 
@@ -46,6 +47,11 @@ EXPORTS = {
     "COURSE_STATUSES": CourseStatus,
     "ENROLLMENT_STATUSES": EnrollmentStatus,
     "ASSIGNMENT_ROLES": AssignmentRole,
+    # Logistics categories and locations are rows, not enums, so they are not
+    # here - they arrive from the API. Condition and status are the small
+    # closed vocabulary the interface reasons about, and they are.
+    "ITEM_CONDITIONS": ItemCondition,
+    "ITEM_STATUSES": ItemStatus,
 }
 
 

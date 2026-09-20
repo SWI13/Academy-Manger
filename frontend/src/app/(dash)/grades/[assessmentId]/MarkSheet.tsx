@@ -15,6 +15,7 @@ import { useToast } from "@/components/ui/Toast";
 import { ApiFailure, api } from "@/lib/api";
 import { formatDate } from "@/lib/format";
 import type { Assessment, Enrollment, Score } from "@/types";
+import { useDict, useFill } from "@/components/LocaleProvider";
 
 type Row = {
   publicId: string;
@@ -50,6 +51,8 @@ export function MarkSheet({
   roster: Enrollment[];
   scores: Score[];
 }) {
+  const d = useDict();
+  const t = useFill();
   const router = useRouter();
   const can = useCan();
   const toast = useToast();
@@ -134,10 +137,13 @@ export function MarkSheet({
         `/assessments/${assessment.id}/scores`,
         { rows: payload },
       );
-      const summary = `${result.created} entered, ${result.updated} corrected.`;
+      const summary = t(d.phrases.marksEntered, {
+        created: result.created,
+        updated: result.updated,
+      });
       setSaved(summary);
       setDirty(false);
-      toast({ tone: "ok", title: "Sheet saved", description: summary });
+      toast({ tone: "ok", title: d.grades.sheetSaved, description: summary });
       router.refresh();
     } catch (failure) {
       if (failure instanceof ApiFailure) {
@@ -154,7 +160,7 @@ export function MarkSheet({
   return (
     <section className="flex flex-col gap-4">
       <SectionHeader
-        title="Mark sheet"
+        title={d.grades.markSheet}
         description={`Out of ${max}. A blank is not a zero — leave it empty for anyone you have not marked.`}
         action={
           <div className="flex items-center gap-3">
@@ -165,7 +171,10 @@ export function MarkSheet({
               value={marked}
               max={rows.length}
               tone={marked === rows.length ? "ok" : "accent"}
-              label={`${marked} of ${rows.length} students marked`}
+              label={t(d.phrases.studentsMarked, {
+                marked,
+                total: rows.length,
+              })}
               className="w-20"
             />
           </div>
@@ -185,22 +194,16 @@ export function MarkSheet({
                 */}
                 <th
                   scope="col"
-                  className="eyebrow sticky left-0 z-10 bg-black/40 px-4 py-2.5 text-left"
-                >
-                  Student
-                </th>
-                <th scope="col" className="eyebrow px-4 py-2.5 text-right">
+                  className="eyebrow sticky start-0 z-10 bg-black/40 px-4 py-2.5 text-start"
+                >{d.filters.student}</th>
+                <th scope="col" className="eyebrow px-4 py-2.5 text-end">
                   Mark
                 </th>
                 <th
                   scope="col"
-                  className="eyebrow hidden px-4 py-2.5 text-left sm:table-cell"
-                >
-                  Comment
-                </th>
-                <th scope="col" className="eyebrow px-4 py-2.5 text-left">
-                  History
-                </th>
+                  className="eyebrow hidden px-4 py-2.5 text-start sm:table-cell"
+                >{d.grades.comment}</th>
+                <th scope="col" className="eyebrow px-4 py-2.5 text-start">{d.payments.history}</th>
               </tr>
             </thead>
             <tbody>
@@ -215,7 +218,7 @@ export function MarkSheet({
                   >
                     <th
                       scope="row"
-                      className="sticky left-0 z-10 bg-surface px-4 py-2.5 text-left font-normal transition-colors group-hover:bg-white/[0.06]"
+                      className="sticky start-0 z-10 bg-surface px-4 py-2.5 text-start font-normal transition-colors group-hover:bg-white/[0.06]"
                     >
                       <span className="flex items-center gap-2.5">
                         <Avatar
@@ -234,7 +237,7 @@ export function MarkSheet({
                       </span>
                     </th>
 
-                    <td className="px-4 py-2.5 text-right">
+                    <td className="px-4 py-2.5 text-end">
                       <span className="inline-flex items-center gap-1.5">
                         <input
                           ref={(element) => {
@@ -254,7 +257,7 @@ export function MarkSheet({
                           onChange={(event) =>
                             update(row.publicId, { value: event.target.value })
                           }
-                          className={`tabular h-9 w-20 rounded-md border bg-surface px-2.5 text-right text-sm text-ink shadow-xs transition-colors disabled:bg-sunk disabled:text-ink-faint ${
+                          className={`tabular h-9 w-20 rounded-md border bg-surface px-2.5 text-end text-sm text-ink shadow-xs transition-colors disabled:bg-sunk disabled:text-ink-faint ${
                             bad
                               ? "border-bad"
                               : blank
@@ -263,7 +266,7 @@ export function MarkSheet({
                           }`}
                           placeholder="—"
                         />
-                        <span className="tabular w-8 text-left text-xs text-ink-faint">
+                        <span className="tabular w-8 text-start text-xs text-ink-faint">
                           /{max}
                         </span>
                       </span>
@@ -299,7 +302,7 @@ export function MarkSheet({
                           {formatDate(row.existing.entered_at)}
                         </span>
                       ) : (
-                        <span className="text-ink-faint">Not marked</span>
+                        <span className="text-ink-faint">{d.grades.notMarked}</span>
                       )}
                     </td>
                   </tr>
@@ -318,9 +321,7 @@ export function MarkSheet({
               busy={busy}
               disabled={invalid.length > 0 || !dirty}
               onClick={save}
-            >
-              Save sheet
-            </Button>
+            >{d.grades.saveSheet}</Button>
 
             {invalid.length ? (
               <p className="flex items-center gap-1.5 text-[13px] text-bad">
@@ -330,9 +331,7 @@ export function MarkSheet({
               </p>
             ) : dirty ? (
               <p className="flex items-center gap-1.5 text-[13px] text-warn">
-                <Icon name="clock" size={14} />
-                Unsaved changes
-              </p>
+                <Icon name="clock" size={14} />{d.ui.unsavedChanges}</p>
             ) : saved ? (
               <p
                 role="status"
@@ -347,9 +346,7 @@ export function MarkSheet({
               </p>
             )}
 
-            <p className="ml-auto hidden text-xs text-ink-faint lg:block">
-              The sheet saves as one unit: either every mark lands or none does.
-            </p>
+            <p className="ms-auto hidden text-xs text-ink-faint lg:block">{d.grades.atomicNote}</p>
           </div>
         ) : null}
       </div>

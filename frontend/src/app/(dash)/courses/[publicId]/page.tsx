@@ -14,6 +14,8 @@ import { getJson } from "@/lib/django";
 import { formatDate, formatMoney, formatNumber } from "@/lib/format";
 import { can, cookieHeader, getSession } from "@/lib/session";
 import type { Assessment, Course, Schedule } from "@/types";
+import { getDict } from "@/lib/i18n.server";
+import { fill } from "@/lib/i18n";
 
 import { WeekGrid } from "../../schedules/WeekGrid";
 
@@ -24,6 +26,7 @@ export async function generateMetadata({ params }: Props) {
 }
 
 export default async function CoursePage({ params }: Props) {
+  const d = await getDict();
   const { publicId } = await params;
   const cookie = await cookieHeader();
 
@@ -59,7 +62,7 @@ export default async function CoursePage({ params }: Props) {
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        back={{ href: "/courses", label: "Courses" }}
+        back={{ href: "/courses", label: d.nav.courses }}
         title={course.title}
         eyebrow={
           <span className="tabular">
@@ -77,7 +80,7 @@ export default async function CoursePage({ params }: Props) {
               >
                 {seesTheClass
                   ? `Class list (${formatNumber(course.seats_taken)})`
-                  : "Your enrolment"}
+                  : d.courses.yourEnrollment}
               </LinkButton>
             ) : null}
             {can(session, "score.view") ? (
@@ -85,16 +88,14 @@ export default async function CoursePage({ params }: Props) {
                 href={`/grades?course=${course.public_id}`}
                 icon="check-circle"
               >
-                {seesTheClass ? "Gradebook" : "Your marks"}
+                {seesTheClass ? d.grades.gradebook : d.grades.yourMarks}
               </LinkButton>
             ) : null}
             {showsPrice ? (
               <LinkButton
                 href={`/payments?course=${course.public_id}`}
                 icon="wallet"
-              >
-                Payments
-              </LinkButton>
+              >{d.nav.payments}</LinkButton>
             ) : null}
           </>
         }
@@ -127,7 +128,7 @@ export default async function CoursePage({ params }: Props) {
                     ))}
                   </ul>
                 ) : (
-                  <span className="text-ink-faint">Unassigned</span>
+                  <span className="text-ink-faint">{d.courses.unassigned}</span>
                 ),
               },
               course.description
@@ -139,7 +140,7 @@ export default async function CoursePage({ params }: Props) {
 
         <Card className="flex flex-col gap-5">
           <div>
-            <p className="eyebrow">Seats</p>
+            <p className="eyebrow">{d.courses.seats}</p>
             <p className="tabular mt-2 text-2xl font-semibold text-ink">
               {formatNumber(course.seats_taken)}
               {course.capacity ? (
@@ -155,26 +156,31 @@ export default async function CoursePage({ params }: Props) {
                   value={course.seats_taken}
                   max={course.capacity}
                   tone={course.seats_taken >= course.capacity ? "warn" : "accent"}
-                  label={`${course.seats_taken} of ${course.capacity} seats taken`}
+                  label={fill(d.phrases.seatsTaken, {
+                    taken: course.seats_taken,
+                    capacity: course.capacity,
+                  })}
                   className="mt-3"
                 />
                 <p className="mt-2 text-xs text-ink-faint">
                   {course.seats_taken >= course.capacity
                     ? "Full."
-                    : `${formatNumber(course.capacity - course.seats_taken)} left`}
+                    : fill(d.phrases.seatsLeft, {
+                        count: formatNumber(course.capacity - course.seats_taken),
+                      })}
                 </p>
               </>
             ) : (
-              <p className="mt-2 text-xs text-ink-faint">Uncapped</p>
+              <p className="mt-2 text-xs text-ink-faint">{d.courses.uncapped}</p>
             )}
           </div>
 
           {showsPrice ? (
             <div className="border-t border-rule pt-4">
               <Figure
-                label="Price"
+                label={d.courses.price}
                 value={formatMoney(course.price_minor, course.currency)}
-                note="Frozen onto each enrolment as it is made"
+                note={d.courses.priceNote}
               />
             </div>
           ) : null}
@@ -185,15 +191,13 @@ export default async function CoursePage({ params }: Props) {
       {schedules ? (
         <section>
           <SectionHeader
-            title="Weekly schedule"
-            description="A recurring pattern, not a diary of dated sessions."
+            title={d.courses.weeklySchedule}
+            description={d.courses.weeklyScheduleNote}
             action={
               <Link
                 href={`/schedules?course=${course.public_id}`}
                 className="inline-flex items-center gap-1 text-sm font-medium text-accent hover:underline"
-              >
-                Full timetable
-                <Icon name="arrow-right" size={14} />
+              >{d.courses.fullTimetable}<Icon name="arrow-right" size={14} />
               </Link>
             }
           />
@@ -205,11 +209,11 @@ export default async function CoursePage({ params }: Props) {
       {assessments ? (
         <section>
           <SectionHeader
-            title="Assessments"
+            title={d.courses.assessments}
             description={
               seesTheClass
-                ? "Each carries a weight, which is its share of the course average."
-                : "Only published assessments show a mark."
+                ? d.courses.assessmentsNote
+                : d.courses.onlyPublished
             }
           />
           {assessments.results.length ? (
@@ -236,13 +240,9 @@ export default async function CoursePage({ params }: Props) {
                         {formatNumber(assessment.marked_count)} marked
                       </span>
                       {assessment.is_published ? (
-                        <Badge tone="ok" dot>
-                          Published
-                        </Badge>
+                        <Badge tone="ok" dot>{d.courses.published}</Badge>
                       ) : (
-                        <Badge tone="warn" dot>
-                          Not published
-                        </Badge>
+                        <Badge tone="warn" dot>{d.courses.notPublished}</Badge>
                       )}
                       <Icon
                         name="chevron-right"
@@ -257,8 +257,8 @@ export default async function CoursePage({ params }: Props) {
           ) : (
             <EmptyState
               icon="check-circle"
-              title="No assessments yet"
-              description="Marks and averages appear here once an assessment exists on this course."
+              title={d.courses.noAssessments}
+              description={d.courses.noAssessmentsBody}
             />
           )}
         </section>

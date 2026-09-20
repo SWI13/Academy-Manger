@@ -1,6 +1,10 @@
+"use client";
+
 import type { ReactNode } from "react";
 
+
 import { Icon, type IconName } from "./Icon";
+import { useDict, useFill } from "@/components/LocaleProvider";
 
 /**
  * Nothing here, said properly.
@@ -60,14 +64,15 @@ export function EmptyState({
  * developer to somebody trying to take a payment.
  */
 export function ErrorState({
-  title = "This could not be loaded",
-  description = "The request did not come back. Refreshing usually settles it.",
+  title,
+  description,
   action,
 }: {
   title?: ReactNode;
   description?: ReactNode;
   action?: ReactNode;
 }) {
+  const d = useDict();
   return (
     <div
       role="alert"
@@ -79,9 +84,11 @@ export function ErrorState({
       >
         <Icon name="alert" size={19} />
       </span>
-      <p className="text-sm font-medium text-ink">{title}</p>
+      <p className="text-sm font-medium text-ink">
+        {title ?? d.empty.errorTitle}
+      </p>
       <p className="mt-1 max-w-sm text-sm leading-relaxed text-ink-soft">
-        {description}
+        {description ?? d.empty.errorBody}
       </p>
       {action ? <div className="mt-4">{action}</div> : null}
     </div>
@@ -101,11 +108,13 @@ export function ErrorState({
  * include it - not what is behind it, nor whether anything is.
  */
 export function NoAccess({
-  what = "This screen",
+  what,
 }: {
-  /** Sentence-case subject: "Payments", "The gradebook". */
+  /** Sentence-case subject: d.nav.payments, "The gradebook". */
   what?: string;
 }) {
+  const d = useDict();
+  const t = useFill();
   return (
     <div className="glass flex flex-col items-center justify-center rounded-xl border border-rule px-6 py-14 text-center">
       <span
@@ -115,12 +124,10 @@ export function NoAccess({
         <Icon name="lock" size={19} />
       </span>
       <p className="text-sm font-medium text-ink">
-        {what} is not part of your role
+        {t(d.empty.noAccessTitle, { what: what ?? d.empty.noAccessSubject })}
       </p>
       <p className="mt-1 max-w-sm text-sm leading-relaxed text-ink-soft">
-        Nothing here is hidden from you — the records behind this screen are
-        never sent to your account at all. If you need it, an owner can grant
-        the permission.
+        {d.empty.noAccessBody}
       </p>
     </div>
   );

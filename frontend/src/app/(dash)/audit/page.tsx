@@ -7,40 +7,48 @@ import { getJson } from "@/lib/django";
 import type { SearchParams } from "@/lib/list";
 import { can, cookieHeader, getSession } from "@/lib/session";
 import type { AuditLog } from "@/types";
+import type { Dict } from "@/lib/dict/en";
+import { getDict } from "@/lib/i18n.server";
 
 import { AuditFeed } from "./AuditFeed";
 
-export const metadata = { title: "Audit log" };
+export async function generateMetadata() {
+  const d = await getDict();
+  return { title: d.nav.audit };
+}
 
 const FILTERS = ["action", "actor", "object_type", "object_id", "from", "to"];
 
 // Grouped the way the catalogue groups permissions, so the dropdown reads as
 // a list of things that happen rather than an alphabet of constants.
-const ACTIONS = [
-  { value: "LOGIN_FAILED", label: "Failed login" },
-  { value: "USER_CREATED", label: "User created" },
-  { value: "USER_UPDATED", label: "User updated" },
-  { value: "USER_STATUS_CHANGED", label: "User status changed" },
-  { value: "PASSWORD_RESET", label: "Password reset" },
-  { value: "ROLE_GRANTED", label: "Role granted" },
-  { value: "ROLE_REVOKED", label: "Role revoked" },
-  { value: "ENROLLMENT_CREATED", label: "Student enrolled" },
-  { value: "MARK_CHANGED", label: "Mark changed" },
-  { value: "MARKS_PUBLISHED", label: "Marks published" },
-  { value: "PAYMENT_CREATED", label: "Payment recorded" },
-  { value: "PAYMENT_APPROVED", label: "Payment approved" },
-  { value: "PAYMENT_REJECTED", label: "Payment rejected" },
-  { value: "PROOF_DOWNLOADED", label: "Proof downloaded" },
-  { value: "REVIEW_MODERATED", label: "Review moderated" },
-  { value: "REPORT_EXPORTED", label: "Report exported" },
-  { value: "EXPORT_DOWNLOADED", label: "Export downloaded" },
-];
+function actionOptions(d: Dict) {
+  return [
+    { value: "LOGIN_FAILED", label: d.audit.actions.loginFailed },
+    { value: "USER_CREATED", label: d.audit.actions.userCreated },
+    { value: "USER_UPDATED", label: d.audit.actions.userUpdated },
+    { value: "USER_STATUS_CHANGED", label: d.audit.actions.userStatusChanged },
+    { value: "PASSWORD_RESET", label: d.audit.actions.passwordReset },
+    { value: "ROLE_GRANTED", label: d.audit.actions.roleGranted },
+    { value: "ROLE_REVOKED", label: d.audit.actions.roleRevoked },
+    { value: "ENROLLMENT_CREATED", label: d.audit.actions.studentEnrolled },
+    { value: "MARK_CHANGED", label: d.audit.actions.markChanged },
+    { value: "MARKS_PUBLISHED", label: d.audit.actions.marksPublished },
+    { value: "PAYMENT_CREATED", label: d.audit.actions.paymentRecorded },
+    { value: "PAYMENT_APPROVED", label: d.payments.approved },
+    { value: "PAYMENT_REJECTED", label: d.payments.rejected },
+    { value: "PROOF_DOWNLOADED", label: d.audit.actions.proofDownloaded },
+    { value: "REVIEW_MODERATED", label: d.audit.actions.reviewModerated },
+    { value: "REPORT_EXPORTED", label: d.audit.actions.reportExported },
+    { value: "EXPORT_DOWNLOADED", label: d.audit.actions.exportDownloaded },
+  ];
+}
 
 export default async function AuditPage({
   searchParams,
 }: {
   searchParams: Promise<SearchParams>;
 }) {
+  const d = await getDict();
   const params = await searchParams;
   const session = await getSession();
 
@@ -63,33 +71,33 @@ export default async function AuditPage({
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        title="Audit log"
-        lede="Append-only, enforced by the database rather than by convention — there is no endpoint that edits or deletes a row at any version, and the actions most worth recording here are exactly the ones someone would want to erase."
+        title={d.nav.audit}
+        lede={d.audit.lede}
       />
 
       <Toolbar
         filters={[
-          { param: "action", label: "Action", options: ACTIONS },
-          { param: "actor", label: "Who", placeholder: "REC-000001" },
+          { param: "action", label: d.columns.action, options: actionOptions(d) },
+          { param: "actor", label: d.filters.who, placeholder: "REC-000001" },
           {
             param: "object_type",
-            label: "On what",
+            label: d.columns.onWhat,
             options: [
-              { value: "User", label: "A person" },
-              { value: "Payment", label: "A payment" },
-              { value: "Course", label: "A course" },
-              { value: "Enrollment", label: "An enrolment" },
-              { value: "Review", label: "A review" },
-              { value: "ReportExport", label: "An export" },
+              { value: "User", label: d.audit.subjects.person },
+              { value: "Payment", label: d.audit.subjects.payment },
+              { value: "Course", label: d.audit.subjects.course },
+              { value: "Enrollment", label: d.audit.subjects.enrollment },
+              { value: "Review", label: d.audit.subjects.review },
+              { value: "ReportExport", label: d.audit.subjects.reportExport },
             ],
           },
-          { param: "from", label: "From" },
-          { param: "to", label: "To" },
+          { param: "from", label: d.filters.from },
+          { param: "to", label: d.filters.to },
         ]}
       />
 
       {!page ? (
-        <ErrorState title="The log could not be read" />
+        <ErrorState title={d.audit.errorTitle} />
       ) : (
         <AuditFeed initial={page.results} initialNext={page.next} />
       )}

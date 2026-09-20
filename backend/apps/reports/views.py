@@ -1,6 +1,7 @@
-"""The dashboard, the three reports, and export jobs."""
+"""The dashboard, the three reports, the two printable summaries, and export jobs."""
 
 import logging
+from datetime import date
 
 from django.db import transaction
 from django.shortcuts import get_object_or_404
@@ -17,11 +18,14 @@ from apps.core.viewsets import ScopedReadOnlyModelViewSet
 from apps.rbac.permissions import IsAuthenticatedAndActive, RequirePermission
 from apps.rbac.services import has_permission
 
+from . import management_reports
 from .dashboards import build_dashboard
 from .models import ReportExport
-from .queries import REPORT_PERMISSIONS, run
+from .queries import REPORT_PERMISSIONS, parse_date, run
 from .serializers import (
     ExportRequestSerializer,
+    FinancialSummarySerializer,
+    ManagementReportSerializer,
     ReportExportSerializer,
     ReportResultSerializer,
 )
@@ -206,3 +210,73 @@ class ExportDownloadView(APIView):
             label=f"{export.report_name} export",
         )
         return Response({"url": url, "expires_in": storage.settings.S3_DOWNLOAD_URL_TTL})
+
+
+class FinancialSummaryView(APIView):
+    """
+    Income against expenditure, over any date range.
+
+    Behind `report.view_financial`, which reception and professors do not
+    hold - the same line the revenue report draws. Printing must never be a
+    way around a permission, so this is the one gate and there is no second
+    path to the same numbers.
+    """
+
+    permission_classes = [RequirePermission]
+    required_permission = "report.view_financial"
+
+    @extend_schema(
+        summary="Income, expenditure and the net figure",
+        parameters=[
+            OpenApiParameter("from", str, description="On or after (ISO date)."),
+            OpenApiParameter("to", str, description="On or before (ISO date)."),
+        ],
+        responses={200: FinancialSummarySerializer},
+    )
+    def get(self, request):
+        return Response(
+            management_reports.financial_summary(
+                start=parse_date(request.query_params.get("from")),
+                end=parse_date(request.query_params.get("to")),
+            )
+        )
+
+
+class ManagementReportView(APIView):
+    """
+    One month of the institute on one sheet - "August 2026 Management Report".
+
+    `report.view_financial` rather than `report.view_operational`, because the
+    sheet carries income, expenditure and what is outstanding. An operational
+    reader gets the dashboard, which is assembled tile by tile from the
+    permissions they actually hold.
+    """
+
+    permission_classes = [RequirePermission]
+    required_permission = "report.view_financial"
+
+    @extend_schema(
+        summary="The month's management report",
+        parameters=[
+            OpenApiParameter("year", int, description="Defaults to this year."),
+            OpenApiParameter("month", int, description="1-12. Defaults to this month."),
+        ],
+        responses={200: ManagementReportSerializer},
+    )
+    def get(self, request):
+        today = date.today()
+        year = _int_param(request.query_params, "year", today.year)
+        month = _int_param(request.query_params, "month", today.month)
+        if not 1 <= month <= 12:
+            month = today.month
+        return Response(management_reports.management_report(year=year, month=month))
+
+
+def _int_param(params, key: str, default: int) -> int:
+    raw = (params.get(key) or "").strip()
+    if not raw:
+        return default
+    try:
+        return int(raw)
+    except ValueError:
+        return default

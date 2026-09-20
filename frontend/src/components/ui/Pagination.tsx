@@ -3,6 +3,7 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTransition } from "react";
 
+import { useDict } from "@/components/LocaleProvider";
 import { formatNumber } from "@/lib/format";
 
 import { Button } from "./Button";
@@ -22,18 +23,21 @@ export function Pagination({
   count,
   page,
   pageSize,
-  unit = "record",
-  plural,
+  unit,
 }: {
   count: number;
   page: number;
   pageSize: number;
-  /** Singular noun: "record", "payment", "slot". */
-  unit?: string;
-  /** Given only where a trailing s is wrong - "person" / "people". */
-  plural?: string;
+  /**
+   * The noun after the count, already in the reader's language.
+   *
+   * Passed in rather than derived: this used to append an "s" for the plural,
+   * which is wrong in French as often as it is right and meaningless in
+   * Arabic, where the noun after a number over ten is singular anyway.
+   */
+  unit: string;
 }) {
-  const many = plural ?? `${unit}s`;
+  const d = useDict();
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
@@ -44,7 +48,7 @@ export function Pagination({
   if (pages <= 1) {
     return (
       <p className="tabular text-[13px] text-ink-faint">
-        {formatNumber(count)} {count === 1 ? unit : many}
+        {formatNumber(count)} {unit}
       </p>
     );
   }
@@ -62,7 +66,7 @@ export function Pagination({
 
   return (
     <nav
-      aria-label="Pages"
+      aria-label={d.ui.pages}
       aria-busy={pending || undefined}
       className="flex flex-wrap items-center justify-between gap-3"
     >
@@ -70,7 +74,7 @@ export function Pagination({
         <span className="font-medium text-ink-soft">
           {formatNumber(first)}–{formatNumber(last)}
         </span>{" "}
-        of {formatNumber(count)} {count === 1 ? unit : many}
+        {d.common.of} {formatNumber(count)} {unit}
       </p>
 
       <div className="flex items-center gap-2">
@@ -80,7 +84,7 @@ export function Pagination({
           onClick={() => go(page - 1)}
           disabled={page <= 1 || pending}
         >
-          Previous
+          {d.common.previous}
         </Button>
         <span className="tabular px-1 text-[13px] text-ink-soft">
           {page} <span className="text-ink-faint">/ {pages}</span>
@@ -91,7 +95,7 @@ export function Pagination({
           onClick={() => go(page + 1)}
           disabled={page >= pages || pending}
         >
-          Next
+          {d.common.next}
         </Button>
       </div>
     </nav>

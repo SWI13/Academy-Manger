@@ -34,6 +34,7 @@ export type IconName =
   | "chevron-down"
   | "chevron-left"
   | "chevron-right"
+  | "clipboard"
   | "clock"
   | "close"
   | "download"
@@ -42,6 +43,7 @@ export type IconName =
   | "file"
   | "filter"
   | "gauge"
+  | "globe"
   | "bolt"
   | "car"
   | "chip"
@@ -61,6 +63,7 @@ export type IconName =
   | "phone"
   | "pin"
   | "plus"
+  | "printer"
   | "receipt"
   | "search"
   | "settings"
@@ -92,6 +95,11 @@ const PATHS: Record<IconName, string> = {
   "chevron-down": "m6 9 6 6 6-6",
   "chevron-left": "m15 18-6-6 6-6",
   "chevron-right": "m9 18 6-6-6-6",
+  /* The register. A board with a clip and a tick, distinct from the plain
+     tick that means a mark - two screens in the same group cannot share a
+     glyph or the rail stops being scannable. */
+  clipboard:
+    "M9 4H7a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2M9 4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1 1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1Zm-.2 10.5 2 2 4.4-4.4",
   clock: "M12 6v6l4 2m6-2a10 10 0 1 1-20 0 10 10 0 0 1 20 0Z",
   close: "M18 6 6 18M6 6l12 12",
   download: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3",
@@ -100,6 +108,10 @@ const PATHS: Record<IconName, string> = {
   file: "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zm0 0v6h6",
   filter: "M3 5h18l-7 8v6l-4 2v-8L3 5Z",
   gauge: "M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm2.1-2.9L18 8M4.2 17A9.5 9.5 0 0 1 12 2.5 9.5 9.5 0 0 1 19.8 17",
+  /* The language switcher, and nowhere else. Meridians rather than a flag:
+     a flag names a country, and three of these name languages. */
+  globe:
+    "M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18ZM3.2 9.8h17.6M3.2 14.2h17.6M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18",
 
   /*
    * The trades the academy teaches.
@@ -129,6 +141,11 @@ const PATHS: Record<IconName, string> = {
   phone: "M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2 4.2 2 2 0 0 1 4 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.1a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2Z",
   pin: "M12 21s-7-5.7-7-11a7 7 0 1 1 14 0c0 5.3-7 11-7 11Zm0-8.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z",
   plus: "M12 5v14M5 12h14",
+  /* The sheet coming out of the top, the body, the tray. Drawn to the same
+     24 grid and 1.75 stroke as the rest - a printer glyph borrowed from
+     another set is the one icon that would look borrowed. */
+  printer:
+    "M7 8V3h10v5M7 19H5a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M7 15h10v6H7zM17.5 12.5h.01",
   receipt: "M4 2v20l2.5-1.5L9 22l2.5-1.5L14 22l2.5-1.5L19 22V2l-2.5 1.5L14 2l-2.5 1.5L9 2 6.5 3.5 4 2Zm4 6h8M8 12h8M8 16h5",
   search: "m21 21-4.3-4.3M19 11a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z",
   settings:

@@ -1,4 +1,8 @@
+"use client";
+
 import type { ReactNode } from "react";
+
+import { useDict } from "@/components/LocaleProvider";
 
 type Tone = "neutral" | "ok" | "warn" | "bad" | "info" | "accent";
 type Size = "sm" | "md";
@@ -61,6 +65,19 @@ const STATUS_TONES: Record<string, Tone> = {
   FAILED: "bad",
   CLEAN: "ok",
   INFECTED: "bad",
+  // Inventory status. AVAILABLE is neutral rather than green on purpose: a
+  // chair sitting in a store is not good news, it is the ordinary case, and a
+  // page of green badges makes the amber one harder to find.
+  AVAILABLE: "neutral",
+  IN_USE: "info",
+  UNDER_REPAIR: "warn",
+  MISSING: "bad",
+  // Inventory condition. NEEDS_REPAIR is the one somebody has to act on, so
+  // it is the one that is amber; DAMAGED is past acting on.
+  NEW: "ok",
+  GOOD: "ok",
+  NEEDS_REPAIR: "warn",
+  DAMAGED: "bad",
 };
 
 export function toneFor(status: string): Tone {
@@ -108,9 +125,19 @@ export function StatusBadge({
   status?: string | null;
   size?: Size;
 }) {
+  const d = useDict();
   if (!status) return null;
+  /*
+   * The dictionary first, then sentence case as a fallback.
+   *
+   * The status codes come from the backend, and a new one can appear there
+   * before it appears here. Falling back to the code in sentence case shows
+   * something readable rather than a blank badge - and it is visibly English
+   * in a French page, which is exactly the signal that a word is missing.
+   */
+  const known = (d.status as Record<string, string | undefined>)[status];
   const label =
-    status.charAt(0) + status.slice(1).toLowerCase().replace(/_/g, " ");
+    known ?? status.charAt(0) + status.slice(1).toLowerCase().replace(/_/g, " ");
   return (
     <Badge tone={toneFor(status)} size={size} dot>
       {label}

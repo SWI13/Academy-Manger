@@ -11,6 +11,7 @@ import { useToast } from "@/components/ui/Toast";
 import { ApiFailure, api } from "@/lib/api";
 import { formatDateTime, formatNumber } from "@/lib/format";
 import type { ReportExport } from "@/types";
+import { useDict, useFill } from "@/components/LocaleProvider";
 
 /**
  * Queue a CSV, wait for it, fetch it.
@@ -33,6 +34,8 @@ export function ExportPanel({
   report: string;
   filters: Record<string, string>;
 }) {
+  const d = useDict();
+  const t = useFill();
   const toast = useToast();
   const [job, setJob] = useState<ReportExport | null>(null);
   const [busy, setBusy] = useState(false);
@@ -58,8 +61,10 @@ export function ExportPanel({
         if (next.status === "READY") {
           toast({
             tone: "ok",
-            title: "Export ready",
-            description: `${formatNumber(next.row_count)} rows.`,
+            title: d.reports.exportReady,
+            description: t(d.phrases.rowsExported, {
+              count: formatNumber(next.row_count),
+            }),
           });
         }
       } catch {
@@ -69,7 +74,7 @@ export function ExportPanel({
     }, POLL_MS);
 
     return () => clearInterval(timer);
-  }, [waiting, job, toast]);
+  }, [waiting, job, toast, d, t]);
 
   async function queue() {
     setBusy(true);
@@ -83,7 +88,7 @@ export function ExportPanel({
       setError(
         failure instanceof ApiFailure
           ? failure.message
-          : "Could not reach the server.",
+          : d.ui.serverUnreachable,
       );
     } finally {
       setBusy(false);
@@ -102,7 +107,7 @@ export function ExportPanel({
       setError(
         failure instanceof ApiFailure
           ? failure.message
-          : "Could not prepare the download.",
+          : d.payments.downloadFailed,
       );
     }
   }
@@ -110,9 +115,9 @@ export function ExportPanel({
   return (
     <Card>
       <CardHeader
-        title="Export"
+        title={d.reports.export}
         icon="download"
-        description="A CSV of exactly the rows above, built in the background."
+        description={d.reports.exportNote}
         divider
         className="mb-4"
         action={
@@ -122,7 +127,7 @@ export function ExportPanel({
             onClick={queue}
             disabled={waiting}
           >
-            {job ? "Export again" : "Export CSV"}
+            {job ? d.reports.exportAgain : d.reports.exportCsv}
           </Button>
         }
       />
@@ -133,9 +138,7 @@ export function ExportPanel({
 
           {waiting ? (
             <span className="flex items-center gap-2 text-sm text-ink-soft">
-              <Spinner size={13} />
-              Building the file…
-            </span>
+              <Spinner size={13} />{d.reports.exportBuilding}</span>
           ) : null}
 
           {job.status === "READY" ? (
@@ -144,9 +147,7 @@ export function ExportPanel({
                 {formatNumber(job.row_count)} rows ·{" "}
                 {formatDateTime(job.finished_at)}
               </span>
-              <Button variant="primary" icon="download" onClick={download}>
-                Download
-              </Button>
+              <Button variant="primary" icon="download" onClick={download}>{d.reports.exportDownload}</Button>
             </>
           ) : null}
 
@@ -157,9 +158,7 @@ export function ExportPanel({
           ) : null}
         </div>
       ) : (
-        <p className="text-[13px] text-ink-faint">
-          Nothing queued yet.
-        </p>
+        <p className="text-[13px] text-ink-faint">{d.reports.exportNothingQueued}</p>
       )}
 
       {error ? (
@@ -171,9 +170,7 @@ export function ExportPanel({
       {job?.status === "READY" ? (
         <p className="mt-4 flex flex-wrap items-center gap-2 border-t border-rule pt-4 text-xs leading-relaxed text-ink-faint">
           <Badge tone="info" size="sm">
-            <Icon name="lock" size={11} />
-            Private
-          </Badge>
+            <Icon name="lock" size={11} />{d.reports.exportPrivate}</Badge>
           The file is yours alone — nobody else can download it, the owner
           included. The link expires in seconds, and who fetched it is recorded.
         </p>

@@ -502,3 +502,127 @@ staff-initiated and returns a temporary password once, in the response.
 **Deny by default everywhere.** A view declaring no permission is closed. A
 viewset that never implements `scope_queryset` raises rather than returning
 every row. An action the view did not map is denied even for the owner.
+
+---
+
+## Logistics: the inventory and what it costs to run (29 Aug 2026)
+
+The academy's physical resources and its monthly operating costs, added as one
+app with two halves. They answer the same question from opposite sides: the
+inventory is what the money bought, and the expenses are what the money went
+on, so they share a category table rather than owning one each.
+
+| Ref | Question | Answer |
+| --- | --- | --- |
+| D-11 | How does the office add a kind of equipment nobody wrote code for? | **Categories are rows.** `logistics.Category` is a table with a `kind` discriminator (`ITEM` / `EXPENSE`), seeded with twenty-four labels and editable from a setup screen. A `TextChoices` would have been a deploy every time the institute bought something new. Condition and status stay enumerations, because the interface reasons about those four values - they drive colours, tiles and filters. |
+| D-12 | Reception must see everything and change nothing. Where does that live? | **In `required_permissions`, per action.** Four permissions, two per half: `logistics.view` / `logistics.manage` and `expense.view` / `expense.manage`. Reception holds both `.view`s and neither `.manage`. A single `logistics.access` permission could not express the distinction without a role check somewhere else, which is the thing this platform does not do. |
+| D-13 | An expense is dated. Why does it also carry a month? | **Because February's bill is often paid in March.** `spent_on` is when the money left; `period_year` / `period_month` are the accounting month it belongs to. The period defaults to the month of `spent_on` and moves with it when the date is corrected, and can be set apart from it deliberately. Every total is computed over the period, so "March" means the same thing on the dashboard, in the history table and on the printed report. |
+| D-14 | Delete, when the platform's rule is that nothing is deleted? | **Soft, and the first user of `SoftDeleteModel`.** The requirement asked for a delete button; the row leaves every list, every count and every printed sheet at once, and `LOGISTICS_ITEM_DELETED` / `EXPENSE_DELETED` keep who removed it. A deleted item 404s rather than 403s - "deleted" and "never existed" look the same from outside. |
+
+### Inventory rules
+
+- `quantity` is what lets forty chairs and one projector be one shape. Anything
+  with a serial number is a line of its own with a quantity of one, and a
+  partial unique index refuses two live rows claiming the same serial. An
+  inventory that counts a laptop twice is worse than one nobody wrote down.
+- Every figure is counted two ways: `items` is how many lines match, `units` is
+  how many objects they describe. "12 items needing repair" and "12 chairs
+  needing repair" are different sentences and the second is usually the one
+  meant.
+- Categories and rooms are **retired, never deleted** - `DELETE` answers 405,
+  as it does for reviews. Every row filed under a label refers to it, so
+  deleting one would either orphan those rows or take them with it. Retiring
+  removes it from the dropdowns; the edit forms put an item's own retired
+  category back into its dropdown, so re-saving cannot silently re-file it.
+- The purchase price follows `report.view_financial`, not `logistics.view`. It
+  is a commercial figure and the permission that governs the rest of them
+  governs this one.
+
+### Printing
+
+Two A4 sheets, rendered by the application rather than generated as PDFs:
+`/print/logistics` and `/print/expenses`, in their own route group so they
+inherit no dashboard chrome.
+
+- They read the same filters the list screens put in the URL, which is what
+  makes "print all", "print the filtered list", "print one room" and "print one
+  category" the same feature rather than four buttons.
+- They fetch `/logistics/items/print/` and `/logistics/expenses/print/`, which
+  answer **unpaginated**. A printed inventory that silently stops at the
+  twenty-fifth row is worse than no printed inventory: it looks complete.
+- The totals travel with the rows and describe the same filtered selection, and
+  the sheet says in words what narrowed it - "Room 3" in the heading is the
+  difference between a document filed as the whole inventory and one filed as
+  one room's.
+- `globals.css` gains a `.sheet` block that deliberately opts out of the design
+  system. Everything else here is built on black being the ground; paper is
+  not, and half the ink in a dark interface disappears on a laser printer.
+- Reception can print. Printing changes nothing, and the desk is who walks the
+  list around the building.
+
+---
+
+## Printing as a platform feature, and attendance (30 Aug 2026)
+
+Fifteen printed documents, one system, and a register to print. The three
+pieces arrived together because the printing was the requirement and the other
+two were what it turned out to need: a document has to say whose institute it
+belongs to, and an attendance report has to have attendance to report.
+
+| Ref | Question | Answer |
+| --- | --- | --- |
+| D-15 | How does a print button print *what the reader is looking at*? | **The filters are already in the URL.** The toolbar has kept search, dates and categories in the query string since Phase 6, because a filtered view is a thing people send each other. `PrintButton` copies the ones its screen declares onto the print route, and the print route hands them to `.../print/` - the same scoped queryset the list ran, without the page boundary. "Print the filtered list" was not built; it fell out. |
+| D-16 | Can printing become a way around a permission? | **No, and the mechanism is that there is no second door.** `PrintableMixin.printable` is an action on the same viewset, mapped to the same codename the list uses, running `get_queryset` - scope and all. A professor printing a roster gets their own courses because `scope_queryset` says so. `apps/core/tests/test_printing.py` asserts this against every printable resource. |
+| D-17 | Where do "Page 1 of 5", repeating headers and clean breaks come from? | **Measured JavaScript, not CSS.** `@page { @bottom-right { content: counter(page) }}` is real CSS that no browser engine implements; Chrome's own page numbers are a print-dialog setting that also stamps the URL across the top. So `PrintDocument` measures the rendered rows and deals them into fixed-height page boxes. That buys a true page count, a column header at the top of every page, and totals at the foot of the last one - none of which `break-inside: avoid` can do alone. |
+| D-18 | Where does the letterhead come from? | **A singleton `core.Organisation`, edited by the owner.** A phone number on a receipt is not deployment configuration. This is what `settings.manage` has been reserved for since Phase 5, where it was seeded to the owner and governed nothing. The *logo* is deliberately not in it: the official artwork already lives in `public/brand/` under the rule that it is placed and never redrawn, and a second copy uploaded through a form is how an institute ends up with two logos and no answer about which is current. |
+| D-19 | Does late count as attendance? | **Yes, and the decision lives in one function.** `attendance.services.attendance_rate` is `(present + late) / total`. Somebody who walked in twenty minutes after the start was in the room, and a register that scores them the same as a student who never came is one a professor stops trusting. It is one function precisely because somebody will eventually want it changed. |
+| D-20 | What does an empty register mean? | **That nobody has taken it** - not that everybody was away, and the two are not the same thing to a parent asking why their child is marked absent. Opening a register is a deliberate act, unmarked rows are omitted from the PUT rather than defaulted to ABSENT, and a rate over no records is `null` rather than 0%. |
+
+### The print system
+
+- `apps/core/printing.py` gives any list resource a `GET .../print/`: the
+  caller's own filters, unpaginated, capped at 2,000 with a `truncated` flag
+  the sheet prints when it is reached. Nine resources use it.
+- `PrintDocument` is the only printed layout in the platform. A route supplies
+  a title, columns, rows and totals; the masthead, filter line, page breaks,
+  repeated headers, page numbers and footer are not a route's business. The
+  logistics inventory sheet - which predates the system and had a layout of
+  its own - was migrated onto it, which is the evidence that one system is
+  enough.
+- A route with a table is **two files**: a server `page.tsx` that guards,
+  fetches and passes plain data, and a colocated client component that
+  declares the columns. `PrintDocument` must be a client component (it
+  measures the DOM and calls `window.print()`), and a `cell` function cannot
+  cross that boundary - the same split the dashboard's tables already use. A
+  document with no table stays one server file.
+- **PDF is the browser's.** The print dialog's "Save as PDF" destination
+  produces this exact layout because it *is* this layout, on every operating
+  system. The button says so rather than hiding it in the dialog. A
+  server-side renderer would be a second rendering path to keep matching the
+  first, forever.
+- `globals.css` grew a `PAPER` section that deliberately opts out of the
+  design system. Everything else here is built on black being the ground;
+  paper is not, and half the ink in a dark interface disappears on a laser
+  printer.
+
+### Attendance
+
+- `AttendanceSession` is one register - one course, one date, unique together.
+  `AttendanceRecord` hangs off an `Enrollment` rather than a student, the same
+  decision `Payment` makes: a record cannot exist for somebody who is not on
+  the course, and the roster the register offers is the roster by construction.
+- Written a whole sheet at a time through `PUT .../register/`, never a row at
+  a time. A professor marking forty names on institute Wi-Fi either saves all
+  of them or none, and a second write path is how one of them ends up without
+  an audit trail. `AttendanceRecordViewSet` is read-only for the same reason.
+- Registers do not lock, for the same reason marks do not (D-7). The weight is
+  on the trail: `change_count`, `last_changed_by` and `last_changed_at` sit on
+  the row, and a correction writes `ATTENDANCE_CHANGED` with both values.
+  Taking a register writes one `ATTENDANCE_TAKEN`, not forty.
+- Reception holds `attendance.view` and not `attendance.record`: the desk is
+  asked "was my child in on Tuesday" and must be able to answer it without
+  being able to change the answer.
+- An untaken register prints as a **blank sheet** - the roster down the page
+  with three empty boxes beside each name - which is how a register is often
+  actually taken in a room with no laptop in it. Same route, same layout as a
+  taken one, because they are the same document at two points in its life.

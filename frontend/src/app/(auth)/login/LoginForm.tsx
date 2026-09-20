@@ -3,12 +3,14 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
+import { useDict } from "@/components/LocaleProvider";
 import { Button } from "@/components/ui/Button";
 import { Field } from "@/components/ui/Field";
 import { Icon } from "@/components/ui/Icon";
 import { ApiFailure, api } from "@/lib/api";
 
 export function LoginForm() {
+  const d = useDict();
   const router = useRouter();
   const params = useSearchParams();
   const [identifier, setIdentifier] = useState("");
@@ -46,7 +48,7 @@ export function LoginForm() {
         // and rephrasing it here is how that gets undone.
         setError(failure.message);
       } else {
-        setError("Could not reach the server. Try again.");
+        setError(d.login.unreachable);
       }
       setBusy(false);
     }
@@ -55,7 +57,7 @@ export function LoginForm() {
   return (
     <form onSubmit={submit} className="flex flex-col gap-5" noValidate>
       <Field
-        label="ID or phone number"
+        label={d.login.identifier}
         name="identifier"
         autoComplete="username"
         autoFocus
@@ -63,13 +65,13 @@ export function LoginForm() {
         icon="user"
         value={identifier}
         onChange={(event) => setIdentifier(event.target.value)}
-        placeholder="STU-000042"
-        hint="The identifier printed on your card, or the number you registered."
+        placeholder={d.login.identifierPlaceholder}
+        hint={d.login.identifierHint}
       />
 
       <div className="relative">
         <Field
-          label="Password"
+          label={d.login.password}
           name="password"
           type={reveal ? "text" : "password"}
           autoComplete="current-password"
@@ -77,7 +79,7 @@ export function LoginForm() {
           icon="lock"
           value={password}
           onChange={(event) => setPassword(event.target.value)}
-          className="pr-10"
+          className="pe-10"
         />
         {/*
           Bottom-anchored rather than vertically centred: the label sits above
@@ -86,9 +88,9 @@ export function LoginForm() {
         <button
           type="button"
           onClick={() => setReveal((current) => !current)}
-          aria-label={reveal ? "Hide password" : "Show password"}
+          aria-label={reveal ? d.login.hidePassword : d.login.showPassword}
           aria-pressed={reveal}
-          className="absolute bottom-[2px] right-1 inline-flex size-8 items-center justify-center rounded-md text-ink-faint transition-colors hover:bg-white/[0.06] hover:text-ink"
+          className="absolute bottom-[2px] end-1 inline-flex size-8 items-center justify-center rounded-md text-ink-faint transition-colors hover:bg-white/[0.06] hover:text-ink"
         >
           <Icon name="eye" size={16} />
         </button>
@@ -120,7 +122,7 @@ export function LoginForm() {
         className="mt-1 text-[15px] tracking-[0.01em]"
         trailing={busy ? undefined : "arrow-right"}
       >
-        {busy ? "Signing in…" : "Sign in"}
+        {busy ? d.login.submitting : d.login.submit}
       </Button>
     </form>
   );

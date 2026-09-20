@@ -4,9 +4,15 @@ import Link from "next/link";
 
 import { PersonCell } from "@/components/ui/Avatar";
 import { DataTable, type Column } from "@/components/ui/DataTable";
+import type { Dict } from "@/lib/dict/en";
 import { Meter } from "@/components/ui/Stars";
 import { formatNumber } from "@/lib/format";
+/** The placeholder filler, passed in because a column table is not a
+    component and so cannot call a hook of its own. */
+type Filler = (template: string, values: Record<string, string | number>) => string;
+
 import type { GradebookRow } from "@/types";
+import { useDict, useFill } from "@/components/LocaleProvider";
 
 /**
  * A percentage, or an honest blank.
@@ -15,10 +21,10 @@ import type { GradebookRow } from "@/types";
  * printing 0% would put a failing figure beside a name for no reason other
  * than that the professor has not got to them.
  */
-export function percent(value: string | null) {
+export function percent(value: string | null, d: Dict) {
   if (value === null) {
     return (
-      <span className="text-ink-faint" title="Not marked yet">
+      <span className="text-ink-faint" title={d.grades.notMarkedYet}>
         —
       </span>
     );
@@ -29,10 +35,11 @@ export function percent(value: string | null) {
   return <span className={`font-semibold ${tone}`}>{number.toFixed(2)}%</span>;
 }
 
-const COLUMNS: Column<GradebookRow>[] = [
+function columnsFor(d: Dict, t: Filler): Column<GradebookRow>[] {
+  return [
   {
     key: "student",
-    header: "Student",
+    header: d.filters.student,
     lead: true,
     cell: (row) => (
       <Link href={`/enrollments/${row.enrollment_id}`} className="block min-w-0">
@@ -42,14 +49,14 @@ const COLUMNS: Column<GradebookRow>[] = [
   },
   {
     key: "age",
-    header: "Age",
+    header: d.columns.age,
     numeric: true,
     secondary: true,
     cell: (row) => row.age ?? "—",
   },
   {
     key: "level",
-    header: "Level",
+    header: d.columns.level,
     secondary: true,
     cell: (row) => (
       <span className="text-ink-soft">{row.prior_level || "—"}</span>
@@ -57,7 +64,7 @@ const COLUMNS: Column<GradebookRow>[] = [
   },
   {
     key: "marked",
-    header: "Marked",
+    header: d.grades.marked,
     numeric: true,
     cell: (row) => (
       <span className="inline-flex min-w-20 flex-col items-end gap-1.5">
@@ -75,7 +82,10 @@ const COLUMNS: Column<GradebookRow>[] = [
             value={row.marked_count}
             max={row.assessment_count}
             tone={row.marked_count < row.assessment_count ? "warn" : "ok"}
-            label={`${row.marked_count} of ${row.assessment_count} assessments marked`}
+            label={t(d.phrases.assessmentsMarked, {
+              marked: row.marked_count,
+              total: row.assessment_count,
+            })}
             className="w-16"
           />
         ) : null}
@@ -84,24 +94,27 @@ const COLUMNS: Column<GradebookRow>[] = [
   },
   {
     key: "average",
-    header: "Average",
+    header: d.columns.average,
     numeric: true,
     trail: true,
-    cell: (row) => percent(row.weighted_percentage),
+    cell: (row) => percent(row.weighted_percentage, d),
   },
-];
+  ];
+}
 
 export function GradebookTable({ rows }: { rows: GradebookRow[] }) {
+  const d = useDict();
+  const t = useFill();
   return (
     <DataTable
-      caption="Gradebook"
-      columns={COLUMNS}
+      caption={d.grades.gradebook}
+      columns={columnsFor(d, t)}
       rows={rows}
       rowKey={(row) => row.student_public_id}
       rowHref={(row) => `/enrollments/${row.enrollment_id}`}
       emptyIcon="users"
-      empty="Nobody is enrolled in this course yet"
-      emptyDescription="The gradebook fills in as students are enrolled and assessments are marked."
+      empty={d.grades.nobodyEnrolled}
+      emptyDescription={d.grades.nobodyEnrolledBody}
     />
   );
 }

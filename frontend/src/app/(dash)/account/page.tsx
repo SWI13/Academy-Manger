@@ -7,13 +7,17 @@ import { Card, CardHeader } from "@/components/ui/Card";
 import { DescriptionList } from "@/components/ui/DescriptionList";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { formatDateTime } from "@/lib/format";
-import { ROLE_LABELS, type RoleCode } from "@/lib/permissions";
+import type { RoleCode } from "@/lib/permissions";
 import { getSession } from "@/lib/session";
+import { getDict } from "@/lib/i18n.server";
 
 import { ChangePassword } from "./ChangePassword";
 import { PermissionList } from "./PermissionList";
 
-export const metadata = { title: "Your account" };
+export async function generateMetadata() {
+  const d = await getDict();
+  return { title: d.nav.account };
+}
 
 /**
  * Your own record, and the one thing you can change about it.
@@ -28,6 +32,7 @@ export const metadata = { title: "Your account" };
  * which people otherwise work out by clicking around and being refused.
  */
 export default async function AccountPage() {
+  const d = await getDict();
   const session = await getSession();
   if (!session) redirect("/login");
 
@@ -38,8 +43,8 @@ export default async function AccountPage() {
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        title="Your account"
-        lede="What we hold about you, and what your role lets you reach."
+        title={d.nav.account}
+        lede={d.account.lede}
       />
 
       <Card>
@@ -62,32 +67,30 @@ export default async function AccountPage() {
             </p>
             <div className="mt-3 flex flex-wrap gap-1.5">
               <Badge tone="accent" size="sm">
-                {ROLE_LABELS[session.primary_role]} · primary
+                {d.roles[session.primary_role]} · {d.users.primary}
               </Badge>
               {extraRoles.map((code) => (
                 <Badge key={code} tone="info" size="sm">
-                  {ROLE_LABELS[code as RoleCode] ?? code}
+                  {d.roles[code as RoleCode] ?? code}
                 </Badge>
               ))}
             </div>
           </div>
-          <LinkButton href={`/users/${session.public_id}`} icon="user">
-            Full record
-          </LinkButton>
+          <LinkButton href={`/users/${session.public_id}`} icon="user">{d.account.fullRecord}</LinkButton>
         </div>
 
         <div className="mt-6 border-t border-rule pt-5">
           <DescriptionList
             items={[
               {
-                label: "Phone",
+                label: d.users.phone,
                 value: (
                   <span className="tabular">{session.phone || "—"}</span>
                 ),
               },
-              { label: "Email", value: session.email || "—" },
+              { label: d.users.email, value: session.email || "—" },
               {
-                label: "Last signed in",
+                label: d.account.lastSignedIn,
                 value: session.last_login ? (
                   <span className="tabular">
                     {formatDateTime(session.last_login)}
@@ -110,9 +113,9 @@ export default async function AccountPage() {
 
       <Card>
         <CardHeader
-          title="What your role allows"
+          title={d.account.permissionsTitle}
           icon="shield"
-          description="Granted by permission, not by job title. The server checks every one of these on every request."
+          description={d.account.permissionsNote}
           divider
           className="mb-5"
         />

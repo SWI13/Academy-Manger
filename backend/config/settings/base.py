@@ -70,11 +70,13 @@ LOCAL_APPS = [
     "apps.enrollments",
     "apps.schedules",
     "apps.assessments",
+    "apps.attendance",
     "apps.payments",
     "apps.audit",
     "apps.notifications",
     "apps.reviews",
     "apps.reports",
+    "apps.logistics",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -274,6 +276,11 @@ SPECTACULAR_SETTINGS = {
         "DeliveryStatusEnum": "apps.notifications.models.DeliveryStatus.choices",
         "ReviewStatusEnum": "apps.reviews.models.ReviewStatus.choices",
         "ExportStatusEnum": "apps.reports.models.ExportStatus.choices",
+        "CategoryKindEnum": "apps.logistics.models.CategoryKind.choices",
+        "ItemConditionEnum": "apps.logistics.models.ItemCondition.choices",
+        "ItemStatusEnum": "apps.logistics.models.ItemStatus.choices",
+        "AttendanceStatusEnum": "apps.attendance.models.AttendanceStatus.choices",
+        "SessionStatusEnum": "apps.attendance.models.SessionStatus.choices",
     },
 }
 

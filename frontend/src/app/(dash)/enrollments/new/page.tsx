@@ -4,12 +4,14 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { getJson } from "@/lib/django";
 import { can, cookieHeader, getSession } from "@/lib/session";
 import type { Course, Enrollment, User } from "@/types";
+import { getDict } from "@/lib/i18n.server";
 
 import { EnrolForm } from "./EnrolForm";
 
 export const metadata = { title: "Enrol a student" };
 
 export default async function NewEnrolmentPage() {
+  const d = await getDict();
   const session = await getSession();
   // Checked here as well as hidden from the list page. The API refuses
   // regardless, but rendering a form nobody can submit is its own kind of rude.
@@ -40,9 +42,9 @@ export default async function NewEnrolmentPage() {
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        back={{ href: "/enrollments", label: "Enrolments" }}
+        back={{ href: "/enrollments", label: d.nav.enrollments }}
         title="Enrol a student"
-        lede="One student, one course. Everything else — payments, marks, a review — hangs off the enrolment this creates."
+        lede={d.enrollments.enrolLede}
       />
 
       <EnrolForm

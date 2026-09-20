@@ -1,3 +1,5 @@
+import { getDict } from "@/lib/i18n.server";
+
 /**
  * Loading states shaped like the thing that is loading.
  *
@@ -36,9 +38,10 @@ function Frame({ children, label }: { children: React.ReactNode; label: string }
 }
 
 /** A row of stat tiles, at the count the real dashboard will render. */
-export function SkeletonTiles({ count = 4 }: { count?: number }) {
+export async function SkeletonTiles({ count = 4 }: { count?: number }) {
+  const d = await getDict();
   return (
-    <Frame label="Loading figures">
+    <Frame label={d.ui.loadingFigures}>
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {Array.from({ length: count }, (_, index) => (
           <div
@@ -56,15 +59,16 @@ export function SkeletonTiles({ count = 4 }: { count?: number }) {
 }
 
 /** A table, header included, at a plausible row count. */
-export function SkeletonTable({
+export async function SkeletonTable({
   rows = 6,
   columns = 5,
 }: {
   rows?: number;
   columns?: number;
 }) {
+  const d = await getDict();
   return (
-    <Frame label="Loading rows">
+    <Frame label={d.ui.loadingRows}>
       <div className="overflow-hidden rounded-xl border border-rule bg-surface shadow-xs">
         <div className="flex gap-4 border-b border-rule bg-sunk/40 px-4 py-2.5">
           {Array.from({ length: columns }, (_, index) => (
@@ -90,9 +94,10 @@ export function SkeletonTable({
 }
 
 /** A stack of cards - reviews, notifications, audit entries. */
-export function SkeletonList({ rows = 4 }: { rows?: number }) {
+export async function SkeletonList({ rows = 4 }: { rows?: number }) {
+  const d = await getDict();
   return (
-    <Frame label="Loading">
+    <Frame label={d.common.loading}>
       <div className="flex flex-col gap-3">
         {Array.from({ length: rows }, (_, index) => (
           <div
@@ -113,9 +118,10 @@ export function SkeletonList({ rows = 4 }: { rows?: number }) {
 }
 
 /** The page title block, so the header does not pop in after the body. */
-export function SkeletonHeader({ lede = true }: { lede?: boolean }) {
+export async function SkeletonHeader({ lede = true }: { lede?: boolean }) {
+  const d = await getDict();
   return (
-    <Frame label="Loading page">
+    <Frame label={d.ui.loadingPage}>
       <div>
         <Skeleton className="h-7 w-52" />
         {lede ? <Skeleton className="mt-3 h-3.5 w-full max-w-lg" /> : null}
@@ -125,9 +131,10 @@ export function SkeletonHeader({ lede = true }: { lede?: boolean }) {
 }
 
 /** A detail page: a description list of label/value pairs. */
-export function SkeletonDetail({ items = 6 }: { items?: number }) {
+export async function SkeletonDetail({ items = 6 }: { items?: number }) {
+  const d = await getDict();
   return (
-    <Frame label="Loading details">
+    <Frame label={d.ui.loadingDetails}>
       <div className="rounded-xl border border-rule bg-surface p-5 shadow-xs">
         <div className="grid gap-x-8 gap-y-5 sm:grid-cols-2">
           {Array.from({ length: items }, (_, index) => (
@@ -143,9 +150,10 @@ export function SkeletonDetail({ items = 6 }: { items?: number }) {
 }
 
 /** The week grid, which is seven columns whatever is in it. */
-export function SkeletonWeek() {
+export async function SkeletonWeek() {
+  const d = await getDict();
   return (
-    <Frame label="Loading the schedule">
+    <Frame label={d.ui.loadingSchedule}>
       <div className="overflow-hidden rounded-xl border border-rule bg-surface shadow-xs">
         <div className="grid grid-cols-7 divide-x divide-rule">
           {Array.from({ length: 7 }, (_, day) => (

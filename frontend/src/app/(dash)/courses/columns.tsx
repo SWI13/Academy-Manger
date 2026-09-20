@@ -6,6 +6,8 @@ import { StatusBadge } from "@/components/ui/Badge";
 import type { Column } from "@/components/ui/DataTable";
 import { Meter } from "@/components/ui/Stars";
 import { formatDate, formatMoney, formatNumber } from "@/lib/format";
+import type { Dict } from "@/lib/dict/en";
+import { fill } from "@/lib/i18n";
 import type { Permission } from "@/lib/permissions";
 import type { Course } from "@/types";
 
@@ -19,11 +21,12 @@ import type { Course } from "@/types";
  */
 export function courseColumns(
   can: (permission: Permission) => boolean,
+  d: Dict,
 ): Column<Course>[] {
   const columns: Column<Course>[] = [
     {
       key: "title",
-      header: "Course",
+      header: d.filters.course,
       lead: true,
       cell: (course) => (
         <Link
@@ -41,7 +44,7 @@ export function courseColumns(
     },
     {
       key: "dates",
-      header: "Runs",
+      header: d.columns.runs,
       secondary: true,
       cell: (course) => (
         <span className="tabular whitespace-nowrap text-ink-soft">
@@ -51,7 +54,7 @@ export function courseColumns(
     },
     {
       key: "professors",
-      header: "Taught by",
+      header: d.courses.taughtBy,
       secondary: true,
       cell: (course) =>
         course.professors.length ? (
@@ -63,12 +66,12 @@ export function courseColumns(
             ))}
           </ul>
         ) : (
-          <span className="text-ink-faint">Unassigned</span>
+          <span className="text-ink-faint">{d.courses.unassigned}</span>
         ),
     },
     {
       key: "seats",
-      header: "Seats",
+      header: d.courses.seats,
       numeric: true,
       cell: (course) => (
         // Capacity is optional in the model, so an uncapped course gets the
@@ -86,7 +89,10 @@ export function courseColumns(
               value={course.seats_taken}
               max={course.capacity}
               tone={course.seats_taken >= course.capacity ? "warn" : "accent"}
-              label={`${course.seats_taken} of ${course.capacity} seats taken`}
+              label={fill(d.phrases.seatsTaken, {
+                taken: course.seats_taken,
+                capacity: course.capacity,
+              })}
               className="w-20"
             />
           ) : null}
@@ -98,7 +104,7 @@ export function courseColumns(
   if (can("payment.view")) {
     columns.push({
       key: "price",
-      header: "Price",
+      header: d.courses.price,
       numeric: true,
       cell: (course) => (
         <span className="font-medium text-ink">
@@ -110,7 +116,7 @@ export function courseColumns(
 
   columns.push({
     key: "status",
-    header: "Status",
+    header: d.columns.status,
     trail: true,
     width: "1%",
     cell: (course) => <StatusBadge status={course.status} />,

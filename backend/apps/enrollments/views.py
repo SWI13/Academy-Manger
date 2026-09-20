@@ -9,6 +9,7 @@ from rest_framework.response import Response
 
 from apps.audit.models import AuditAction
 from apps.audit.services import record
+from apps.core.printing import PrintableMixin, print_response_serializer, print_schema
 from apps.core.viewsets import ScopedModelViewSet
 from apps.courses.scoping import scope_enrollments
 from apps.notifications.models import NotificationKind
@@ -23,6 +24,8 @@ from .serializers import (
 
 logger = logging.getLogger(__name__)
 
+EnrollmentPrintSerializer = print_response_serializer(EnrollmentSerializer, "EnrollmentPrint")
+
 
 @extend_schema_view(
     list=extend_schema(
@@ -34,12 +37,23 @@ logger = logging.getLogger(__name__)
         ],
     )
 )
-class EnrollmentViewSet(ScopedModelViewSet):
+@print_schema(EnrollmentPrintSerializer)
+class EnrollmentViewSet(PrintableMixin, ScopedModelViewSet):
+    """
+    A student on a course, and the price they agreed to.
+
+    The price is copied onto the enrolment rather than read from the course,
+    so raising the catalogue price next term does not silently re-price
+    everybody already enrolled.
+    """
+
     queryset = Enrollment.objects.all().select_related(
         "course", "student", "student__student_profile"
     )
 
     required_permissions = {
+        # Printing is exactly as wide a door as reading, never wider.
+        "printable": "enrollment.view",
         "list": "enrollment.view",
         "retrieve": "enrollment.view",
         "create": "enrollment.create",

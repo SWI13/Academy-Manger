@@ -12,6 +12,7 @@ import { useToast } from "@/components/ui/Toast";
 import { ApiFailure, api } from "@/lib/api";
 import { formatDateTime } from "@/lib/format";
 import type { Notification } from "@/types";
+import { useDict } from "@/components/LocaleProvider";
 
 /**
  * The notification centre.
@@ -70,6 +71,7 @@ export function NotificationList({
   items: Notification[];
   unreadOnly: boolean;
 }) {
+  const d = useDict();
   const router = useRouter();
   const pathname = usePathname();
   const toast = useToast();
@@ -84,7 +86,7 @@ export function NotificationList({
     setError(null);
     try {
       await api.post("/notifications/read-all");
-      toast({ tone: "ok", title: "All marked as read" });
+      toast({ tone: "ok", title: d.notifications.allMarkedRead });
       router.refresh();
     } catch (failure) {
       setError(
@@ -144,9 +146,7 @@ export function NotificationList({
         </div>
 
         {unread ? (
-          <Button size="sm" icon="check" busy={busy} onClick={markAll}>
-            Mark all as read
-          </Button>
+          <Button size="sm" icon="check" busy={busy} onClick={markAll}>{d.notifications.markAllRead}</Button>
         ) : null}
       </div>
 
@@ -161,7 +161,7 @@ export function NotificationList({
                 <button
                   type="button"
                   onClick={() => open(item)}
-                  className={`flex w-full items-start gap-3.5 rounded-xl border p-4 text-left shadow-xs transition-[border-color,background-color,box-shadow] hover:shadow-sm ${
+                  className={`flex w-full items-start gap-3.5 rounded-xl border p-4 text-start shadow-xs transition-[border-color,background-color,box-shadow] hover:shadow-sm ${
                     item.is_read
                       ? "glass border-rule hover:border-rule-strong"
                       : "border-accent-line bg-accent-soft/40 hover:border-accent"
@@ -220,11 +220,11 @@ export function NotificationList({
         <EmptyState
           icon="bell"
           tone={unreadOnly ? "ok" : "neutral"}
-          title={unreadOnly ? "Nothing unread" : "No notifications yet"}
+          title={unreadOnly ? d.notifications.nothingUnread : d.notifications.emptyTitle}
           description={
             unreadOnly
-              ? "You are all caught up."
-              : "You will hear about the things that concern you — an enrolment, a mark released, a payment decided."
+              ? d.notifications.caughtUp
+              : d.notifications.emptyBody
           }
         />
       )}

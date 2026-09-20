@@ -4,6 +4,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState, useTransition } from "react";
 
 import { Icon } from "./Icon";
+import { useDict } from "@/components/LocaleProvider";
 
 /**
  * Filters that live in the URL.
@@ -33,6 +34,7 @@ export function Toolbar({
   filters: FilterSpec[];
   children?: React.ReactNode;
 }) {
+  const d = useDict();
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
@@ -62,7 +64,7 @@ export function Toolbar({
               <select
                 value={params.get(filter.param) ?? ""}
                 onChange={(event) => apply(filter.param, event.target.value)}
-                className="h-9 w-full appearance-none rounded-md border border-rule-strong bg-surface pl-3 pr-9 text-sm text-ink shadow-xs transition-colors hover:border-ink-faint focus:border-accent sm:w-auto sm:min-w-36"
+                className="h-9 w-full appearance-none rounded-md border border-rule-strong bg-surface ps-3 pe-9 text-sm text-ink shadow-xs transition-colors hover:border-ink-faint focus:border-accent sm:w-auto sm:min-w-36"
               >
                 <option value="">Any</option>
                 {filter.options.map((option) => (
@@ -74,7 +76,7 @@ export function Toolbar({
               <Icon
                 name="chevron-down"
                 size={15}
-                className="pointer-events-none absolute right-3 text-ink-faint"
+                className="pointer-events-none absolute end-3 text-ink-faint"
               />
             </div>
           ) : (
@@ -83,7 +85,7 @@ export function Toolbar({
                 <Icon
                   name="search"
                   size={15}
-                  className="pointer-events-none absolute left-3 text-ink-faint"
+                  className="pointer-events-none absolute start-3 text-ink-faint"
                 />
               )}
               <input
@@ -102,10 +104,10 @@ export function Toolbar({
                     apply(filter.param, event.currentTarget.value.trim());
                   }
                 }}
-                className={`h-9 w-full rounded-md border border-rule-strong bg-surface pr-3 text-sm text-ink shadow-xs transition-colors placeholder:text-ink-faint hover:border-ink-faint focus:border-accent sm:w-52 ${
+                className={`h-9 w-full rounded-md border border-rule-strong bg-surface pe-3 text-sm text-ink shadow-xs transition-colors placeholder:text-ink-faint hover:border-ink-faint focus:border-accent sm:w-52 ${
                   filter.param === "from" || filter.param === "to"
-                    ? "pl-3"
-                    : "pl-9"
+                    ? "ps-3"
+                    : "ps-9"
                 }`}
               />
             </div>
@@ -119,9 +121,7 @@ export function Toolbar({
           onClick={() => startTransition(() => router.push(pathname))}
           className="inline-flex h-9 items-center gap-1.5 self-start rounded-md px-2.5 text-sm text-ink-soft transition-colors hover:bg-white/[0.06] hover:text-ink"
         >
-          <Icon name="close" size={14} />
-          Clear
-        </button>
+          <Icon name="close" size={14} />{d.common.clear}</button>
       ) : null}
     </div>
   );
@@ -166,9 +166,7 @@ export function Toolbar({
       ) : null}
 
       {pending ? (
-        <span className="sr-only" role="status">
-          Updating the list
-        </span>
+        <span className="sr-only" role="status">{d.ui.updatingList}</span>
       ) : null}
     </div>
   );

@@ -2,10 +2,12 @@
 
 import { Badge } from "@/components/ui/Badge";
 import { DataTable, type Column } from "@/components/ui/DataTable";
+import type { Dict } from "@/lib/dict/en";
 import { Note } from "@/components/ui/Field";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { formatDate } from "@/lib/format";
 import type { Score } from "@/types";
+import { useDict } from "@/components/LocaleProvider";
 
 import { percent } from "./GradebookTable";
 
@@ -18,10 +20,11 @@ import { percent } from "./GradebookTable";
  * (architecture D-7), and a mark that quietly changed between two visits is
  * worse than one that says it changed.
  */
-const COLUMNS: Column<Score>[] = [
+function columnsFor(d: Dict): Column<Score>[] {
+  return [
   {
     key: "assessment",
-    header: "Assessment",
+    header: d.grades.assessment,
     lead: true,
     cell: (score) => (
       <div className="min-w-0">
@@ -35,7 +38,7 @@ const COLUMNS: Column<Score>[] = [
   },
   {
     key: "kind",
-    header: "Type",
+    header: d.columns.type,
     secondary: true,
     cell: (score) => (
       <span className="capitalize text-ink-soft">
@@ -45,7 +48,7 @@ const COLUMNS: Column<Score>[] = [
   },
   {
     key: "score",
-    header: "Mark",
+    header: d.columns.mark,
     numeric: true,
     cell: (score) => (
       <span className="font-semibold text-ink">
@@ -59,14 +62,14 @@ const COLUMNS: Column<Score>[] = [
   },
   {
     key: "percentage",
-    header: "Percent",
+    header: d.columns.percent,
     numeric: true,
     trail: true,
-    cell: (score) => percent(score.percentage),
+    cell: (score) => percent(score.percentage, d),
   },
   {
     key: "entered",
-    header: "Recorded",
+    header: d.grades.recorded,
     secondary: true,
     cell: (score) => (
       <div className="tabular text-xs">
@@ -79,16 +82,18 @@ const COLUMNS: Column<Score>[] = [
       </div>
     ),
   },
-];
+  ];
+}
 
 export function MyMarks({ marks }: { marks: Score[] }) {
+  const d = useDict();
   const corrected = marks.filter((score) => score.was_edited).length;
 
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        title="Your marks"
-        lede="Published results only. A mark appears here once your professor releases the assessment it belongs to."
+        title={d.grades.yourMarks}
+        lede={d.grades.yourMarksLede}
       />
 
       {/*
@@ -97,21 +102,19 @@ export function MyMarks({ marks }: { marks: Score[] }) {
         different number, and the wrong one.
       */}
       <DataTable
-        caption="Your marks"
-        columns={COLUMNS}
+        caption={d.grades.yourMarks}
+        columns={columnsFor(d)}
         rows={marks}
         rowKey={(score) => String(score.id)}
         emptyIcon="check-circle"
-        empty="No marks published yet"
-        emptyDescription="Your professor releases an assessment when the class has been marked. Nothing is hidden from you here — there is simply nothing yet."
+        empty={d.grades.noMarks}
+        emptyDescription={d.grades.noMarksBody}
       />
 
       {corrected ? (
         <Note tone="warn">
           <span className="inline-flex flex-wrap items-center gap-2">
-            <Badge tone="warn" size="sm">
-              Corrected
-            </Badge>
+            <Badge tone="warn" size="sm">{d.grades.corrected}</Badge>
             {corrected === 1 ? "One of these was" : `${corrected} of these were`}{" "}
             changed after first being recorded. Marks do not lock, so a
             professor can put right a mistake at any point.

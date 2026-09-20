@@ -109,3 +109,17 @@ export const ASSIGNMENT_ROLES: Choice[] = [
   { value: "LEAD", label: "Lead" },
   { value: "ASSISTANT", label: "Assistant" },
 ];
+
+export const ITEM_CONDITIONS: Choice[] = [
+  { value: "NEW", label: "New" },
+  { value: "GOOD", label: "Good" },
+  { value: "NEEDS_REPAIR", label: "Needs repair" },
+  { value: "DAMAGED", label: "Damaged" },
+];
+
+export const ITEM_STATUSES: Choice[] = [
+  { value: "AVAILABLE", label: "Available" },
+  { value: "IN_USE", label: "In use" },
+  { value: "UNDER_REPAIR", label: "Under repair" },
+  { value: "MISSING", label: "Missing" },
+];

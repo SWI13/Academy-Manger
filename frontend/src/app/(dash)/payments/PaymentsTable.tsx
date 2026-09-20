@@ -3,22 +3,24 @@
 import { useCan } from "@/components/SessionProvider";
 import { DataTable } from "@/components/ui/DataTable";
 import type { Payment } from "@/types";
+import { useDict } from "@/components/LocaleProvider";
 
 import { paymentColumns } from "./columns";
 
 export function PaymentsTable({ rows }: { rows: Payment[] }) {
+  const d = useDict();
   const can = useCan();
 
   return (
     <DataTable
-      caption="Payments"
-      columns={paymentColumns(can)}
+      caption={d.nav.payments}
+      columns={paymentColumns(can, d)}
       rows={rows}
       rowKey={(payment) => payment.public_id}
       rowHref={(payment) => `/payments/${payment.public_id}`}
       emptyIcon="wallet"
-      empty="No payments match these filters"
-      emptyDescription="Nothing recorded in this range. Clearing the filters shows the whole ledger."
+      empty={d.payments.emptyTitle}
+      emptyDescription={d.payments.emptyBody}
     />
   );
 }

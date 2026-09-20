@@ -9,8 +9,11 @@ import { Meter } from "@/components/ui/Stars";
 import { Figure, StatTile } from "@/components/ui/StatTile";
 import { getJson } from "@/lib/django";
 import { formatDateTime, formatMoney, formatNumber } from "@/lib/format";
-import { ROLE_LABELS, type Permission, type RoleCode } from "@/lib/permissions";
+import type { Dict } from "@/lib/dict/en";
+import type { Permission, RoleCode } from "@/lib/permissions";
 import { can, cookieHeader, getSession } from "@/lib/session";
+import { fill } from "@/lib/i18n";
+import { getDict } from "@/lib/i18n.server";
 
 export const metadata = { title: "Dashboard" };
 
@@ -77,14 +80,15 @@ function has(value: unknown): boolean {
 }
 
 /** Morning, afternoon or evening, from the server's clock. */
-function greeting(): string {
+function greeting(d: Dict): string {
   const hour = new Date().getHours();
-  if (hour < 12) return "Good morning";
-  if (hour < 18) return "Good afternoon";
-  return "Good evening";
+  if (hour < 12) return d.dashboard.morning;
+  if (hour < 18) return d.dashboard.afternoon;
+  return d.dashboard.evening;
 }
 
 export default async function DashboardPage() {
+  const d = await getDict();
   const [data, session] = await Promise.all([
     getJson<Dashboard>("/api/v1/reports/dashboard/", await cookieHeader()),
     getSession(),
@@ -93,8 +97,8 @@ export default async function DashboardPage() {
   if (!data || !session) {
     return (
       <ErrorState
-        title="The dashboard could not be loaded"
-        description="The figures did not come back from the server. Refreshing usually settles it."
+        title={d.dashboard.errorTitle}
+        description={d.dashboard.errorBody}
       />
     );
   }
@@ -116,18 +120,18 @@ export default async function DashboardPage() {
         <span aria-hidden className="fx-grid-fine absolute inset-0 -z-10 opacity-70" />
         <span
           aria-hidden
-          className="fx-glow fx-soft absolute -right-24 -top-28 -z-10 size-72 rounded-full blur-3xl"
+          className="fx-glow fx-soft absolute -end-24 -top-28 -z-10 size-72 rounded-full blur-3xl"
         />
         {/* Hazard hatching along the top edge - the workshop marking that
             says "this is equipment", carried into the interface. */}
         <span aria-hidden className="fx-hatch absolute inset-x-0 top-0 h-[3px]" />
 
-        <p className="eyebrow text-accent">{ROLE_LABELS[session.primary_role]}</p>
+        <p className="eyebrow text-accent">{d.roles[session.primary_role]}</p>
         <h1 className="mt-2 text-2xl font-semibold text-white sm:text-[30px]">
-          {greeting()}, {first}
+          {greeting(d)}, {first}
         </h1>
         <p className="mt-2 max-w-2xl text-[15px] leading-relaxed text-ink-soft">
-          {blurb(data)}
+          {blurb(data, d)}
         </p>
       </header>
 
@@ -143,31 +147,33 @@ export default async function DashboardPage() {
       <Attention data={data} currency={currency} />
 
       {/* --- the institute --------------------------------------------- */}
-      <Group title="Money" note="Approved payments only. Pending money is not revenue yet.">
+      <Group title={d.dashboard.money} note={d.dashboard.moneyNote}>
         {has(data.revenue_this_month_minor) && (
           <StatTile
-            label="Collected this month"
+            label={d.dashboard.collected}
             value={formatMoney(data.revenue_this_month_minor, currency)}
-            note={`${formatMoney(data.revenue_total_minor, currency)} all time`}
+            note={fill(d.phrases.allTime, {
+              total: formatMoney(data.revenue_total_minor, currency),
+            })}
             tone="ok"
             icon="trend-up"
           />
         )}
         {has(data.outstanding_minor) && (
           <StatTile
-            label="Outstanding"
+            label={d.dashboard.outstanding}
             value={formatMoney(data.outstanding_minor, currency)}
-            note="Contracted minus approved, over live enrolments"
+            note={d.dashboard.outstandingNote}
             icon="receipt"
             href="/reports?report=outstanding"
           />
         )}
       </Group>
 
-      <Group title="Teaching">
+      <Group title={d.dashboard.teaching}>
         {has(data.courses_active) && (
           <StatTile
-            label="Active courses"
+            label={d.dashboard.activeCourses}
             value={formatNumber(data.courses_active)}
             note={`${formatNumber(data.courses_draft)} draft · ${formatNumber(
               data.courses_completed,
@@ -178,7 +184,7 @@ export default async function DashboardPage() {
         )}
         {has(data.enrolments_live) && (
           <StatTile
-            label="Live enrolments"
+            label={d.dashboard.liveEnrollments}
             value={formatNumber(data.enrolments_live)}
             icon="graduation"
             href="/enrollments?status=ACTIVE"
@@ -186,7 +192,7 @@ export default async function DashboardPage() {
         )}
         {has(data.my_courses) && (
           <StatTile
-            label={isStudent ? "Your courses" : "My courses"}
+            label={isStudent ? d.dashboard.yourCourses : d.dashboard.myCourses}
             value={formatNumber(data.my_courses)}
             icon="book"
             href="/courses"
@@ -194,7 +200,7 @@ export default async function DashboardPage() {
         )}
         {has(data.my_students) && (
           <StatTile
-            label="My students"
+            label={d.dashboard.myStudents}
             value={formatNumber(data.my_students)}
             icon="users"
             href="/enrollments"
@@ -202,19 +208,21 @@ export default async function DashboardPage() {
         )}
       </Group>
 
-      <Group title="People">
+      <Group title={d.dashboard.people}>
         {has(data.students_active) && (
           <StatTile
-            label="Active students"
+            label={d.dashboard.activeStudents}
             value={formatNumber(data.students_active)}
-            note={`${formatNumber(data.students_total)} on record`}
+            note={fill(d.phrases.onRecord, {
+              count: formatNumber(data.students_total),
+            })}
             icon="graduation"
             href="/users?role=STUDENT&status=ACTIVE"
           />
         )}
         {has(data.professors_total) && (
           <StatTile
-            label="Professors"
+            label={d.dashboard.professors}
             value={formatNumber(data.professors_total)}
             icon="user"
             href="/users?role=PROFESSOR"
@@ -222,7 +230,7 @@ export default async function DashboardPage() {
         )}
         {has(data.reception_total) && (
           <StatTile
-            label="Reception"
+            label={d.dashboard.reception}
             value={formatNumber(data.reception_total)}
             icon="users"
             href="/users?role=RECEPTION"
@@ -230,7 +238,7 @@ export default async function DashboardPage() {
         )}
         {has(data.admins_total) && (
           <StatTile
-            label="Administrators"
+            label={d.dashboard.administrators}
             value={formatNumber(data.admins_total)}
             icon="shield"
             href="/users?role=ADMIN"
@@ -238,10 +246,10 @@ export default async function DashboardPage() {
         )}
       </Group>
 
-      <Group title="Today">
+      <Group title={d.dashboard.today}>
         {has(data.enrolments_today) && (
           <StatTile
-            label="Enrolments today"
+            label={d.dashboard.enrollmentsToday}
             value={formatNumber(data.enrolments_today)}
             icon="user-plus"
             href="/enrollments"
@@ -249,7 +257,7 @@ export default async function DashboardPage() {
         )}
         {has(data.payments_recorded_today) && (
           <StatTile
-            label="Payments recorded today"
+            label={d.dashboard.paymentsToday}
             value={formatNumber(data.payments_recorded_today)}
             icon="receipt"
             href="/payments"
@@ -263,18 +271,18 @@ export default async function DashboardPage() {
 }
 
 /** The sentence under the greeting, which differs by what this person does. */
-function blurb(data: Dashboard): string {
+function blurb(data: Dashboard, d: Dict): string {
   switch (data.role) {
     case "STUDENT":
-      return "Your courses, marks and payments in one place.";
+      return d.dashboard.blurbStudent;
     case "PROFESSOR":
-      return "What is next, and what is still waiting to be marked.";
+      return d.dashboard.blurbProfessor;
     case "RECEPTION":
-      return "Today at the desk — enrolments, payments and the approval queue.";
+      return d.dashboard.blurbReception;
     case "ADMIN":
-      return "Operations across the institute.";
+      return d.dashboard.blurbAdmin;
     default:
-      return "Here is what is happening at SM Academy today.";
+      return d.dashboard.blurbOwner;
   }
 }
 
@@ -285,23 +293,22 @@ function blurb(data: Dashboard): string {
  * there is no dated-session table to read - so everything here is a field of
  * `next_session` and nothing is derived in the browser.
  */
-function NextSession({
+async function NextSession({
   session,
 }: {
   session: NonNullable<Dashboard["next_session"]>;
 }) {
+  const d = await getDict();
   return (
     <Card className="relative overflow-hidden border-accent-line bg-accent-soft">
       <span
         aria-hidden
-        className="pointer-events-none absolute -right-16 -top-16 size-56 rounded-full bg-accent/10 blur-2xl"
+        className="pointer-events-none absolute -end-16 -top-16 size-56 rounded-full bg-accent/10 blur-2xl"
       />
       <div className="relative flex flex-wrap items-end justify-between gap-5">
         <div className="min-w-0">
           <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.055em] text-accent">
-            <Icon name="clock" size={13} />
-            Next class
-          </p>
+            <Icon name="clock" size={13} />{d.dashboard.nextClass}</p>
           <p className="mt-2.5 text-xl font-semibold text-ink">
             {session.course_title}
           </p>
@@ -325,9 +332,7 @@ function NextSession({
         <Link
           href={`/courses/${session.course_public_id}`}
           className="inline-flex h-9 items-center gap-2 rounded-md bg-accent-fill px-4 text-sm font-medium text-accent-ink shadow-xs transition-colors hover:bg-accent-fill-hover"
-        >
-          Open class
-          <Icon name="arrow-right" size={15} />
+        >{d.dashboard.openClass}<Icon name="arrow-right" size={15} />
         </Link>
       </div>
     </Card>
@@ -341,20 +346,21 @@ function NextSession({
  * browser. The bar is drawn from paid over total, which is a proportion of
  * two figures the API sent rather than a new amount of money.
  */
-function StudentBalance({
+async function StudentBalance({
   data,
   currency,
 }: {
   data: Dashboard;
   currency: string;
 }) {
+  const d = await getDict();
   const settled = (data.remaining_minor ?? 0) === 0;
 
   return (
     <Card>
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="eyebrow">Your balance</p>
+          <p className="eyebrow">{d.dashboard.yourBalance}</p>
           <p
             className={`tabular mt-2 text-3xl font-semibold tracking-tight ${
               settled ? "text-ok" : "text-ink"
@@ -363,11 +369,11 @@ function StudentBalance({
             {formatMoney(data.remaining_minor, currency)}
           </p>
           <p className="mt-1.5 text-sm text-ink-soft">
-            {settled ? "Nothing outstanding. You are all paid up." : "Still to pay"}
+            {settled ? d.dashboard.allPaidUp : d.dashboard.stillToPay}
           </p>
         </div>
         <Badge tone={settled ? "ok" : "warn"} dot>
-          {settled ? "Settled" : "Outstanding"}
+          {settled ? d.dashboard.settled : d.dashboard.outstanding}
         </Badge>
       </div>
 
@@ -390,16 +396,16 @@ function StudentBalance({
         />
         <div className="mt-3 grid grid-cols-2 gap-4 sm:grid-cols-3">
           <Figure
-            label="Agreed"
+            label={d.dashboard.agreed}
             value={formatMoney(data.total_minor, currency)}
           />
           <Figure
-            label="Paid"
+            label={d.dashboard.paid}
             value={formatMoney(data.paid_minor, currency)}
             tone="ok"
           />
           <Figure
-            label="Remaining"
+            label={d.dashboard.remaining}
             value={formatMoney(data.remaining_minor, currency)}
             tone={settled ? "ok" : "warn"}
           />
@@ -416,7 +422,14 @@ function StudentBalance({
  * on the page that are actionable. A pending payment is somebody's afternoon;
  * the number of professors is not.
  */
-function Attention({ data, currency }: { data: Dashboard; currency: string }) {
+async function Attention({
+  data,
+  currency,
+}: {
+  data: Dashboard;
+  currency: string;
+}) {
+  const d = await getDict();
   const items: {
     key: string;
     icon: IconName;
@@ -431,7 +444,7 @@ function Attention({ data, currency }: { data: Dashboard; currency: string }) {
     items.push({
       key: "pending",
       icon: "wallet",
-      label: "Awaiting approval",
+      label: d.dashboard.awaitingApproval,
       value: formatMoney(data.pending_amount_minor, currency),
       note: `${formatNumber(data.pending_count)} ${
         data.pending_count === 1 ? "payment" : "payments"
@@ -445,9 +458,9 @@ function Attention({ data, currency }: { data: Dashboard; currency: string }) {
     items.push({
       key: "review",
       icon: "receipt",
-      label: "Payments awaiting review",
+      label: d.dashboard.awaitingApproval,
       value: formatNumber(data.payments_awaiting_review),
-      note: "Recorded, not yet approved",
+      note: d.dashboard.awaitingApprovalNote,
       href: "/payments?status=PENDING",
       urgent: Boolean(data.payments_awaiting_review),
     });
@@ -457,9 +470,9 @@ function Attention({ data, currency }: { data: Dashboard; currency: string }) {
     items.push({
       key: "unmarked",
       icon: "check-circle",
-      label: "Assessments unmarked",
+      label: d.dashboard.unmarked,
       value: formatNumber(data.assessments_unmarked),
-      note: "No marks entered yet",
+      note: d.dashboard.unmarkedNote,
       href: "/grades",
       urgent: Boolean(data.assessments_unmarked),
     });
@@ -469,9 +482,9 @@ function Attention({ data, currency }: { data: Dashboard; currency: string }) {
     items.push({
       key: "moderation",
       icon: "star",
-      label: "Reviews to moderate",
+      label: d.dashboard.toModerate,
       value: formatNumber(data.reviews_awaiting_moderation),
-      note: "Waiting for a decision",
+      note: d.dashboard.toModerateNote,
       href: "/reviews?status=PENDING",
       urgent: Boolean(data.reviews_awaiting_moderation),
     });
@@ -480,10 +493,10 @@ function Attention({ data, currency }: { data: Dashboard; currency: string }) {
   if (!items.length) return null;
 
   return (
-    <section aria-label="Needs attention">
+    <section aria-label={d.dashboard.attention}>
       <SectionHeader
-        title="Needs attention"
-        description="Waiting on a person, not on time."
+        title={d.dashboard.attention}
+        description={d.dashboard.attentionNote}
       />
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {items.map((item) => (
@@ -538,13 +551,14 @@ function Attention({ data, currency }: { data: Dashboard; currency: string }) {
  * professor does not - and neither is a claim about what the backend will
  * allow, only about what is worth offering.
  */
-function QuickActions({
+async function QuickActions({
   session,
   role,
 }: {
   session: Parameters<typeof can>[0];
   role: RoleCode;
 }) {
+  const d = await getDict();
   const holds = (permission: Permission) => can(session, permission);
 
   const actions: { href: string; label: string; icon: IconName }[] = [];
@@ -552,43 +566,43 @@ function QuickActions({
   if (holds("payment.create")) {
     actions.push({
       href: "/payments/new",
-      label: "Record a payment",
+      label: d.dashboard.recordPayment,
       icon: "wallet",
     });
   }
   if (holds("enrollment.create")) {
     actions.push({
       href: "/enrollments/new",
-      label: "Enrol a student",
+      label: d.dashboard.enrolStudent,
       icon: "graduation",
     });
   }
   if (holds("user.create")) {
-    actions.push({ href: "/users/new", label: "Add a person", icon: "user-plus" });
+    actions.push({ href: "/users/new", label: d.dashboard.addPerson, icon: "user-plus" });
   }
   if (holds("payment.approve")) {
     actions.push({
       href: "/payments?status=PENDING",
-      label: "Review pending payments",
+      label: d.dashboard.reviewPending,
       icon: "check-circle",
     });
   }
   if (holds("score.enter")) {
-    actions.push({ href: "/grades", label: "Enter marks", icon: "check-circle" });
+    actions.push({ href: "/grades", label: d.dashboard.enterMarks, icon: "check-circle" });
   }
   if (holds("report.view_operational")) {
-    actions.push({ href: "/reports", label: "Run a report", icon: "activity" });
+    actions.push({ href: "/reports", label: d.dashboard.runReport, icon: "activity" });
   }
   if (role === "STUDENT") {
-    actions.push({ href: "/schedules", label: "Your timetable", icon: "calendar" });
-    actions.push({ href: "/grades", label: "Your marks", icon: "check-circle" });
+    actions.push({ href: "/schedules", label: d.dashboard.yourTimetable, icon: "calendar" });
+    actions.push({ href: "/grades", label: d.dashboard.yourMarks, icon: "check-circle" });
   }
 
   if (!actions.length) return null;
 
   return (
-    <section aria-label="Quick actions">
-      <SectionHeader title="Quick actions" />
+    <section aria-label={d.dashboard.quickActions}>
+      <SectionHeader title={d.dashboard.quickActions} />
       <div className="flex flex-wrap gap-2">
         {actions.slice(0, 5).map((action) => (
           <LinkButton
